@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reader</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f5f0e8; --bg2:#fff; --bg3:#ede7d9;
+  --text:#1a1610; --text2:#6b6254; --text3:#a09484;
+  --accent:#2d5a8e; --accent2:#1a3d63; --accent-bg:#e8f0f9;
+  --border:rgba(0,0,0,.10); --border2:rgba(0,0,0,.18);
+  --hl-bg:#fffbea; --hl-border:#d4a830;
+  --word-bg:#d4e8ff;
+  --shadow:0 2px 12px rgba(0,0,0,.10);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#15130f; --bg2:#1e1b16; --bg3:#26231c;
+  --text:#ede7d9; --text2:#8a8070; --text3:#5a5448;
+  --accent:#6fa3d4; --accent2:#8cbde0; --accent-bg:#162438;
+  --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.15);
+  --hl-bg:#2a2410; --hl-border:#8a7025;
+  --word-bg:#1a3050;
+  --shadow:0 2px 16px rgba(0,0,0,.4);
+}}
+
+body{font-family:'Libre Baskerville',Georgia,serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── TOOLTIP ─────────────────────────────────────────── */
+/*
+  Key design decisions:
+  - Fixed position, body-level, outside any scroll/overflow/stacking context
+  - Uses opacity 0/1 (not display/visibility) so offsetWidth is always measurable
+  - pointer-events:none so it never blocks mouse events on words
+*/
+#tt{
+  position:fixed;
+  z-index:99999;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .12s ease;
+  /* off-screen until first placement */
+  left:-999px; top:-999px;
+}
+#tt.show{ opacity:1; }
+#tt-box{
+  background:#1c1814;color:#f0ebe2;
+  border-radius:10px;padding:10px 14px;
+  min-width:140px;max-width:260px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  font-family:'DM Mono',monospace;font-size:12px;line-height:1.55;
+  white-space:normal;
+}
+@media(prefers-color-scheme:dark){
+  #tt-box{background:#eee8df;color:#1a1610}
+  #tt-lbl,#tt-note{color:#8a8070!important}
+}
+#tt-lbl{font-size:11px;font-weight:500;color:#7a7060;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+#tt-trans{font-family:'Libre Baskerville',serif;font-size:15px;margin-bottom:2px}
+#tt-note{font-size:11px;color:#7a7060;margin-top:2px}
+
+/* ── HEADER ─────────────────────────────────────────── */
+header{
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:0 2rem;display:flex;align-items:center;gap:1.25rem;
+  height:56px;position:sticky;top:0;z-index:200;box-shadow:var(--shadow);
+}
+.logo{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--accent);letter-spacing:.05em;white-space:nowrap}
+.hsep{flex:1}
+.hlabel{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase}
+select{
+  appearance:none;background:var(--bg3);border:1px solid var(--border);
+  border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;
+  font-size:12px;padding:5px 10px;cursor:pointer;height:30px;
+}
+select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.rate-wrap{display:flex;align-items:center;gap:6px}
+.rate-disp{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);min-width:30px}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:72px;height:3px;border-radius:2px;background:var(--border2);cursor:pointer;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;
+}
+
+/* ── MAIN ───────────────────────────────────────────── */
+main{max-width:700px;margin:0 auto;padding:2.5rem 2rem 6rem}
+
+.drop-zone{
+  border:2px dashed var(--border2);border-radius:12px;padding:2.5rem;
+  text-align:center;color:var(--text2);cursor:pointer;
+  transition:border-color .2s,background .2s;
+  margin-bottom:1.25rem;font-family:'DM Mono',monospace;font-size:13px;line-height:1.8;
+}
+.drop-zone:hover{border-color:var(--accent);background:var(--accent-bg)}
+.drop-zone.hidden{display:none}
+.di{font-size:32px;display:block;margin-bottom:.5rem;opacity:.5}
+
+textarea{
+  width:100%;min-height:160px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:10px;color:var(--text);
+  font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.75;
+  padding:1rem 1.25rem;resize:vertical;display:none;margin-bottom:1rem;
+}
+textarea:focus{outline:2px solid var(--accent)}
+
+.btn-row{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.5rem}
+
+button{
+  appearance:none;border:1px solid var(--border2);border-radius:7px;
+  background:var(--bg2);color:var(--text);font-family:'DM Mono',monospace;
+  font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;
+  transition:background .15s,color .15s,border-color .15s;letter-spacing:.02em;
+}
+button:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+button:active{transform:scale(.97)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.primary:hover{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.ghost{background:none;border:none;color:var(--accent);font-size:12px;padding:0;cursor:pointer;
+  font-family:'DM Mono',monospace;text-decoration:underline;text-underline-offset:3px;letter-spacing:.02em}
+.ghost:hover{color:var(--accent2);background:none}
+
+#reader{display:none}
+.book-title{font-size:1.45rem;font-weight:700;line-height:1.3;margin-bottom:.4rem;font-style:italic}
+.book-meta{display:flex;align-items:center;gap:.75rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.04em;margin-bottom:1.5rem}
+.msep{color:var(--border2)}
+.progress-wrap{height:2px;background:var(--border);border-radius:1px;margin-bottom:1.5rem;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:1px;transition:width .4s;width:0%}
+
+.play-bar{
+  position:sticky;top:56px;z-index:150;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:8px 2rem;margin:0 -2rem 1.75rem;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.pb{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0}
+#play-info{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em}
+
+.hint-bar{margin-bottom:1.75rem;padding:9px 14px;background:var(--accent-bg);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:.03em;line-height:1.6}
+
+.para{margin-bottom:2rem;font-size:18px;line-height:1.9;font-weight:400}
+.sent{display:inline;border-radius:3px;transition:background .15s}
+.sent.on{background:var(--hl-bg);outline:1px solid var(--hl-border);border-radius:3px}
+
+.sbtn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:50%;
+  border:1px solid var(--border2);background:var(--bg2);color:var(--text3);
+  cursor:pointer;font-size:9px;margin:0 3px;vertical-align:middle;
+  position:relative;top:-1px;transition:all .15s;padding:0;flex-shrink:0;
+}
+.sbtn:hover,.sbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.w{
+  display:inline;border-radius:2px;padding:0 1px;
+  transition:background .1s;cursor:pointer;
+}
+.w:hover{background:var(--word-bg)}
+
+
+.mbtn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;margin:0 3px 0 0;vertical-align:middle;position:relative;top:-1px;padding:0;transition:all .15s}
+.mbtn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.mbtn.rec{background:#c0392b;border-color:#c0392b;color:#fff;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 5px rgba(192,57,43,.25)}}
+.w.ok{background:rgba(46,160,67,.22)}
+.w.close{background:rgba(219,150,20,.28)}
+.w.bad{background:rgba(207,34,46,.25);text-decoration:underline wavy rgba(207,34,46,.8);text-underline-offset:3px}
+#pp{position:fixed;left:50%;bottom:16px;transform:translate(-50%,140%);width:min(680px,calc(100% - 24px));z-index:300;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.25);padding:12px 16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);transition:transform .25s}
+#pp.open{transform:translate(-50%,0)}
+#pp .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#pp-score{font-size:20px;font-weight:500;color:var(--text)}
+#pp-heard{font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.7;color:var(--text);margin-top:8px;min-height:1.7em}
+#pp-heard .ok{color:#2ea043}#pp-heard .close{color:#c98a0a}#pp-heard .bad{color:#cf222e;font-weight:700}#pp-heard .extra{color:var(--text3);text-decoration:line-through}
+@media(max-width:600px){
+  header{padding:0 1rem;gap:.6rem} .hlabel{display:none}
+  main{padding:1.5rem 1rem 5rem}
+  .play-bar{margin:0 -1rem 1.5rem;padding:8px 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Tooltip: direct child of body, no overflow/stacking context around it -->
+<div id="tt"><div id="tt-box">
+  <div id="tt-lbl"></div>
+  <div id="tt-trans"></div>
+  <div id="tt-note"></div>
+</div></div>
+
+<header>
+  <span class="logo">[ READER ]</span>
+  <div class="hsep"></div>
+  <span class="hlabel">Voice</span>
+  <select id="vsel"></select>
+  <span class="hlabel">Speed</span>
+  <div class="rate-wrap">
+    <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
+    <span class="rate-disp" id="rdsp">1×</span>
+  </div>
+</header>
+
+<main>
+<div id="inp">
+  <div class="drop-zone" id="dz" tabindex="0" role="button">
+    <span class="di">📄</span>
+    <strong>Click to paste English text</strong><br>
+    or drag &amp; drop a .txt file here
+  </div>
+  <textarea id="ta" placeholder="Paste or type English text here…"></textarea>
+  <div class="btn-row">
+    <button class="primary" id="load-btn">Load text</button>
+    <button id="file-btn">Open .txt file</button>
+    <button class="ghost" id="smpl-btn">Load sample</button>
+    <input type="file" id="fi" accept=".txt,text/plain" style="display:none">
+  </div>
+</div>
+
+<div id="reader">
+  <div class="book-title" id="btitle"></div>
+  <div class="book-meta">
+    <span id="ms"></span><span class="msep">·</span>
+    <span id="mw"></span><span class="msep">·</span>
+    <button class="ghost" id="back-btn">← Change text</button>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="prog"></div></div>
+  <div class="play-bar">
+    <button class="pb" id="prev-btn" title="Previous sentence">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+    </button>
+    <button class="pb primary" id="play-btn">
+      <svg id="i-play" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="i-pause" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+    <button class="pb" id="next-btn" title="Next sentence">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>
+    </button>
+    <div id="play-info">Press ▶ to start</div>
+    <button class="pb" id="stop-btn" title="Stop">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+    </button>
+  </div>
+  <div class="hint-bar">💡 Hover any word for Russian translation &nbsp;·&nbsp; Space = pause &nbsp;·&nbsp; ← → = prev/next &nbsp;·&nbsp; Esc = stop &nbsp;·&nbsp; 🎤 = check pronunciation</div>
+  <div id="content"></div>
+</div>
+</main>
+
+<div id="pp"><div class="row"><span id="pp-score"></span><span id="pp-status" style="flex:1"></span><button id="pp-retry">↻ Try again</button><button id="pp-close">✕</button></div><div id="pp-heard"></div></div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// SAMPLE
+// ═══════════════════════════════════════════════════════
+const SAMPLE = `The forest in late autumn had a kind of stripped dignity. The oaks had released their leaves weeks ago, and now the branches made clean dark lines against a pale sky. There was something almost architectural about it — the way the trees held their structure without any softness to hide behind.
+
+She walked the same path she had walked every October for thirty years. The ground was soft underfoot, layered with wet leaves that smelled of iron and cold water. She was not walking for exercise. She was walking because the house had become too quiet since her husband died, and motion was the only thing that kept her from noticing it.
+
+At the stone bridge she stopped. Below, the stream ran shallow and clear over a bed of smooth pebbles. She watched it for a long time. The water made no particular sound at this depth, just a low, even murmur that sounded like patience.
+
+She thought about him, as she always did here. Not the last months, not the hospital — but the earlier version, the one who had whistled while he read the newspaper and never once in forty years forgotten her birthday. That was the person she was trying to preserve in her memory, and she worried sometimes that she was failing.`;
+
+// ═══════════════════════════════════════════════════════
+// SENTENCE SPLITTER
+// Hard rule: boundaries ONLY at . ! ?
+// Commas, semicolons, colons, dashes = intonation only.
+// Terminating punct is KEPT so TTS gets correct pause/intonation.
+// Protected: abbreviations, decimals, ellipsis.
+// ═══════════════════════════════════════════════════════
+function splitSentences(para) {
+  let s = para
+    .replace(/\b(Mr|Mrs|Ms|Dr|Prof|Rev|St|Jr|Sr|vs|etc|e\.g|i\.e|No|Vol|Fig|Dept|Corp|Inc|Ltd)\./gi,
+             (_, g) => g + '\x01')
+    .replace(/\b([A-Z])\.\s+(?=[A-Z])/g, '$1\x01 ')
+    .replace(/(\d)\.(\d)/g, '$1\x02$2')
+    .replace(/\.{2,}/g, m => '\x03'.repeat(m.length));
+
+  const TERM  = new Set(['.', '!', '?']);
+  const CLOSE = new Set(['"', '\u201d', "'", '\u2019', ')', ']', '\u00bb']);
+  const parts = [];
+  let start = 0, i = 0;
+
+  while (i < s.length) {
+    if (TERM.has(s[i])) {
+      let end = i;
+      while (end < s.length && TERM.has(s[end])) end++;
+      while (end < s.length && CLOSE.has(s[end])) end++;
+      let j = end;
+      while (j < s.length && s[j] === ' ') j++;
+      const atEnd     = j >= s.length;
+      const nextUpper = !atEnd && /[A-Z\u0400-\u042F\u201c"]/.test(s[j]);
+      if (atEnd || nextUpper) {
+        const chunk = restore(s.slice(start, end).trim());
+        if (chunk.length > 1) parts.push(chunk);
+        start = j; i = j; continue;
+      }
+    }
+    i++;
+  }
+  if (start < s.length) {
+    const chunk = restore(s.slice(start).trim());
+    if (chunk.length > 1) parts.push(chunk);
+  }
+  return parts.length ? parts : [para.trim()];
+}
+
+function restore(s) {
+  return s.replace(/\x01/g,'.').replace(/\x02/g,'.').replace(/\x03+/g, m=>'.'.repeat(m.length));
+}
+
+// ═══════════════════════════════════════════════════════
+// VOICES
+// ═══════════════════════════════════════════════════════
+const synth  = window.speechSynthesis;
+let voices   = [];
+const vsel   = document.getElementById('vsel');
+const rateEl = document.getElementById('rate');
+const rdspEl = document.getElementById('rdsp');
+
+function loadVoices() {
+  voices = synth.getVoices();
+  const en   = voices.filter(v => v.lang.startsWith('en'));
+  const list = en.length ? en : voices;
+  vsel.innerHTML = '';
+  list.forEach(v => {
+    const o = document.createElement('option');
+    o.value = voices.indexOf(v);
+    o.textContent = v.name + (v.localService ? '' : ' ☁');
+    vsel.appendChild(o);
+  });
+  const pref = list.findIndex(v => v.lang === 'en-US' || v.lang === 'en-GB');
+  if (pref >= 0) vsel.selectedIndex = pref;
+}
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined)
+  speechSynthesis.onvoiceschanged = loadVoices;
+rateEl.addEventListener('input', () => {
+  rdspEl.textContent = parseFloat(rateEl.value).toFixed(1).replace('.0','') + '×';
+});
+
+// ═══════════════════════════════════════════════════════
+// INPUT / FILE
+// ═══════════════════════════════════════════════════════
+const dz    = document.getElementById('dz');
+const ta    = document.getElementById('ta');
+const inpEl = document.getElementById('inp');
+const rdEl  = document.getElementById('reader');
+
+function openTA() {
+  dz.classList.add('hidden');
+  ta.style.display = 'block';
+  ta.focus();
+}
+
+dz.addEventListener('click',   openTA);
+dz.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') openTA(); });
+document.getElementById('smpl-btn').addEventListener('click', () => { openTA(); ta.value = SAMPLE; });
+
+// ── TXT file loading (single clean handler) ──────────
+document.getElementById('file-btn').addEventListener('click', () =>
+  document.getElementById('fi').click());
+
+document.getElementById('fi').addEventListener('change', function() {
+  const f = this.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    ta.value = e.target.result;
+    openTA();
+  };
+  reader.onerror = function() { alert('Could not read the file.'); };
+  reader.readAsText(f, 'utf-8');
+  this.value = ''; // reset so same file can be re-selected
+});
+
+// ── Drag & drop ──────────────────────────────────────
+document.body.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+document.body.addEventListener('drop', e => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  if (!f.name.toLowerCase().endsWith('.txt') && f.type !== 'text/plain') {
+    alert('Please drop a .txt file.'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => { ta.value = ev.target.result; openTA(); };
+  reader.readAsText(f, 'utf-8');
+});
+
+document.getElementById('load-btn').addEventListener('click', () => {
+  const t = ta.value.trim(); if (!t) return;
+  buildReader(t);
+});
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  stopAll();
+  rdEl.style.display  = 'none';
+  inpEl.style.display = 'block';
+});
+
+// ═══════════════════════════════════════════════════════
+// BUILD READER
+// ═══════════════════════════════════════════════════════
+let sentences = [];
+let curIdx    = -1;
+let isPlaying = false;
+
+const SPLAY  = `<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+const SPAUSE = `<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+
+function buildReader(raw) {
+  stopAll();
+  sentences = [];
+  document.getElementById('content').innerHTML = '';
+
+  const paras    = raw.split(/\n+/).map(p => p.trim()).filter(p => p.length > 1);
+  const titleRaw = paras[0] || '';
+  document.getElementById('btitle').textContent =
+    titleRaw.length > 72 ? titleRaw.slice(0, 72) + '…' : titleRaw;
+
+  let idx = 0;
+  paras.forEach(para => {
+    const pDiv = document.createElement('div');
+    pDiv.className = 'para';
+
+    splitSentences(para).forEach(sentText => {
+      const i = idx++;
+
+      const btn = document.createElement('button');
+      btn.className   = 'sbtn';
+      btn.dataset.i   = i;
+      btn.title       = 'Read this sentence';
+      btn.innerHTML   = SPLAY;
+      btn.addEventListener('click', () => {
+        (isPlaying && curIdx === +btn.dataset.i) ? pauseResume() : playSent(+btn.dataset.i);
+      });
+
+      const span = document.createElement('span');
+      span.className = 'sent';
+      span.dataset.i = i;
+      const words = buildWords(span, sentText);
+      let mic = null;
+      if (SR) { mic = document.createElement("button"); mic.className = "mbtn"; mic.title = "Check my pronunciation"; mic.innerHTML = MIC; mic.addEventListener("click", () => toggleRec(i)); }
+
+      pDiv.appendChild(btn);
+      if (mic) pDiv.appendChild(mic);
+      pDiv.appendChild(span);
+      pDiv.appendChild(document.createTextNode(' '));
+      sentences.push({ text: sentText, btn, span, words, mic });
+    });
+
+    document.getElementById('content').appendChild(pDiv);
+  });
+
+  const wc = raw.split(/\s+/).filter(Boolean).length;
+  document.getElementById('ms').textContent = sentences.length + ' sentences';
+  document.getElementById('mw').textContent = wc.toLocaleString() + ' words';
+
+  inpEl.style.display = 'none';
+  rdEl.style.display  = 'block';
+  updateProg();
+}
+
+function normWord(t) { return t.toLowerCase().replace(/\u2019/g, "'"); }
+function buildWords(container, text) {
+  const out = [];
+  (text.match(/[A-Za-z]+(?:['\u2019][A-Za-z]+)*|[^A-Za-z]+/g) || [text]).forEach(tok => {
+    if (/^[A-Za-z]/.test(tok)) {
+      const w = document.createElement('span');
+      w.className = 'w'; w.textContent = tok;
+      w.dataset.key = normWord(tok);
+      w.addEventListener('mouseenter', onWordEnter);
+      w.addEventListener('mouseleave', onWordLeave);
+      container.appendChild(w);
+      out.push({ el: w, norm: normWord(tok) });
+    } else container.appendChild(document.createTextNode(tok));
+  });
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════
+// TTS
+// ═══════════════════════════════════════════════════════
+function playSent(i) {
+  if (i < 0 || i >= sentences.length) { stopAll(); return; }
+  stopAll(false);
+  curIdx = i; isPlaying = true;
+  hlAll(); updateProg(); updateBar(); scrollTo(i);
+
+  const utt = new SpeechSynthesisUtterance(sentences[i].text);
+  utt.lang = 'en-US';
+  utt.rate = parseFloat(rateEl.value);
+  const vi = parseInt(vsel.value, 10);
+  if (!isNaN(vi) && voices[vi]) utt.voice = voices[vi];
+
+  utt.onend   = () => { clearHL(i); if (isPlaying) playSent(i + 1); };
+  utt.onerror = ev => { if (ev.error !== 'interrupted') { isPlaying = false; updateBar(); } };
+  synth.speak(utt);
+}
+
+function stopAll(reset = true) {
+  synth.cancel();
+  stopRec(true);
+  if (reset) {
+    isPlaying = false;
+    if (curIdx >= 0 && curIdx < sentences.length) clearHL(curIdx);
+    curIdx = -1;
+    updateBar(); updateProg();
+    document.getElementById('play-info').textContent = 'Press ▶ to start';
+  }
+}
+
+function pauseResume() {
+  if (synth.speaking && !synth.paused) { synth.pause();  isPlaying = false; updateBar(); }
+  else if (synth.paused)               { synth.resume(); isPlaying = true;  updateBar(); }
+}
+
+function hlAll() {
+  sentences.forEach((s, i) => {
+    const on = i === curIdx;
+    s.span.classList.toggle('on', on);
+    s.btn.classList.toggle('on', on);
+    s.btn.innerHTML = on ? SPAUSE : SPLAY;
+    s.btn.title     = on ? 'Pause' : 'Read this sentence';
+  });
+  if (curIdx >= 0 && curIdx < sentences.length) {
+    const t = sentences[curIdx].text;
+    document.getElementById('play-info').textContent =
+      `${curIdx+1}/${sentences.length} — ${t.length > 55 ? t.slice(0,55)+'…' : t}`;
+  }
+}
+function clearHL(i) {
+  if (i < 0 || i >= sentences.length) return;
+  sentences[i].span.classList.remove('on');
+  sentences[i].btn.classList.remove('on');
+  sentences[i].btn.innerHTML = SPLAY;
+  sentences[i].btn.title     = 'Read this sentence';
+}
+function updateProg() {
+  const pct = sentences.length ? Math.max(0, Math.round(((curIdx+1)/sentences.length)*100)) : 0;
+  document.getElementById('prog').style.width = pct + '%';
+}
+function updateBar() {
+  const go = isPlaying && !synth.paused;
+  document.getElementById('i-play').style.display  = go ? 'none' : '';
+  document.getElementById('i-pause').style.display = go ? ''     : 'none';
+}
+function scrollTo(i) {
+  if (i >= 0 && i < sentences.length)
+    sentences[i].span.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+document.getElementById('play-btn').addEventListener('click', () => {
+  if (!sentences.length) return;
+  synth.paused ? pauseResume() : isPlaying ? pauseResume() : playSent(curIdx >= 0 ? curIdx : 0);
+});
+document.getElementById('prev-btn').addEventListener('click', () => {
+  if (!sentences.length) return;
+  playSent(Math.max(0, curIdx <= 0 ? 0 : curIdx - 1));
+});
+document.getElementById('next-btn').addEventListener('click', () => {
+  if (!sentences.length) return;
+  playSent(Math.min(sentences.length - 1, curIdx < 0 ? 0 : curIdx + 1));
+});
+document.getElementById('stop-btn').addEventListener('click', () => stopAll());
+document.addEventListener('keydown', e => {
+  if (['TEXTAREA','INPUT','SELECT'].includes(e.target.tagName)) return;
+  if (e.code === 'Space')      { e.preventDefault(); document.getElementById('play-btn').click(); }
+  if (e.code === 'ArrowRight') document.getElementById('next-btn').click();
+  if (e.code === 'ArrowLeft')  document.getElementById('prev-btn').click();
+  if (e.code === 'Escape')     stopAll();
+});
+
+// ═══════════════════════════════════════════════════════
+// TOOLTIP
+// Strategy:
+//  - #tt always rendered (opacity:0 when hidden), so offsetWidth is real
+//  - On enter: set content + position, then add .show class (opacity:1)
+//  - On leave: remove .show (opacity:0), position stays wherever it was
+//  - No requestAnimationFrame needed — measure right after content set
+// ═══════════════════════════════════════════════════════
+const ttEl    = document.getElementById('tt');
+const ttLbl   = document.getElementById('tt-lbl');
+const ttTrans = document.getElementById('tt-trans');
+const ttNote  = document.getElementById('tt-note');
+
+const xlat  = {};    // cache: word key → {translation, note}
+let ttKey   = '';
+let ttOn    = false;
+let ttTimer = null;
+
+function onWordEnter(e) {
+  const key = e.currentTarget.dataset.key;
+  if (!key) return;
+  clearTimeout(ttTimer);
+  ttTimer = setTimeout(() => showTT(e.currentTarget, key), 150);
+}
+
+function onWordLeave() {
+  clearTimeout(ttTimer);
+  hideTT();
+}
+
+function showTT(wordEl, key) {
+  ttOn  = true;
+  ttKey = key;
+
+  // Set placeholder content first
+  ttLbl.textContent   = key;
+  ttTrans.innerHTML   = '<i style="opacity:.55;font-size:12px;font-style:italic">перевод…</i>';
+  ttNote.textContent  = '';
+
+  // Position tooltip (content is already set, opacity:0 so invisible but measurable)
+  placeTT(wordEl);
+
+  // Fade in
+  ttEl.classList.add('show');
+
+  // Fetch or serve from cache
+  if (xlat[key]) {
+    renderTT(xlat[key]);
+    return;
+  }
+  apiTranslate(key)
+    .then(r => {
+      xlat[key] = r;
+      if (ttOn && ttKey === key) renderTT(r);
+    })
+    .catch(err => {
+      console.error('translate error:', err);
+      if (ttOn && ttKey === key) {
+        ttTrans.textContent = '—';
+        ttNote.textContent  = '';
+      }
+    });
+}
+
+function renderTT(r) {
+  ttTrans.textContent = r.translation || '—';
+  ttNote.textContent  = r.note || '';
+}
+
+function hideTT() {
+  ttOn  = false;
+  ttKey = '';
+  ttEl.classList.remove('show');
+}
+
+function placeTT(wordEl) {
+  // Measure tooltip (opacity:0 but display:block equivalent — always in DOM)
+  const tw = ttEl.offsetWidth  || 200;
+  const th = ttEl.offsetHeight || 70;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  const r  = wordEl.getBoundingClientRect();
+  let x = r.left + r.width / 2 - tw / 2;
+  let y = r.bottom + 10;
+
+  // Flip above if no room below
+  if (y + th + 8 > vh) y = r.top - th - 10;
+  // Clamp horizontal
+  x = Math.max(8, Math.min(x, vw - tw - 8));
+
+  ttEl.style.left = x + 'px';
+  ttEl.style.top  = y + 'px';
+}
+
+// ═══════════════════════════════════════════════════════
+// Translation EN → RU (Google gtx, MyMemory fallback)
+// ═══════════════════════════════════════════════════════
+const POS = {noun:'сущ.',verb:'гл.',adjective:'прил.',adverb:'нареч.',preposition:'предлог',conjunction:'союз',pronoun:'мест.',interjection:'межд.',article:'артикль',determiner:'опред.'};
+async function apiTranslate(w) {
+  try { return await gtx(w); } catch (e) { console.warn('gtx failed:', e); }
+  return await myMemory(w);
+}
+async function gtx(w) {
+  const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&dt=bd&q=' + encodeURIComponent(w));
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  const main = (d[0] || []).map(x => x[0]).join('').trim();
+  if (!main) throw new Error('empty');
+  const note = (d[1] || []).slice(0, 3).map(e => (POS[e[0]] || e[0]) + ': ' + (e[1] || []).slice(0, 3).join(', ')).join(' · ');
+  return { translation: main, note };
+}
+async function myMemory(w) {
+  const r = await fetch('https://api.mymemory.translated.net/get?langpair=en|ru&q=' + encodeURIComponent(w));
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const t = ((await r.json()).responseData || {}).translatedText;
+  if (!t) throw new Error('empty');
+  return { translation: t, note: '' };
+}
+
+// ═══════════════════════════════════════════════════════
+// DICTATION — pronunciation check (Web Speech Recognition)
+// ═══════════════════════════════════════════════════════
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const MIC = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg>';
+if (!SR) { const hb = document.querySelector('.hint-bar'); hb.innerHTML = hb.innerHTML.replace('🎤 = check pronunciation', '🎤 dictation needs Chrome / Edge / Safari'); }
+
+const pp = document.getElementById('pp'), ppScore = document.getElementById('pp-score'),
+      ppStatus = document.getElementById('pp-status'), ppHeard = document.getElementById('pp-heard');
+let rec = null, recIdx = -1, recText = '', recTimer = null, markedIdx = -1;
+
+const tokens = s => s.toLowerCase().replace(/\u2019/g, "'").match(/[a-z]+(?:'[a-z]+)*/g) || [];
+function lev(a, b) {
+  let p = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const c = [i];
+    for (let j = 1; j <= b.length; j++) c[j] = Math.min(p[j] + 1, c[j-1] + 1, p[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    p = c;
+  }
+  return p[b.length];
+}
+// 0 = same, 0.5 = close (small spelling/sound difference), 1 = different
+function cost(a, b) { if (a === b) return 0; const L = Math.max(a.length, b.length); return L >= 4 && lev(a, b) / L <= 0.34 ? 0.5 : 1; }
+
+// word-level alignment of expected (E) vs recognised (R)
+function align(E, R) {
+  const n = E.length, m = R.length, D = [];
+  for (let i = 0; i <= n; i++) { D[i] = []; for (let j = 0; j <= m; j++) D[i][j] = (i && j) ? 0 : i + j; }
+  for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++)
+    D[i][j] = Math.min(D[i-1][j-1] + cost(E[i-1], R[j-1]), D[i-1][j] + 1, D[i][j-1] + 1);
+  const es = Array(n).fill('bad'), rs = Array(m).fill('extra');
+  let i = n, j = m;
+  while (i > 0 || j > 0) {
+    if (i && j && D[i][j] === D[i-1][j-1] + cost(E[i-1], R[j-1])) {
+      const c = cost(E[i-1], R[j-1]), st = c === 0 ? 'ok' : c < 1 ? 'close' : 'bad';
+      es[i-1] = st; rs[j-1] = st; i--; j--;
+    } else if (i && D[i][j] === D[i-1][j] + 1) i--;   // expected word missing
+    else j--;                                          // extra word
+  }
+  return { es, rs };
+}
+
+function clearMarks() {
+  if (markedIdx >= 0 && sentences[markedIdx]) sentences[markedIdx].words.forEach(w => w.el.className = 'w');
+  markedIdx = -1;
+}
+
+function evaluate(i, heard) {
+  const s = sentences[i], E = s.words.map(w => w.norm), R = tokens(heard);
+  if (!R.length) { ppScore.textContent = ''; ppHeard.textContent = ''; ppStatus.textContent = "Didn't catch anything — try again, a bit louder."; return; }
+  const { es, rs } = align(E, R);
+  s.words.forEach((w, k) => w.el.className = 'w ' + es[k]);
+  markedIdx = i;
+  const pts = es.reduce((a, x) => a + (x === 'ok' ? 1 : x === 'close' ? 0.5 : 0), 0);
+  const pct = Math.round(pts / (E.length || 1) * 100);
+  ppScore.textContent = pct + '%';
+  ppStatus.textContent = pct >= 90 ? 'Excellent!' : pct >= 70 ? 'Good — check the highlighted words' : 'Keep practicing — check the highlighted words';
+  ppHeard.innerHTML = R.map((w, k) => '<span class="' + rs[k] + '">' + w + '</span>').join(' ');
+}
+
+function toggleRec(i) { (rec && recIdx === i) ? stopRec() : startRec(i); }
+
+function startRec(i) {
+  stopRec(true); stopAll(); clearMarks();
+  recIdx = i; recText = '';
+  const r = rec = new SR();
+  r.lang = 'en-US'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+  r.onresult = ev => {
+    let t = '';
+    for (let k = 0; k < ev.results.length; k++) t += ev.results[k][0].transcript + ' ';
+    recText = t; ppHeard.textContent = t;
+    clearTimeout(recTimer); recTimer = setTimeout(() => stopRec(), 2200);   // auto-finish after a pause
+  };
+  r.onerror = ev => {
+    if (ev.error === 'aborted') return;
+    const msg = { 'not-allowed': 'Microphone access denied — allow it in the browser.', 'service-not-allowed': 'Microphone access denied.',
+                  'audio-capture': 'No microphone found.', 'no-speech': "Didn't hear anything — try again.", 'network': 'Speech service unavailable (network).' }[ev.error];
+    if (msg) { ppStatus.textContent = msg; r._err = true; }
+  };
+  r.onend = () => {
+    if (rec !== r) return;
+    clearTimeout(recTimer); rec = null;
+    sentences[recIdx].mic.classList.remove('rec');
+    if (!r._err) evaluate(recIdx, recText);
+  };
+  pp.classList.add('open');
+  ppScore.textContent = ''; ppHeard.textContent = '';
+  ppStatus.textContent = '🎤 Listening… read the sentence aloud (click 🎤 to finish)';
+  sentences[i].mic.classList.add('rec');
+  try { r.start(); } catch (e) { console.error(e); }
+}
+
+function stopRec(silent) {
+  clearTimeout(recTimer);
+  if (!rec) return;
+  const r = rec;
+  if (silent) {
+    rec = null; r.abort();
+    if (recIdx >= 0 && sentences[recIdx] && sentences[recIdx].mic) sentences[recIdx].mic.classList.remove('rec');
+  } else r.stop();
+}
+
+document.getElementById('pp-retry').addEventListener('click', () => { if (recIdx >= 0) startRec(recIdx); });
+document.getElementById('pp-close').addEventListener('click', () => { stopRec(true); pp.classList.remove('open'); clearMarks(); });
+</script>
+</body>
+</html>
