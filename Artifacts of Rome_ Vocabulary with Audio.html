@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Artifacts of Rome: Vocabulary with Audio</title>
+<style>
+:root{--bg:#faf7f2;--fg:#2a2420;--mut:#6f655c;--card:#fff;--line:#e2d9cc;--acc:#9a3b2e;--uk:#1f4e8c;--us:#b3262e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1917;--fg:#ece5dc;--mut:#a39a90;--card:#26211e;--line:#3a332e;--acc:#e08a7a;--uk:#7fb0ee;--us:#f08a90}}
+:root[data-theme="dark"]{--bg:#1c1917;--fg:#ece5dc;--mut:#a39a90;--card:#26211e;--line:#3a332e;--acc:#e08a7a;--uk:#7fb0ee;--us:#f08a90}
+html{color-scheme:light dark;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Georgia,"Times New Roman",serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.7rem;margin:.2em 0 .1em;color:var(--acc)}
+h2{font-size:1.3rem;margin:1.8em 0 .5em;border-bottom:2px solid var(--line);padding-bottom:.2em}
+h3{font-size:1.05rem;margin:1.2em 0 .4em;color:var(--mut);font-weight:600}
+.sub{color:var(--mut);margin:0 0 .8em}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:5;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.bar span{color:var(--mut);font-size:.9rem}
+.seg button{font:inherit;font-size:.9rem;padding:5px 12px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0;border-left:0}
+.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+#msg{font-size:.85rem;color:var(--mut);margin:.5em 0}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:8px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);font-size:.95rem}
+th{font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+tr:last-child td{border-bottom:0}
+td.w{font-weight:700;white-space:nowrap}
+td.ipa{font-family:"Segoe UI","Lucida Sans Unicode",sans-serif;color:var(--mut);white-space:nowrap}
+td.ex{font-style:italic}
+.pl{display:inline-flex;gap:4px}
+.pl button{font:inherit;font-size:.78rem;font-weight:700;padding:3px 8px;border-radius:6px;border:1px solid currentColor;background:transparent;cursor:pointer}
+.pl .uk{color:var(--uk)}.pl .us{color:var(--us)}
+.pl button:active,.ex button:active{opacity:.6}
+.ex button{font:inherit;border:0;background:transparent;color:var(--acc);cursor:pointer;padding:0 4px}
+.note{font-size:.88rem;color:var(--mut);margin-top:.6em}
+@media print{.bar,#msg{display:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Artifacts of Rome: Roman Household Shrines</h1>
+<p class="sub">Vocabulary with British and American pronunciation · Level B1+/B2</p>
+<div class="bar">
+<span>Example sentences:</span>
+<div class="seg"><button id="bUK" class="on">British</button><button id="bUS">American</button></div>
+</div>
+<p id="msg"></p>
+<div id="out"></div>
+<p class="note">Audio is produced by your device’s speech synthesis, so voices vary between browsers and phones. Latin terms (lararium, aedicula, Penates) are read from a respelling and may sound slightly off: always compare with the transcription. Transcription is British IPA.</p>
+</main>
+<script>
+var G=[
+["1. Vocabulary: Roman household shrines",null],
+["A. The shrine and its parts",[
+["shrine","/ʃraɪn/","святилище","Almost every Roman house had a small shrine near the hearth."],
+["niche","/niːʃ/","ниша","A niche in the wall held the figurines."],
+["altar","/ˈɔːltə/","алтарь","The family left food on a simple altar."],
+["hearth","/hɑːθ/","очаг","The hearth was the heart of the Roman home."],
+["wall painting","/wɔːl ˈpeɪntɪŋ/","настенная роспись","The wall painting shows two snakes below the main scene."],
+["statuette","/ˌstætʃuˈet/","статуэтка","Bronze statuettes of gods were found in the shrine."],
+["figurine","/ˈfɪɡərɪn/","фигурка","A clay figurine was placed beside the altar."]]],
+["B. Beings and people",[
+["household gods","/ˈhaʊshəʊld ɡɒdz/","домашние боги","Household gods were believed to protect the family."],
+["deity","/ˈdeɪəti/","божество","Each deity had a special role in the home."],
+["guardian spirit","/ˈɡɑːdiən ˈspɪrɪt/","дух-хранитель","A snake could represent a guardian spirit of the place."],
+["serpent","/ˈsɜːpənt/","змея (книжн.)","A serpent was a symbol of protection and prosperity."],
+["ancestor","/ˈænsestə/","предок","The family also remembered its ancestors."],
+["head of the household","/hed əv ðə ˈhaʊshəʊld/","глава семьи","The head of the household led the daily prayers."]]],
+["C. Worship",[
+["worship (v., n.)","/ˈwɜːʃɪp/","поклоняться; поклонение","Romans worshipped their household gods every day.","worship"],
+["offering(s)","/ˈɒfərɪŋ/","приношение, дар","Typical offerings were wine, flowers and small cakes.","offerings"],
+["libation","/laɪˈbeɪʃn/","возлияние","A libation of wine was poured for the gods."],
+["incense","/ˈɪnsens/","благовония, ладан","Incense was burned on the altar."],
+["protect (from)","/prəˈtekt/","защищать","The Lares protect the family from harm.","protect"],
+["prosperity","/prɒˈsperəti/","процветание","The snakes were associated with prosperity."],
+["venerate","/ˈvenəreɪt/","почитать","Ancestors were venerated alongside the gods."],
+["drinking horn","/ˈdrɪŋkɪŋ hɔːn/","рог для питья","The Lares are often shown holding a drinking horn."],
+["horn of plenty","/ˌhɔːn əv ˈplenti/","рог изобилия","The Genius sometimes holds a horn of plenty."],
+["prey","/preɪ/","добыча; жертва хищника","In the painting, a serpent approaches its prey."],
+["pore (over)","/pɔː/","внимательно изучать; пора","Archaeologists pore over every fragment of the painting.","pore"],
+["pare","/peə/","срезать кожуру; урезать","She pared the fruit before placing it on the altar."],
+["wholly","/ˈhəʊlli/","полностью, целиком","The wall painting was wholly preserved."]]],
+["D. Latin terms in English texts",[
+["lararium (pl. lararia)","/ləˈreəriəm/","ларарий, домашнее святилище","The lararium in the kitchen was decorated with a wall painting.","la-rair-ee-um"],
+["aedicula","/iːˈdɪkjʊlə/","эдикула, ниша-«храмик»","The statuettes stood inside a small aedicula shaped like a temple.","ee-dik-yoo-la"],
+["Lar (pl. Lares)","/lɑː/, /ˈlɑːreɪz/","Лар, Лары","The Lares were often shown as dancing young men.","lar... lar-ayz"],
+["Penates","/pɪˈnɑːteɪz/","Пенаты","The Penates were linked with the family’s food stores.","pen-ah-tayz"],
+["Genius (pl. genii)","/ˈdʒiːniəs/","Гений (дух-покровитель)","The Genius of the head of the family was worshipped in the shrine.","Genius"]]],
+["2. Words to watch",null],
+["Words with more than one meaning",[
+["incense (n.)","/ˈɪnsens/","благовония, ладан","Incense was burned on the altar.","incense burning"],
+["incense (v.)","/ɪnˈsens/","приводить в ярость","The destruction of the shrine incensed the family.","to incense"],
+["relief","/rɪˈliːf/","облегчение / рельеф","A relief of Diana decorates the courtyard.","relief"],
+["spirit","/ˈspɪrɪt/","дух / крепкие напитки (spirits)","Guardian spirits protected the home.","spirit"]]],
+["Homophones",[
+["altar / alter","/ˈɔːltə/","алтарь / изменять","They did not alter the altar when the room was converted."],
+["rite / right / write","/raɪt/","обряд / правый / писать","The family performed a daily rite."],
+["site / sight / cite","/saɪt/","место / зрелище / цитировать","The archaeological site is a wonderful sight."],
+["pray / prey","/preɪ/","молиться / добыча","Romans prayed to the Lares."],
+["pour / pore","/pɔː/","лить / пора","He poured a libation of wine."],
+["wine / whine","/waɪn/","вино / скулить","They offered wine to the gods."],
+["flower / flour","/ˈflaʊə/","цветок / мука","Offerings were flowers and cakes made of flour."],
+["soul / sole","/səʊl/","душа / единственный, подошва","The souls of ancestors were honoured."],
+["pair / pear / pare","/peə/","пара / груша / срезать кожуру","Two serpents, a pair of snakes, flank the Genius."],
+["holy / wholly","/ˈhəʊli/","священный / полностью","The shrine was a holy place."],
+["idol / idle","/ˈaɪdl/","идол / праздный","The family kept a small idol in the niche."],
+["hearth / heart","/hɑːθ/ ≠ /hɑːt/","очаг / сердце (почти омофоны)","The hearth was the heart of the home."]]]
+];
+var acc="en-GB",synth=window.speechSynthesis;
+function pick(l){if(!synth)return null;var v=synth.getVoices(),k=l.toLowerCase();
+return v.find(function(x){return x.lang.replace("_","-").toLowerCase()===k})||null}
+function say(list,l){if(!synth)return;synth.cancel();
+list.forEach(function(t){var u=new SpeechSynthesisUtterance(t);u.lang=l;var v=pick(l);if(v)u.voice=v;u.rate=.85;synth.speak(u)})}
+function btn(txt,cls,fn){var b=document.createElement("button");b.textContent=txt;b.className=cls;b.onclick=fn;return b}
+var out=document.getElementById("out");
+G.forEach(function(g){
+if(!g[1]){var h=document.createElement("h2");h.textContent=g[0];out.appendChild(h);return}
+var h3=document.createElement("h3");h3.textContent=g[0];out.appendChild(h3);
+var w=document.createElement("div");w.className="wrap";
+var t=document.createElement("table");
+t.innerHTML="<thead><tr><th>Word</th><th>Listen</th><th>Transcription</th><th>Перевод</th><th>Example</th></tr></thead>";
+var tb=document.createElement("tbody");
+g[1].forEach(function(r){
+var parts=r[4]?[r[4]]:r[0].split(" / ");
+if(r[4]&&r[4].indexOf("...")>-1)parts=r[4].split("...");
+var tr=document.createElement("tr");
+function td(c,x){var d=document.createElement("td");d.className=c;if(x!==undefined)d.textContent=x;tr.appendChild(d);return d}
+td("w",r[0]);
+var p=td("");var box=document.createElement("span");box.className="pl";
+box.appendChild(btn("UK","uk",function(){say(parts,"en-GB")}));
+box.appendChild(btn("US","us",function(){say(parts,"en-US")}));
+p.appendChild(box);
+td("ipa",r[1]);td("",r[2]);
+var e=td("ex",r[3]);
+e.appendChild(btn("▶","",function(){say([r[3]],acc)}));
+tb.appendChild(tr)});
+t.appendChild(tb);w.appendChild(t);out.appendChild(w)});
+function setAcc(a){acc=a;document.getElementById("bUK").className=a==="en-GB"?"on":"";document.getElementById("bUS").className=a==="en-US"?"on":""}
+document.getElementById("bUK").onclick=function(){setAcc("en-GB")};
+document.getElementById("bUS").onclick=function(){setAcc("en-US")};
+function check(){var m=document.getElementById("msg");
+if(!synth){m.textContent="Your browser does not support speech synthesis. Try Chrome, Edge or Safari.";return}
+var a=[];if(!pick("en-GB"))a.push("British");if(!pick("en-US"))a.push("American");
+m.textContent=a.length?"No "+a.join(" or ")+" English voice found on this device; the default English voice will be used. You can install one in your system’s speech settings.":""}
+if(synth){synth.onvoiceschanged=check}
+check();
+</script>
+</body>
+</html>
