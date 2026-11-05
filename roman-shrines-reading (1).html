@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Artifacts of Rome: Reading and Exercises</title>
+<style>
+:root{--bg:#faf7f2;--fg:#2a2420;--mut:#6f655c;--card:#fff;--line:#e2d9cc;--acc:#9a3b2e;--hl:#fbe9c6;--ok:#1d7a3e;--bad:#b3262e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1917;--fg:#ece5dc;--mut:#a39a90;--card:#26211e;--line:#3a332e;--acc:#e08a7a;--hl:#4a3a20;--ok:#6fd08c;--bad:#f08a90}}
+:root[data-theme="dark"]{--bg:#1c1917;--fg:#ece5dc;--mut:#a39a90;--card:#26211e;--line:#3a332e;--acc:#e08a7a;--hl:#4a3a20;--ok:#6fd08c;--bad:#f08a90}
+html{color-scheme:light dark;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 Georgia,"Times New Roman",serif}
+main{max-width:820px;margin:0 auto;padding:20px 16px 56px}
+h1{font-size:1.7rem;margin:.2em 0 .1em;color:var(--acc)}
+h2{font-size:1.3rem;margin:1.9em 0 .5em;border-bottom:2px solid var(--line);padding-bottom:.2em}
+h3{font-size:1.05rem;margin:1.4em 0 .4em}
+.sub,.note{color:var(--mut);margin:0 0 .8em;font-size:.92rem}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line);font-family:system-ui,sans-serif;font-size:.9rem}
+button{font:inherit;font-family:system-ui,sans-serif;font-size:.9rem;padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+button:active{opacity:.7}
+input[type=range]{width:110px;vertical-align:middle}
+.para{margin:.8em 0;padding:8px 10px 8px 8px;border-radius:10px;border:1px solid transparent;transition:background .2s}
+.para.cur{background:var(--hl);border-color:var(--line)}
+.pp{padding:1px 7px;margin-right:6px;font-size:.75rem;color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 16px 14px}
+.q{margin:.7em 0;padding:4px 8px;border-left:4px solid transparent;border-radius:4px}
+.q.ok{border-left-color:var(--ok)}.q.bad{border-left-color:var(--bad)}
+.q input[type=text]{font:inherit;font-size:.95rem;width:9.5em;padding:2px 6px;border:0;border-bottom:2px solid var(--mut);background:transparent;color:var(--fg)}
+.q input.long{width:100%;box-sizing:border-box;margin-top:4px}
+.q select{font:inherit;font-size:.95rem;padding:2px 4px;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px}
+.q label{margin-right:12px;white-space:nowrap}
+.fb{display:block;font-size:.85rem;font-family:system-ui,sans-serif;margin-top:2px}
+.q.ok .fb{color:var(--ok)}.q.bad .fb{color:var(--bad)}
+.acts{display:flex;gap:8px;align-items:center;margin-top:.8em;flex-wrap:wrap}
+.score{font-family:system-ui,sans-serif;font-weight:700}
+.bank{font-family:system-ui,sans-serif;font-size:.9rem;color:var(--mut)}
+.fig{float:right;width:132px;margin:2px 0 6px 14px;text-align:center}
+.fig svg{width:120px;height:120px;background:var(--card);border:1px solid var(--line);border-radius:10px}
+.fig .s{fill:none;stroke:var(--fg);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.fig .f{fill:var(--acc);fill-opacity:.35}
+.fig .sn{fill:none;stroke:var(--acc);stroke-width:5;stroke-linecap:round}
+.fig .hd{fill:var(--acc)}
+.fig figcaption{font:.72rem/1.3 system-ui,sans-serif;color:var(--mut);margin-top:3px}
+.para:after{content:"";display:block;clear:both}
+.tr{display:block;font-family:system-ui,sans-serif;color:var(--mut);font-size:.88rem;margin-top:6px}
+body.hidetr .tr{display:none}
+@media print{.bar{display:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Artifacts of Rome: Reading and Exercises</h1>
+<p class="sub">Level B1+/B2 · Listen to the text, then check your understanding</p>
+
+<h2>1. Reading: Who lived in a Roman household shrine?</h2>
+<div class="bar">
+<button class="pri" id="bPlay">▶ Listen</button>
+<button id="bPause">⏸ Pause</button>
+<button id="bStop">⏹ Stop</button>
+<span>Speed <input type="range" id="rate" min="0.6" max="1.3" step="0.1" value="0.9"> <b id="rv">0.9×</b></span>
+<button id="bUK" class="on">British</button><button id="bUS">American</button><button id="bTr">Hide translation</button>
+</div>
+<div id="text"></div>
+<p class="note" id="msg">Tap ▶ next to a paragraph to start from there. Voices depend on your device.</p>
+
+<h2>2. Exercises</h2>
+<div id="ex"></div>
+</main>
+<script>
+var P=[
+["","A Roman household shrine, or lararium, was usually found in the atrium, the kitchen or near the hearth. It could be a simple niche, a painted wall or a small aedicula resembling a temple. Several kinds of beings were worshipped there, and their number depended on the wealth and personal beliefs of the family.","shrine"],
+["The Lares.","The most typical figures were the Lares, guardian spirits of the household. They were usually represented as two young men in short tunics, dancing and holding a drinking horn and a libation bowl.","lares"],
+["The Penates.","These gods were associated with the family’s store of food. Their role was to guarantee that the household would never go hungry. They had no single fixed appearance, so they are difficult to recognise in art.","penates"],
+["The Genius.","The Genius was the protective spirit of the head of the household. It is often shown as a man in a toga with his head covered, pouring a libation, sometimes holding a horn of plenty. Women had a similar spirit of their own.","genius"],
+["Serpents.","Snakes were often painted below the main scene, sometimes approaching an altar with offerings. They are thought to have represented the guardian spirit of the place or a symbol of fertility and prosperity.","serpents"],
+["Other gods.","Families added deities of their own choice: Vesta, goddess of the hearth; Mercury and Fortuna, associated with trade and luck; Hercules, Minerva and Venus. In some houses, gods from the East, such as Isis, also appeared.","gods"],
+["Ancestors.","Some families also honoured their dead relatives, whose memory was kept alive with masks, portraits and offerings.","ancestors"],
+["","Not every shrine contained all these beings. Their combination varied from house to house, which makes each lararium a valuable source of information about the beliefs of its owners."]
+];
+function S(x){return '<svg viewBox="0 0 120 120" role="img" aria-label="illustration">'+x+'</svg>'}
+var lar='<circle class="s" cx="35" cy="30" r="7"/><path class="s f" d="M30 44H40L44 68H26Z"/><path class="s" d="M35 46L50 33M35 46L22 56M35 68L26 92M35 68L48 84L44 96"/><path class="s f" d="M50 33Q56 26 59 36Z"/>';
+var snk='<path class="sn" d="M8 98C20 78 30 98 38 82C42 74 40 70 42 66"/><circle class="hd" cx="42" cy="65" r="3.5"/>';
+var IMG={
+shrine:[S('<path class="s" d="M20 50L60 22L100 50Z"/><path class="s" d="M28 50V98M92 50V98M18 98H102"/><path class="s f" d="M48 98V68A12 12 0 0 1 72 68V98Z"/><circle class="s" cx="60" cy="78" r="4"/>'),'Aedicula: a shrine shaped like a small temple (schematic)'],
+lares:[S(lar+'<g transform="translate(120 0) scale(-1 1)">'+lar+'</g>'),'Two dancing Lares with drinking horns (schematic)'],
+penates:[S('<path class="s f" d="M52 24H68C68 36 84 42 82 68C80 88 70 98 60 98C50 98 40 88 38 68C36 42 52 36 52 24Z"/><path class="s" d="M52 30Q38 30 42 46M68 30Q82 30 78 46M50 24H70"/>'),'A storage jar as a symbol of food stores. The Penates had no fixed appearance'],
+genius:[S('<path class="s f" d="M46 46L40 100H80L74 46Z"/><path class="s f" d="M49 32A11 11 0 0 1 71 32L74 46H46Z"/><path class="s" d="M72 54L90 62M88 78H104V100H88Z"/><ellipse class="s" cx="95" cy="68" rx="7" ry="2.5"/><path class="s f" d="M44 62Q16 60 20 34Q30 52 48 54Z"/>'),'The Genius: veiled head, libation bowl, horn of plenty (schematic)'],
+serpents:[S('<path class="s f" d="M44 66H76V100H44Z"/><path class="s" d="M40 66H80"/><circle class="s f" cx="60" cy="58" r="5"/>'+snk+'<g transform="translate(120 0) scale(-1 1)">'+snk+'</g>'),'Two serpents approaching an altar with offerings (schematic)'],
+gods:[S('<path class="s f" d="M35 90C20 70 40 62 36 40C52 54 56 72 48 90Z"/><path class="s" d="M22 96H62M88 30V100"/><path class="s" d="M88 38Q72 28 66 40Q76 42 88 46M88 38Q104 28 110 40Q100 42 88 46"/><path class="s" d="M88 54Q78 60 88 66Q98 72 88 78"/>'),'Flame of Vesta and the winged staff of Mercury (symbols)'],
+ancestors:[S('<path class="s f" d="M60 20C40 20 36 50 42 72C46 88 54 96 60 96C66 96 74 88 78 72C84 50 80 20 60 20Z"/><circle class="s" cx="50" cy="50" r="3"/><circle class="s" cx="70" cy="50" r="3"/><path class="s" d="M60 54V70M52 80Q60 85 68 80"/>'),'An ancestor mask (schematic)']
+};
+var TRR=[
+"Римское домашнее святилище, или ларарий, обычно находилось в атриуме, на кухне или возле очага. Это могла быть простая ниша, расписанная стена или небольшая эдикула, похожая на храм. Там поклонялись нескольким видам существ, и их число зависело от богатства и личных верований семьи.",
+"Самыми типичными фигурами были Лары, духи-хранители дома. Их обычно изображали в виде двух юношей в коротких туниках, танцующих и держащих рог для питья и чашу для возлияний.",
+"Этих богов связывали с семейным запасом еды. Их задача была в том, чтобы дом никогда не голодал. У них не было одного постоянного облика, поэтому их трудно узнать в искусстве.",
+"Гений был духом-покровителем главы семьи. Его часто изображают мужчиной в тоге с покрытой головой, совершающим возлияние, иногда с рогом изобилия. У женщин был похожий дух-покровитель.",
+"Змей часто рисовали под главной сценой, иногда они приближались к алтарю с приношениями. Считается, что они изображали духа-хранителя места или были символом плодородия и процветания.",
+"Семьи добавляли божеств по своему выбору: Весту, богиню очага; Меркурия и Фортуну, связанных с торговлей и удачей; Геркулеса, Минерву и Венеру. В некоторых домах появлялись и боги Востока, например Исида.",
+"Некоторые семьи также чтили умерших родственников, память о которых сохранялась с помощью масок, портретов и приношений.",
+"Не в каждом святилище были все эти существа. Их сочетание менялось от дома к дому, поэтому каждый ларарий является ценным источником сведений о верованиях его владельцев."];
+document.getElementById("bTr").onclick=function(){var h=document.body.classList.toggle("hidetr");this.textContent=h?"Show translation":"Hide translation"};
+var synth=window.speechSynthesis,acc="en-GB",rate=0.9,idx=0,tok=0,playing=false,paused=false,paras=[];
+function voice(l){if(!synth)return null;var k=l.toLowerCase();return synth.getVoices().find(function(v){return v.lang.replace("_","-").toLowerCase()===k})||null}
+function mark(i){paras.forEach(function(p,j){p.className="para"+(j===i?" cur":"")})}
+function run(my){
+if(my!==tok)return;
+if(idx>=P.length){playing=false;mark(-1);return}
+var u=new SpeechSynthesisUtterance(P[idx][0]+" "+P[idx][1]);
+u.lang=acc;var v=voice(acc);if(v)u.voice=v;u.rate=rate;
+u.onstart=function(){if(my===tok)mark(idx)};
+u.onend=function(){if(my===tok){idx++;run(my)}};
+synth.speak(u)}
+function play(i){
+if(!synth){document.getElementById("msg").textContent="Speech synthesis is not supported in this browser.";return}
+synth.cancel();tok++;idx=i;playing=true;paused=false;
+document.getElementById("bPause").textContent="⏸ Pause";
+var my=tok;setTimeout(function(){run(my)},80)}
+function stop(){tok++;playing=false;paused=false;if(synth)synth.cancel();mark(-1);document.getElementById("bPause").textContent="⏸ Pause"}
+var box=document.getElementById("text");
+P.forEach(function(p,i){
+var d=document.createElement("p");d.className="para";
+var b=document.createElement("button");b.className="pp";b.textContent="▶";b.onclick=function(){play(i)};
+d.appendChild(b);
+if(p[0]){var s=document.createElement("b");s.textContent=p[0]+" ";d.appendChild(s)}
+d.appendChild(document.createTextNode(p[1]));
+var tr=document.createElement("span");tr.className="tr";tr.textContent=TRR[i];d.appendChild(tr);
+box.appendChild(d);paras.push(d)});
+document.getElementById("bPlay").onclick=function(){play(0)};
+document.getElementById("bStop").onclick=stop;
+document.getElementById("bPause").onclick=function(){
+if(!synth||!playing)return;
+if(paused){synth.resume();paused=false;this.textContent="⏸ Pause"}else{synth.pause();paused=true;this.textContent="▶ Resume"}};
+document.getElementById("rate").oninput=function(){
+rate=parseFloat(this.value);document.getElementById("rv").textContent=rate.toFixed(1)+"×";
+if(playing&&!paused)play(idx)};
+function setAcc(a){acc=a;document.getElementById("bUK").className=a==="en-GB"?"on":"";document.getElementById("bUS").className=a==="en-US"?"on":"";if(playing&&!paused)play(idx)}
+document.getElementById("bUK").onclick=function(){setAcc("en-GB")};
+document.getElementById("bUS").onclick=function(){setAcc("en-US")};
+
+/* Exercises */
+function norm(s){return s.toLowerCase().replace(/[.,!?"’']/g,"").replace(/\s+/g," ").trim()}
+var E=[
+{t:"Exercise 1. Fill in the gaps",note:"Word bank: altar, Genius, aedicula, offerings, Penates, serpents, shrine, libation",type:"gap",
+items:[["A small ___ stood in the atrium of the house.","shrine"],["The ___ were the gods of the family’s food stores.","Penates"],["The statuettes were kept in an ___ that looked like a tiny temple.","aedicula"],["The head of the family poured a ___ of wine.","libation"],["Fruit and flowers were typical ___.","offerings"],["The ___ of the head of the family was a protective spirit.","Genius"],["Two ___ were often painted below the main scene.","serpents"],["Incense was burned on the ___.","altar"]]},
+{t:"Exercise 2. Choose the correct word",type:"sel",
+items:[["They ___ a libation of wine for the gods.","poured","poured|pored"],["Fruit and ___ were typical offerings.","flowers","flowers|flour"],["The room was converted, but the old painting was not ___.","altered","altered|altared"],["The snake approaches its ___.","prey","pray|prey"],["The painting is ___ preserved.","wholly","holy|wholly"]]},
+{t:"Exercise 3. Odd one out",note:"Which word is different? altar, alter, shrine, niche",type:"rad",
+items:[["The odd word is:","alter","altar|alter|shrine|niche","alter is a verb; the others are parts of a shrine."]]},
+{t:"Exercise 4. True / False / Not stated",type:"rad",
+items:[["Lararia were always built as small temples.","False","True|False|Not stated"],["The Lares were usually shown as dancing young men.","True","True|False|Not stated"],["The Penates had one fixed appearance.","False","True|False|Not stated"],["Women had a spirit similar to the Genius.","True","True|False|Not stated"],["Snakes were usually painted below the main scene.","True","True|False|Not stated"],["Every shrine contained the same gods.","False","True|False|Not stated"],["The shrines in Pompeii were richer than those in Ostia.","Not stated","True|False|Not stated"]]},
+{t:"Exercise 5. Rewrite in the passive",note:"Write the full sentence. Capital letters and the final full stop are not checked.",type:"txt",
+items:[["Archaeologists discovered the shrine in the 20th century.","the shrine was discovered","The shrine was discovered in the 20th century."],["The Romans painted serpents below the main scene.","serpents were painted below the main scene","Serpents were painted below the main scene."],["People called the building the Mithraeum of the Serpents.","the building was called the mithraeum of the serpents","The building was called the Mithraeum of the Serpents."],["They kept the old painting.","the old painting was kept","The old painting was kept."],["Families left offerings on the altar every day.","offerings were left on the altar every day","Offerings were left on the altar every day."]]}
+];
+var ex=document.getElementById("ex");
+E.forEach(function(e){
+var c=document.createElement("div");c.className="card";
+var h=document.createElement("h3");h.textContent=e.t;c.appendChild(h);
+if(e.note){var n=document.createElement("div");n.className="bank";n.textContent=e.note;c.appendChild(n)}
+var qs=[];
+e.items.forEach(function(it,k){
+var q=document.createElement("div");q.className="q";var get,set;
+if(e.type==="gap"){
+var pr=it[0].split("___");q.appendChild(document.createTextNode((k+1)+". "+pr[0]));
+var i=document.createElement("input");i.type="text";i.setAttribute("aria-label","gap "+(k+1)+"");q.appendChild(i);
+q.appendChild(document.createTextNode(pr[1]));
+get=function(){return i.value};set=function(){i.value=it[1]};
+q.ok=function(){return norm(get())===norm(it[1])};q.msg=function(){return "Answer: "+it[1]}}
+else if(e.type==="sel"){
+var pr2=it[0].split("___");q.appendChild(document.createTextNode((k+1)+". "+pr2[0]));
+var s=document.createElement("select");
+("|"+it[2]).split("|").forEach(function(o){var op=document.createElement("option");op.value=o;op.textContent=o||"…";s.appendChild(op)});
+q.appendChild(s);q.appendChild(document.createTextNode(pr2[1]));
+get=function(){return s.value};set=function(){s.value=it[1]};
+q.ok=function(){return s.value===it[1]};q.msg=function(){return "Answer: "+it[1]}}
+else if(e.type==="rad"){
+q.appendChild(document.createTextNode((e.items.length>1?(k+1)+". ":"")+it[0]+" "));
+var nm="r"+E.indexOf(e)+"_"+k,rs=[];
+it[2].split("|").forEach(function(o){var l=document.createElement("label");var r=document.createElement("input");r.type="radio";r.name=nm;r.value=o;rs.push(r);l.appendChild(r);l.appendChild(document.createTextNode(" "+o));q.appendChild(l)});
+get=function(){var f=rs.filter(function(r){return r.checked})[0];return f?f.value:""};
+set=function(){rs.forEach(function(r){r.checked=r.value===it[1]})};
+q.ok=function(){return get()===it[1]};q.msg=function(){return "Answer: "+it[1]+(it[3]?". "+it[3]:"")}}
+else{
+q.appendChild(document.createTextNode((k+1)+". "+it[0]));
+var t=document.createElement("input");t.type="text";t.className="long";t.setAttribute("aria-label","answer "+(k+1));q.appendChild(t);
+get=function(){return t.value};set=function(){t.value=it[2]};
+q.ok=function(){return norm(get()).indexOf(it[1])>-1};q.msg=function(){return "Model answer: "+it[2]}}
+var fb=document.createElement("span");fb.className="fb";q.appendChild(fb);
+q.fb=fb;q.set=set;q.get=get;qs.push(q);c.appendChild(q)});
+var a=document.createElement("div");a.className="acts";
+var bc=document.createElement("button");bc.className="pri";bc.textContent="Check";
+var bs=document.createElement("button");bs.textContent="Show answers";
+var br=document.createElement("button");br.textContent="Reset";
+var sc=document.createElement("span");sc.className="score";
+bc.onclick=function(){var n=0;qs.forEach(function(q){
+if(!q.get()){q.className="q";q.fb.textContent="";return}
+var ok=q.ok();if(ok)n++;q.className="q "+(ok?"ok":"bad");q.fb.textContent=ok?"Correct":"Not quite. Try again."});
+sc.textContent="Score: "+n+" / "+qs.length};
+bs.onclick=function(){var n=qs.length;qs.forEach(function(q){q.set();q.className="q ok";q.fb.textContent=q.msg()});sc.textContent=""};
+br.onclick=function(){qs.forEach(function(q){q.className="q";q.fb.textContent="";var s=q.querySelector("input[type=text]");if(s)s.value="";var d=q.querySelector("select");if(d)d.value="";q.querySelectorAll("input[type=radio]").forEach(function(r){r.checked=false})});sc.textContent=""};
+a.appendChild(bc);a.appendChild(bs);a.appendChild(br);a.appendChild(sc);c.appendChild(a);
+ex.appendChild(c)});
+</script>
+</body>
+</html>
