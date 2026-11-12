@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Showing Guests Around a Museum</title>
+<style>
+:root{--bg:#faf7f2;--fg:#2a2420;--mut:#6f655c;--card:#fff;--line:#e2d9cc;--acc:#9a3b2e;--hl:#fbe9c6;--ok:#1d7a3e;--bad:#b3262e;--uk:#1f4e8c;--us:#b3262e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1917;--fg:#ece5dc;--mut:#a39a90;--card:#26211e;--line:#3a332e;--acc:#e08a7a;--hl:#4a3a20;--ok:#6fd08c;--bad:#f08a90;--uk:#7fb0ee;--us:#f08a90}}
+:root[data-theme="dark"]{--bg:#1c1917;--fg:#ece5dc;--mut:#a39a90;--card:#26211e;--line:#3a332e;--acc:#e08a7a;--hl:#4a3a20;--ok:#6fd08c;--bad:#f08a90;--uk:#7fb0ee;--us:#f08a90}
+html{color-scheme:light dark;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 Georgia,"Times New Roman",serif}
+main{max-width:960px;margin:0 auto;padding:20px 16px 56px}
+h1{font-size:1.7rem;margin:.2em 0 .1em;color:var(--acc)}
+h2{font-size:1.3rem;margin:1.9em 0 .5em;border-bottom:2px solid var(--line);padding-bottom:.2em}
+h3{font-size:1.05rem;margin:1.3em 0 .4em}
+.sub,.note{color:var(--mut);font-size:.9rem;margin:0 0 .8em}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line);font-family:system-ui,sans-serif;font-size:.88rem}
+button{font:inherit;font-family:system-ui,sans-serif;font-size:.88rem;padding:5px 11px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+button:active{opacity:.7}
+input[type=range]{width:100px;vertical-align:middle}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:7px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line);font-size:.93rem}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+tr:last-child td{border-bottom:0}
+td.w{font-weight:700;white-space:nowrap}
+td.ipa{font-family:"Segoe UI","Lucida Sans Unicode",sans-serif;color:var(--mut);white-space:nowrap}
+td.ex{font-style:italic}
+.pl{display:inline-flex;gap:4px}
+.pl button{font-size:.75rem;font-weight:700;padding:2px 7px;border-radius:6px;background:transparent;border-color:currentColor}
+.pl .uk{color:var(--uk)}.pl .us{color:var(--us)}
+.exb{border:0;background:transparent;color:var(--acc);padding:0 4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 16px 14px;margin:12px 0}
+.txt{margin:.4em 0}
+.s{border-radius:4px;padding:1px 0;cursor:pointer}
+.s.cur{background:var(--hl)}
+.q{margin:.7em 0;padding:4px 8px;border-left:4px solid transparent;border-radius:4px}
+.q.ok{border-left-color:var(--ok)}.q.bad{border-left-color:var(--bad)}
+.q input[type=text]{font:inherit;font-size:.95rem;width:10em;padding:2px 6px;border:0;border-bottom:2px solid var(--mut);background:transparent;color:var(--fg)}
+.q input.long{width:100%;box-sizing:border-box;margin-top:4px}
+.q label{margin-right:12px;white-space:nowrap}
+.fb{display:block;font-size:.85rem;font-family:system-ui,sans-serif;margin-top:2px}
+.q.ok .fb{color:var(--ok)}.q.bad .fb{color:var(--bad)}
+.acts{display:flex;gap:8px;align-items:center;margin-top:.8em;flex-wrap:wrap}
+.score{font-family:system-ui,sans-serif;font-weight:700}
+.bank{font-family:system-ui,sans-serif;font-size:.88rem;color:var(--mut)}
+.ph{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
+.ph:last-child{border:0}.ph b{min-width:9.5em;font-family:system-ui,sans-serif;font-size:.82rem;color:var(--mut)}
+@media print{.bar{display:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Showing Guests Around a Museum</h1>
+<p class="sub">Tretyakov Gallery · Museum of Russian Icons · Sobranie Museum · Level B1+/B2</p>
+<div class="bar">
+<button id="bPause">⏸ Pause</button><button id="bStop">⏹ Stop</button>
+<span>Speed <input type="range" id="rate" min="0.6" max="1.3" step="0.1" value="0.9"> <b id="rv">0.9×</b></span>
+<button id="bUK" class="on">British</button><button id="bUS">American</button>
+</div>
+<p class="note" id="msg">The accent buttons set the voice for texts and phrases. Voices depend on your device.</p>
+
+<h2>1. Vocabulary</h2>
+<div id="vocab"></div>
+
+<h2>2. Model texts: three short tours</h2>
+<p class="note">Tap ▶ Listen, or tap any sentence to start from it. Check dates and figures on the museums’ official websites before a real tour.</p>
+<div id="texts"></div>
+
+<h2>3. Guiding phrases</h2>
+<div class="card" id="phr"></div>
+
+<h2>4. Exercises</h2>
+<div id="ex"></div>
+</main>
+<script>
+var V=[
+["A. The museum",[
+["collection","/kəˈlekʃn/","коллекция, собрание","The museum has a collection of over 5,000 items."],
+["permanent exhibition","/ˈpɜːmənənt ˌeksɪˈbɪʃn/","постоянная экспозиция","The permanent exhibition is on the second floor."],
+["temporary exhibition","/ˈtemprəri ˌeksɪˈbɪʃn/","временная выставка","The temporary exhibition closes in March."],
+["exhibit","/ɪɡˈzɪbɪt/","экспонат","Please do not touch the exhibits."],
+["gallery","/ˈɡæləri/","галерея; зал","The gallery houses works by Russian painters."],
+["curator","/kjʊˈreɪtə/","куратор, хранитель","The curator organised the exhibition."],
+["founder","/ˈfaʊndə/","основатель","The founder began collecting icons in the early 2000s."],
+["patron","/ˈpeɪtrən/","меценат, покровитель искусств","He was a famous patron of the arts."],
+["donate","/dəʊˈneɪt/","передавать в дар","He donated his collection to the city."],
+["private collection","/ˈpraɪvət kəˈlekʃn/","частное собрание","It began as a private collection."],
+["on loan","/ɒn ləʊn/","на временном хранении","The painting is on loan from another museum."],
+["restoration","/ˌrestəˈreɪʃn/","реставрация","The icon needed careful restoration."],
+["display case","/dɪˈspleɪ keɪs/","витрина","The jewellery is in a display case."],
+["label (caption)","/ˈleɪbl/","этикетка, подпись к экспонату","The label gives the date and the artist.","label"]]],
+["B. Art and objects",[
+["masterpiece","/ˈmɑːstəpiːs/","шедевр","This portrait is considered a masterpiece."],
+["canvas","/ˈkænvəs/","холст","The artist painted it on a large canvas."],
+["portrait","/ˈpɔːtrət/","портрет","This is a portrait of the founder."],
+["landscape","/ˈlændskeɪp/","пейзаж","The landscape shows a quiet river in autumn."],
+["still life","/ˌstɪl ˈlaɪf/","натюрморт","The still life shows fruit and flowers."],
+["sculpture","/ˈskʌlptʃə/","скульптура","The sculpture is made of bronze."],
+["icon","/ˈaɪkɒn/","икона","Icons were painted on wooden panels."],
+["icon painter","/ˈaɪkɒn ˈpeɪntə/","иконописец","Andrei Rublev was a famous icon painter."],
+["halo","/ˈheɪləʊ/","нимб","The saint has a golden halo."],
+["applied art","/əˈplaɪd ɑːt/","декоративно-прикладное искусство","Applied art includes porcelain, glass and metalwork."],
+["mechanical","/məˈkænɪkl/","механический","The mechanical bird sings every hour."]]],
+["C. Visiting the museum",[
+["admission","/ədˈmɪʃn/","вход, плата за вход","Admission is free on the first Sunday of the month."],
+["guided tour","/ˌɡaɪdɪd ˈtʊə/","экскурсия с гидом","The guided tour takes about an hour."],
+["audio guide","/ˈɔːdiəʊ ɡaɪd/","аудиогид","You can rent an audio guide at the entrance."],
+["cloakroom","/ˈkləʊkruːm/","гардероб","Please leave your coat in the cloakroom."],
+["book in advance","/bʊk ɪn ədˈvɑːns/","записаться заранее","You need to book in advance."]]]
+];
+var TX=[
+["The Tretyakov Gallery","Welcome to the Tretyakov Gallery, one of the most important museums of Russian art in the world. It is named after Pavel Tretyakov, a Moscow merchant who began to collect works by Russian artists in the middle of the 19th century. In 1867 the collection was opened to the public in his house in Lavrushinsky Lane, and in 1892 he donated it to the city of Moscow. After the Revolution the museum was nationalised, and today it has well over 170,000 works. The main exhibition in this building covers Russian art from the 11th to the early 20th century, so you can see icons, portraits, landscapes and scenes of everyday life. Art of the 20th century is displayed in the branch on Krymsky Val. Please pay special attention to the icons: the collection includes works by Andrei Rublev."],
+["The Museum of Russian Icons","This museum is a private collection that became a public museum. It was founded by the businessman and patron Mikhail Abramov, who began to collect icons in the early 2000s. The museum opened in May 2006, at first in a business centre. Today it is housed in two historic buildings on Goncharnaya Street, close to Taganskaya metro station. The collection has about 5,000 items, including nearly 1,000 icons from the 14th to the 20th century. It also has handwritten books and objects of applied art. It was the first private collection in Russia to be accepted into ICOM, the International Council of Museums. Notice the gold background and the halos: in icon painting, gold symbolises divine light."],
+["The Sobranie Museum","Sobranie means “collection” in Russian, and this museum really is a collection of unusual things. It is a private cultural project of the businessman and patron David Yakobashvili. The museum has more than 20,000 exhibits: mechanical musical instruments and objects, decorative and applied art, clocks, fine art, printed materials and music recordings. Some visitors say they enjoy the mechanical objects most, because many of them still move and play music. Visits may need to be booked in advance, so it is worth checking the website before you come."]
+];
+var PH=[["Welcome","Welcome to the Tretyakov Gallery."],["Welcome","Let me tell you a little about this museum."],["Directing attention","If you look to your left, you can see a portrait of the founder."],["Directing attention","Please pay attention to the gold background."],["Directing attention","Notice how the artist painted the light."],["Moving on","Let’s move on to the next room."],["Numbers","The museum has about five thousand items."],["Describing","This icon dates from the fifteenth century."],["Opinion","Many people consider it a masterpiece."],["Not sure","I’m not sure, but I can check for you."],["Not sure","As far as I know, it was painted in the sixteenth century."],["Not sure","You may want to ask the museum staff."]];
+var synth=window.speechSynthesis,acc="en-GB",rate=0.9,cur=[],idx=0,tok=0,playing=false,paused=false;
+function voice(l){if(!synth)return null;var k=l.toLowerCase();return synth.getVoices().find(function(v){return v.lang.replace("_","-").toLowerCase()===k})||null}
+function mk(el,tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=txt;if(el)el.appendChild(e);return e}
+function mark(el){document.querySelectorAll(".s.cur").forEach(function(x){x.classList.remove("cur")});if(el)el.classList.add("cur")}
+function run(my){
+if(my!==tok)return;
+if(idx>=cur.length){playing=false;mark(null);return}
+var s=cur[idx],u=new SpeechSynthesisUtterance(s.t);
+u.lang=acc;var v=voice(acc);if(v)u.voice=v;u.rate=rate;
+u.onstart=function(){if(my===tok)mark(s.el)};
+u.onend=function(){if(my===tok){idx++;run(my)}};
+synth.speak(u)}
+function playList(list,i,l){
+if(!synth){document.getElementById("msg").textContent="Speech synthesis is not supported in this browser.";return}
+synth.cancel();tok++;cur=list;idx=i;playing=true;paused=false;
+if(l)cur.lang=l;
+document.getElementById("bPause").textContent="⏸ Pause";
+var my=tok;setTimeout(function(){run(my)},80)}
+function speakOnce(list,l){
+if(!synth)return;synth.cancel();tok++;playing=false;mark(null);
+list.forEach(function(t){var u=new SpeechSynthesisUtterance(t);u.lang=l;var v=voice(l);if(v)u.voice=v;u.rate=rate;synth.speak(u)})}
+function stop(){tok++;playing=false;paused=false;if(synth)synth.cancel();mark(null);document.getElementById("bPause").textContent="⏸ Pause"}
+function again(){if(playing&&!paused)playList(cur,idx)}
+document.getElementById("bStop").onclick=stop;
+document.getElementById("bPause").onclick=function(){if(!synth||!playing)return;if(paused){synth.resume();paused=false;this.textContent="⏸ Pause"}else{synth.pause();paused=true;this.textContent="▶ Resume"}};
+document.getElementById("rate").oninput=function(){rate=parseFloat(this.value);document.getElementById("rv").textContent=rate.toFixed(1)+"×";again()};
+function setAcc(a){acc=a;document.getElementById("bUK").className=a==="en-GB"?"on":"";document.getElementById("bUS").className=a==="en-US"?"on":"";again()}
+document.getElementById("bUK").onclick=function(){setAcc("en-GB")};
+document.getElementById("bUS").onclick=function(){setAcc("en-US")};
+
+/* Vocabulary */
+var vo=document.getElementById("vocab");
+V.forEach(function(g){
+mk(vo,"h3",0,g[0]);
+var w=mk(vo,"div","wrap"),t=mk(w,"table");
+t.innerHTML="<thead><tr><th>Word</th><th>Listen</th><th>Transcription</th><th>Перевод</th><th>Example</th></tr></thead>";
+var tb=mk(t,"tbody");
+g[1].forEach(function(r){
+var say=r[4]||r[0],tr=mk(tb,"tr");
+mk(tr,"td","w",r[0]);
+var p=mk(tr,"td"),b=mk(p,"span","pl");
+var u=mk(b,"button","uk","UK");u.onclick=function(){speakOnce([say],"en-GB")};
+var s=mk(b,"button","us","US");s.onclick=function(){speakOnce([say],"en-US")};
+mk(tr,"td","ipa",r[1]);mk(tr,"td",0,r[2]);
+var e=mk(tr,"td","ex",r[3]);
+var x=mk(e,"button","exb","▶");x.onclick=function(){speakOnce([r[3]],acc)}})});
+
+/* Texts */
+var tx=document.getElementById("texts");
+TX.forEach(function(t){
+var c=mk(tx,"div","card");mk(c,"h3",0,t[0]);
+var bt=mk(c,"button","pri","▶ Listen");
+var p=mk(c,"p","txt"),list=[];
+(t[1].match(/[^.!?]+[.!?]+["”]?\s*/g)||[t[1]]).forEach(function(sn,i){
+var sp=mk(p,"span","s",sn);var o={t:sn.trim(),el:sp};list.push(o);
+sp.onclick=function(){playList(list,i)}});
+bt.onclick=function(){playList(list,0)}});
+
+/* Phrases */
+var ph=document.getElementById("phr");
+PH.forEach(function(r){
+var d=mk(ph,"div","ph");mk(d,"b",0,r[0]);
+var b=mk(d,"button","exb","▶");b.onclick=function(){speakOnce([r[1]],acc)};
+mk(d,"span",0,r[1])});
+
+/* Exercises */
+function norm(s){return s.toLowerCase().replace(/[.,!?"’'“”]/g,"").replace(/\s+/g," ").trim()}
+var TF="True|False|Not stated";
+var E=[
+{t:"Exercise 1. Fill in the gaps",note:"Word bank: donated, curator, permanent exhibition, masterpiece, patron, collection, admission, restoration",type:"gap",
+items:[["The ___ is on the first floor, but the special exhibition has moved.","permanent exhibition"],["Pavel Tretyakov was a famous ___ of Russian art.","patron"],["In 1892 he ___ his collection to the city of Moscow.","donated"],["The ___ is happy to answer your questions after the tour.","curator"],["After a long ___, the icon looks as bright as new.","restoration"],["This painting is often called a ___ of Russian art.","masterpiece"],["The museum’s ___ includes paintings, icons and sculptures.","collection"],["___ to the museum is free for children under 7.","admission"]]},
+{t:"Exercise 2. True / False / Not stated",type:"rad",
+items:[["The Tretyakov Gallery is named after its founder.","True",TF],["Pavel Tretyakov sold his collection to the city.","False",TF,"He donated it."],["The main building on Lavrushinsky Lane shows art of the 20th century.","False",TF,"That is the branch on Krymsky Val."],["The Museum of Russian Icons began as a private collection.","True",TF],["The museum has exactly 1,000 icons.","False",TF,"The text says nearly 1,000."],["Sobranie has only paintings.","False",TF],["The ticket price at the Tretyakov Gallery is 800 roubles.","Not stated",TF]]},
+{t:"Exercise 3. Rewrite in the passive",note:"Write the full sentence. Capital letters and the final full stop are not checked.",type:"txt",
+items:[["Pavel Tretyakov founded the gallery.","the gallery was founded","The gallery was founded by Pavel Tretyakov."],["The city of Moscow received the collection in 1892.","the collection was received","The collection was received by the city of Moscow in 1892."],["They display the icons in two historic buildings.","the icons are displayed in two historic buildings","The icons are displayed in two historic buildings."],["People call this painting a masterpiece.","this painting is called a masterpiece","This painting is called a masterpiece."],["The museum owns about 5,000 items.","items are owned by the museum","About 5,000 items are owned by the museum."]]}
+];
+var ex=document.getElementById("ex");
+E.forEach(function(e,ei){
+var c=mk(ex,"div","card");mk(c,"h3",0,e.t);
+if(e.note)mk(c,"div","bank",e.note);
+var qs=[];
+e.items.forEach(function(it,k){
+var q=mk(c,"div","q"),get,set;
+if(e.type==="gap"){
+var pr=it[0].split("___");q.appendChild(document.createTextNode((k+1)+". "+pr[0]));
+var i=mk(q,"input");i.type="text";i.setAttribute("aria-label","gap "+(k+1));
+q.appendChild(document.createTextNode(pr[1]));
+get=function(){return i.value};set=function(){i.value=it[1]};
+q.ok=function(){return norm(get())===norm(it[1])};q.msg=function(){return "Answer: "+it[1]}}
+else if(e.type==="rad"){
+q.appendChild(document.createTextNode((k+1)+". "+it[0]+" "));
+var rs=[];
+it[2].split("|").forEach(function(o){var l=mk(q,"label");var r=mk(l,"input");r.type="radio";r.name="r"+ei+"_"+k;r.value=o;rs.push(r);l.appendChild(document.createTextNode(" "+o))});
+get=function(){var f=rs.filter(function(r){return r.checked})[0];return f?f.value:""};
+set=function(){rs.forEach(function(r){r.checked=r.value===it[1]})};
+q.ok=function(){return get()===it[1]};q.msg=function(){return "Answer: "+it[1]+(it[3]?". "+it[3]:"")}}
+else{
+q.appendChild(document.createTextNode((k+1)+". "+it[0]));
+var t=mk(q,"input","long");t.type="text";t.setAttribute("aria-label","answer "+(k+1));
+get=function(){return t.value};set=function(){t.value=it[2]};
+q.ok=function(){return norm(get()).indexOf(it[1])>-1};q.msg=function(){return "Model answer: "+it[2]}}
+q.fb=mk(q,"span","fb");q.set=set;q.get=get;qs.push(q)});
+var a=mk(c,"div","acts");
+var bc=mk(a,"button","pri","Check"),bs=mk(a,"button",0,"Show answers"),br=mk(a,"button",0,"Reset"),sc=mk(a,"span","score");
+bc.onclick=function(){var n=0;qs.forEach(function(q){
+if(!q.get()){q.className="q";q.fb.textContent="";return}
+var ok=q.ok();if(ok)n++;q.className="q "+(ok?"ok":"bad");q.fb.textContent=ok?"Correct":"Not quite. Try again."});
+sc.textContent="Score: "+n+" / "+qs.length};
+bs.onclick=function(){qs.forEach(function(q){q.set();q.className="q ok";q.fb.textContent=q.msg()});sc.textContent=""};
+br.onclick=function(){qs.forEach(function(q){q.className="q";q.fb.textContent="";var s=q.querySelector("input[type=text]");if(s)s.value="";q.querySelectorAll("input[type=radio]").forEach(function(r){r.checked=false})});sc.textContent=""}});
+</script>
+</body>
+</html>
