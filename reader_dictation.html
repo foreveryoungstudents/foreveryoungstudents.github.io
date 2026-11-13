@@ -446,7 +446,7 @@ function buildReader(raw) {
       span.dataset.i = i;
       const words = buildWords(span, sentText);
       let mic = null;
-      if (SR) { mic = document.createElement("button"); mic.className = "mbtn"; mic.title = "Check my pronunciation"; mic.innerHTML = MIC; mic.addEventListener("click", () => toggleRec(i)); }
+      if (SR) { mic = document.createElement("button"); mic.className = "mbtn"; mic.title = "Проверить мое произношение"; mic.innerHTML = MIC; mic.addEventListener("click", () => toggleRec(i)); }
 
       pDiv.appendChild(btn);
       if (mic) pDiv.appendChild(mic);
@@ -772,8 +772,8 @@ function startRec(i) {
   };
   r.onerror = ev => {
     if (ev.error === 'aborted') return;
-    const msg = { 'not-allowed': 'Microphone access denied — allow it in the browser.', 'service-not-allowed': 'Microphone access denied.',
-                  'audio-capture': 'No microphone found.', 'no-speech': "Didn't hear anything — try again.", 'network': 'Speech service unavailable (network).' }[ev.error];
+    const msg = { 'not-allowed': 'Microphone access denied — allow it in the browser.', 'service-not-allowed': 'Нет доступа к микрофону.',
+                  'audio-capture': 'No microphone found.', 'no-speech': "Ничего не слышно - попробуйте еще раз.", 'network': 'Speech service unavailable (network).' }[ev.error];
     if (msg) { ppStatus.textContent = msg; r._err = true; }
   };
   r.onend = () => {
