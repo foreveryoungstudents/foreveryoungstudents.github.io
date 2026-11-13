@@ -214,9 +214,9 @@ button.primary:hover{background:var(--accent2);border-color:var(--accent2);color
   </div>
   <textarea id="ta" placeholder="Paste or type English text here…"></textarea>
   <div class="btn-row">
-    <button class="primary" id="load-btn">Load text</button>
-    <button id="file-btn">Open .txt file</button>
-    <button class="ghost" id="smpl-btn">Load sample</button>
+     <button class="ghost" id="smpl-btn">Показать пример</button>
+    <button class="primary" id="load-btn">Запустить</button>
+    <button id="file-btn">Открыть .txt файл</button>
     <input type="file" id="fi" accept=".txt,text/plain" style="display:none">
   </div>
 </div>
@@ -226,7 +226,7 @@ button.primary:hover{background:var(--accent2);border-color:var(--accent2);color
   <div class="book-meta">
     <span id="ms"></span><span class="msep">·</span>
     <span id="mw"></span><span class="msep">·</span>
-    <button class="ghost" id="back-btn">← Change text</button>
+    <button class="ghost" id="back-btn">← Заменить текст</button>
   </div>
   <div class="progress-wrap"><div class="progress-fill" id="prog"></div></div>
   <div class="play-bar">
@@ -240,17 +240,17 @@ button.primary:hover{background:var(--accent2);border-color:var(--accent2);color
     <button class="pb" id="next-btn" title="Next sentence">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>
     </button>
-    <div id="play-info">Press ▶ to start</div>
+    <div id="play-info">Нажпите ▶ чтобы начать</div>
     <button class="pb" id="stop-btn" title="Stop">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
     </button>
   </div>
-  <div class="hint-bar">💡 Hover any word for Russian translation &nbsp;·&nbsp; Space = pause &nbsp;·&nbsp; ← → = prev/next &nbsp;·&nbsp; Esc = stop &nbsp;·&nbsp; 🎤 = check pronunciation</div>
+  <div class="hint-bar">💡 Hover any word for Russian translation &nbsp;·&nbsp; Пробел = пауза &nbsp;·&nbsp; ← → = назад / вперед &nbsp;·&nbsp; Esc = stop &nbsp;·&nbsp; 🎤 = проверить произношение</div>
   <div id="content"></div>
 </div>
 </main>
 
-<div id="pp"><div class="row"><span id="pp-score"></span><span id="pp-status" style="flex:1"></span><button id="pp-retry">↻ Try again</button><button id="pp-close">✕</button></div><div id="pp-heard"></div></div>
+<div id="pp"><div class="row"><span id="pp-score"></span><span id="pp-status" style="flex:1"></span><button id="pp-retry">Еще раз</button><button id="pp-close">✕</button></div><div id="pp-heard"></div></div>
 
 <script>
 'use strict';
@@ -753,7 +753,7 @@ function evaluate(i, heard) {
   const pts = es.reduce((a, x) => a + (x === 'ok' ? 1 : x === 'close' ? 0.5 : 0), 0);
   const pct = Math.round(pts / (E.length || 1) * 100);
   ppScore.textContent = pct + '%';
-  ppStatus.textContent = pct >= 90 ? 'Excellent!' : pct >= 70 ? 'Good — check the highlighted words' : 'Keep practicing — check the highlighted words';
+  ppStatus.textContent = pct >= 90 ? 'Отлично!' : pct >= 70 ? 'Хорошо — обратите внимание на произношение подсвеченных слов в тексте' : 'Работайте над произношением подсвеченных слов в тексте';
   ppHeard.innerHTML = R.map((w, k) => '<span class="' + rs[k] + '">' + w + '</span>').join(' ');
 }
 
@@ -784,7 +784,7 @@ function startRec(i) {
   };
   pp.classList.add('open');
   ppScore.textContent = ''; ppHeard.textContent = '';
-  ppStatus.textContent = '🎤 Listening… read the sentence aloud (click 🎤 to finish)';
+  ppStatus.textContent = '🎤 Слушаю… читайте предложение вслух (кликните 🎤 завершить)';
   sentences[i].mic.classList.add('rec');
   try { r.start(); } catch (e) { console.error(e); }
 }
