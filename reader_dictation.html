@@ -435,7 +435,7 @@ function buildReader(raw) {
       const btn = document.createElement('button');
       btn.className   = 'sbtn';
       btn.dataset.i   = i;
-      btn.title       = 'Read this sentence';
+      btn.title       = 'Озвучить';
       btn.innerHTML   = SPLAY;
       btn.addEventListener('click', () => {
         (isPlaying && curIdx === +btn.dataset.i) ? pauseResume() : playSent(+btn.dataset.i);
@@ -446,7 +446,7 @@ function buildReader(raw) {
       span.dataset.i = i;
       const words = buildWords(span, sentText);
       let mic = null;
-      if (SR) { mic = document.createElement("button"); mic.className = "mbtn"; mic.title = "Проверить мое произношение"; mic.innerHTML = MIC; mic.addEventListener("click", () => toggleRec(i)); }
+      if (SR) { mic = document.createElement("button"); mic.className = "mbtn"; mic.title = "Записать себя"; mic.innerHTML = MIC; mic.addEventListener("click", () => toggleRec(i)); }
 
       pDiv.appendChild(btn);
       if (mic) pDiv.appendChild(mic);
