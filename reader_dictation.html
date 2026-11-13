@@ -209,12 +209,12 @@ button.primary:hover{background:var(--accent2);border-color:var(--accent2);color
 <div id="inp">
   <div class="drop-zone" id="dz" tabindex="0" role="button">
     <span class="di">📄</span>
-    <strong>Click to paste English text</strong><br>
-    or drag &amp; drop a .txt file here
+    <strong>Кликните, чтобы вставить текст на английском</strong><br>
+    или перетащите &amp; и отпустите  ваш .txt текстовый файд.
   </div>
   <textarea id="ta" placeholder="Paste or type English text here…"></textarea>
   <div class="btn-row">
-     <button class="ghost" id="smpl-btn">Показать пример</button>
+     <button class="ghost" id="smpl-btn">ПРИМЕР</button>
     <button class="primary" id="load-btn">Запустить</button>
     <button id="file-btn">Открыть .txt файл</button>
     <input type="file" id="fi" accept=".txt,text/plain" style="display:none">
@@ -702,7 +702,7 @@ async function myMemory(w) {
 // ═══════════════════════════════════════════════════════
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const MIC = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg>';
-if (!SR) { const hb = document.querySelector('.hint-bar'); hb.innerHTML = hb.innerHTML.replace('🎤 = check pronunciation', '🎤 dictation needs Chrome / Edge / Safari'); }
+if (!SR) { const hb = document.querySelector('.hint-bar'); hb.innerHTML = hb.innerHTML.replace('🎤 = проверить произношение', '🎤 dictation needs Chrome / Edge / Safari'); }
 
 const pp = document.getElementById('pp'), ppScore = document.getElementById('pp-score'),
       ppStatus = document.getElementById('pp-status'), ppHeard = document.getElementById('pp-heard');
