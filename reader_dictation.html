@@ -230,14 +230,14 @@ button.primary:hover{background:var(--accent2);border-color:var(--accent2);color
   </div>
   <div class="progress-wrap"><div class="progress-fill" id="prog"></div></div>
   <div class="play-bar">
-    <button class="pb" id="prev-btn" title="Previous sentence">
+    <button class="pb" id="prev-btn" title="Предыдущее предложение">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
     </button>
     <button class="pb primary" id="play-btn">
       <svg id="i-play" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       <svg id="i-pause" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
     </button>
-    <button class="pb" id="next-btn" title="Next sentence">
+    <button class="pb" id="next-btn" title="Следующее предложение">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>
     </button>
     <div id="play-info">Нажпите ▶ чтобы начать</div>
@@ -245,7 +245,7 @@ button.primary:hover{background:var(--accent2);border-color:var(--accent2);color
       <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
     </button>
   </div>
-  <div class="hint-bar">💡 Hover any word for Russian translation &nbsp;·&nbsp; Пробел = пауза &nbsp;·&nbsp; ← → = назад / вперед &nbsp;·&nbsp; Esc = stop &nbsp;·&nbsp; 🎤 = проверить произношение</div>
+  <div class="hint-bar">&nbsp;·&nbsp; Пробел = пауза </br> &nbsp;·&nbsp; ← → = назад / вперед </br> &nbsp;·&nbsp; Esc = stop </br> &nbsp;·&nbsp; 🎤 = проверить произношение</div>
   <div id="content"></div>
 </div>
 </main>
@@ -459,8 +459,8 @@ function buildReader(raw) {
   });
 
   const wc = raw.split(/\s+/).filter(Boolean).length;
-  document.getElementById('ms').textContent = sentences.length + ' sentences';
-  document.getElementById('mw').textContent = wc.toLocaleString() + ' words';
+  document.getElementById('ms').textContent = sentences.length + ' Предложений';
+  document.getElementById('mw').textContent = wc.toLocaleString() + ' Слов';
 
   inpEl.style.display = 'none';
   rdEl.style.display  = 'block';
@@ -512,7 +512,7 @@ function stopAll(reset = true) {
     if (curIdx >= 0 && curIdx < sentences.length) clearHL(curIdx);
     curIdx = -1;
     updateBar(); updateProg();
-    document.getElementById('play-info').textContent = 'Press ▶ to start';
+    document.getElementById('play-info').textContent = 'Нажмите ▶ чтобы начать';
   }
 }
 
