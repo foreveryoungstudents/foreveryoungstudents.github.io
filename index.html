@@ -3,328 +3,333 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <img src="icons/logoFYS.png" height="15" width="15">
 <title>Forever Young Students</title>
+<meta name="description" content="Небольшие приложения, тренажёры и материалы для занятий">
 <link rel="icon" href="favicon.ico" sizes="48x48">
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#f6f7f9">
+<meta name="theme-color" content="#f4f5f9">
 <meta name="apple-mobile-web-app-title" content="Приложения">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f6f7f9;
+    --bg: #f4f5f9;
     --card: #ffffff;
-    --text: #1c1e21;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --accent: #4f6ef7;
-    --update-bg: #fffbeb;
-    --update-border: #fcd34d;
-    --update-text: #92400e;
-    --update-accent: #d97706;
+    --text: #1b1d27;
+    --muted: #666b7a;
+    --border: #e3e5ee;
+    --accent: #4f5de8;
+    --tile: #eceffd;
+    --note-bg: #fff8e6;
+    --note-line: #e0a21b;
+    --note-text: #6b4a05;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #14161a;
-      --card: #1d2026;
-      --text: #e8eaed;
-      --muted: #9aa0a9;
-      --border: #2c3038;
-      --accent: #7c93ff;
-      --update-bg: #2a2416;
-      --update-border: #78570d;
-      --update-text: #fcd34d;
-      --update-accent: #fbbf24;
+      --bg: #13141a;
+      --card: #1c1e27;
+      --text: #ebecf2;
+      --muted: #9a9fb0;
+      --border: #2b2e3a;
+      --accent: #8c98ff;
+      --tile: #262a3d;
+      --note-bg: #272213;
+      --note-line: #d4a02a;
+      --note-text: #f1d58a;
     }
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.5;
   }
   main {
-    max-width: 640px;
+    max-width: 680px;
     margin: 0 auto;
     padding: 56px 20px 40px;
   }
-  h1 {
-    margin: 0 0 6px;
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-  .subtitle {
-    margin: 0 0 32px;
-    color: var(--muted);
-    font-size: 15px;
-  }
-  .list { display: grid; gap: 12px; }
-  .card {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas: "icon info arrow";
+
+  header {
+    display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px 18px;
+    margin-bottom: 40px;
+  }
+  .logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    object-fit: cover;
+    background: var(--tile);
+    flex-shrink: 0;
+  }
+  h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+
+  section + section { margin-top: 36px; }
+  h2 {
+    margin: 0 0 12px;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .list { display: grid; gap: 10px; }
+
+  .item {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color .15s;
+  }
+  .item:hover, .item:focus-within { border-color: var(--accent); }
+  .link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
     color: inherit;
     text-decoration: none;
-    transition: border-color .15s, transform .15s;
-    position: relative;
   }
-  .card:hover { border-color: var(--accent); transform: translateY(-1px); }
-
-  /* Карточка с апдейтом: на широком экране добавляется колонка для апдейта */
-  .card.has-update {
-    grid-template-columns: auto 1fr auto auto;
-    grid-template-areas: "icon info update arrow";
-  }
-
-  .card-icon {
-    grid-area: icon;
-    font-size: 28px;
-    line-height: 1;
+  .link:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 16px; }
+  .icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    background: var(--tile);
+    border-radius: 12px;
+    font-size: 24px;
     flex-shrink: 0;
   }
-  .info {
-    grid-area: info;
-    min-width: 0;
-  }
-  .title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .desc { font-size: 14px; color: var(--muted); }
-  .arrow {
-    grid-area: arrow;
-    color: var(--muted);
-    font-size: 18px;
-  }
-  .card:hover .arrow { color: var(--accent); }
-
-  /* Блок апдейта ВНУТРИ карточки */
-  .card-update {
-    grid-area: update;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    padding: 10px 14px;
-    background: var(--update-bg);
-    border: 1px solid var(--update-border);
-    border-left: 3px solid var(--update-accent);
-    border-radius: 10px;
-    font-size: 12px;
-    color: var(--update-text);
-    line-height: 1.45;
-    min-width: 220px;
-    max-width: 280px;
-  }
-  .card-update-icon {
+  .info { flex: 1; min-width: 0; }
+  .title {
     font-size: 16px;
-    flex-shrink: 0;
-    line-height: 1.3;
-  }
-  .card-update-content { flex: 1; min-width: 0; }
-  .card-update-title {
     font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 3px;
-    color: var(--update-accent);
-  }
-  .card-update-text {
-    font-size: 12px;
-    color: var(--update-text);
-  }
-  .card-update-text ul {
-    margin: 0;
-    padding-left: 16px;
-  }
-  .card-update-text li {
-    margin: 1px 0;
-  }
-  .card-update-date {
-    font-size: 10px;
-    color: var(--muted);
-    margin-top: 4px;
-    opacity: 0.85;
-  }
-
-  /* Бейдж NEW на карточке */
-  .badge-new {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 3px;
-    padding: 2px 8px;
-    background: var(--update-accent);
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    border-radius: 10px;
-    text-transform: uppercase;
-    line-height: 1.4;
-    animation: pulse-badge 2s ease-in-out infinite;
+    gap: 8px;
+    flex-wrap: wrap;
   }
-  @keyframes pulse-badge {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.75; }
+  .desc { font-size: 14px; color: var(--muted); }
+  .chev {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--muted);
+    transition: transform .15s, color .15s;
+  }
+  .link:hover .chev { color: var(--accent); transform: translateX(3px); }
+
+  .badge-new {
+    padding: 1px 8px;
+    background: var(--accent);
+    color: var(--card);
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 999px;
   }
 
-  /* Мобильная версия: апдейт переносится под info */
-  @media (max-width: 600px) {
-    .card.has-update {
-      grid-template-columns: auto 1fr auto;
-      grid-template-areas:
-        "icon info arrow"
-        "icon update update";
-      grid-template-rows: auto auto;
-    }
-    .card-update {
-      min-width: 0;
-      max-width: 100%;
-      width: 100%;
-      margin-top: 4px;
-    }
+  .update {
+    margin: 0 14px 14px;
+    padding: 10px 14px;
+    background: var(--note-bg);
+    border-left: 3px solid var(--note-line);
+    border-radius: 8px;
+    color: var(--note-text);
+    font-size: 13px;
   }
+  .update-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .update-date { font-weight: 400; opacity: .8; }
+  .update ul { margin: 0; padding-left: 18px; }
 
   footer {
-    margin-top: 40px;
+    margin-top: 48px;
     text-align: center;
     font-size: 13px;
     color: var(--muted);
+  }
+
+  @media (max-width: 480px) {
+    main { padding-top: 36px; }
+    h1 { font-size: 25px; }
+    .logo { width: 48px; height: 48px; }
   }
 </style>
 </head>
 <body>
 <main>
-  <h1>Forever Young Students</h1>
-  <p class="subtitle">Мои небольшие приложения</p>
+  <header>
+    <img class="logo" src="icons/logoFYS.png" alt="Логотип Forever Young Students">
+    <div>
+      <h1>Forever Young Students</h1>
+      <p class="subtitle">Мои небольшие приложения</p>
+    </div>
+  </header>
 
-  <div class="list">
-       <a class="card" href="https://foreveryoungstudents.github.io/Attention-Trainer/">
-      <span class="card-icon">🧮</span>
-      <span class="info">
-        <div class="title">Mind Fitness</div>
-        <div class="desc">Тренажер</div>
-      </span>
-           <div class="card-update">
-        <span class="card-update-icon">✨</span>
-        <div class="card-update-content">
-          <div class="card-update-title">Обновление</div>
-          <div class="card-update-text">
-            <ul>
-              <li>Поправила рпботу карточек</li>
-              <li>Поправила сами карточки</li>
-            </ul>
-          </div>
-          <div class="card-update-date">17 ноября 2026</div>
+  <!--
+    КАК ДОБАВИТЬ БЕЙДЖ «НОВОЕ»:
+    у карточки <div class="item"> укажите дату создания: data-created="ГГГГ-ММ-ДД".
+    Бейдж появится сам в этот день и исчезнет через NEW_DAYS дней (см. скрипт внизу).
+    Карточки без data-created бейдж не получают.
+  -->
+
+  <section>
+    <h2>Тренажёры</h2>
+    <div class="list">
+
+      <div class="item">
+        <a class="link" href="https://foreveryoungstudents.github.io/Attention-Trainer/">
+          <span class="icon">🧮</span>
+          <span class="info">
+            <span class="title">Mind Fitness</span>
+            <span class="desc">Тренажёр</span>
+          </span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <div class="update">
+          <div class="update-head"><span>Обновление</span><span class="update-date">17 ноября 2026</span></div>
+          <ul>
+            <li>Поправила работу карточек</li>
+            <li>Поправила сами карточки</li>
+          </ul>
         </div>
       </div>
-      <span class="arrow">→</span>
-    </a>
 
-     <a class="card has-update" href="https://foreveryoungstudents.github.io/vocabulary-trainer/?group=beads">
-      <span class="card-icon">🔊</span>
-      <span class="info">
-        <div class="title">
-          Игра в бисер
-          <span class="badge-new">🆕 New</span>
-        </div>
-        <div class="desc">Тренажер</div>
-      </span>
-      <div class="card-update">
-        <span class="card-update-icon">✨</span>
-        <div class="card-update-content">
-          <div class="card-update-title">Обновление</div>
-          <div class="card-update-text">
-            <ul>
-              <li>Запись голоса и распознавание речи</li>
-              <li>Переводы предложений</li>
-            </ul>
-          </div>
-          <div class="card-update-date">17 ноября 2026</div>
+      <div class="item" data-created="2026-11-10">
+        <a class="link" href="https://foreveryoungstudents.github.io/vocabulary-trainer/?group=beads">
+          <span class="icon">🔊</span>
+          <span class="info">
+            <span class="title">Игра в бисер</span>
+            <span class="desc">Тренажёр</span>
+          </span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+        <div class="update">
+          <div class="update-head"><span>Обновление</span><span class="update-date">17 ноября 2026</span></div>
+          <ul>
+            <li>Запись голоса и распознавание речи</li>
+            <li>Переводы предложений</li>
+          </ul>
         </div>
       </div>
-      <span class="arrow">→</span>
-    </a>
 
-      <a class="card" href="https://foreveryoungstudents.github.io/museum-tour-lesson.html">
-      <span class="card-icon">🏛️</span>
-      <span class="info">
-        <div class="title">Поход в музей</div>
-        <div class="desc">Занятие</div>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-      
-     <a class="card" href="https://foreveryoungstudents.github.io/roman-shrines-handout.html">
-      <span class="card-icon">🏛️</span>
-      <span class="info">
-        <div class="title">Артефакты Рима</div>
-        <div class="desc">Глоссарий</div>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-       <a class="card" href="https://foreveryoungstudents.github.io/roman-shrines-reading.html">
-      <span class="card-icon">🏛️</span>
-      <span class="info">
-        <div class="title">Артефакты Рима</div>
-        <div class="desc">Занятие</div>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-        <a class="card" href="https://foreveryoungstudents.github.io/reader_dictation.html">
-      <span class="card-icon">📚</span>
-      <span class="info">
-        <div class="title">Читалка</div>
-        <div class="desc">Тренажер для чтения текстов</div>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-    <a class="card" href="https://foreveryoungstudents.github.io/vocabulary-trainer/?group=tourism">
-      <span class="card-icon">🗺️</span>
-      <span class="info">
-        <div class="title">Туризм</div>
-        <div class="desc">Тренажер</div>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-    <!-- ВРЕМЕННО НЕ ИСПОЛНЯЕТСЯ
-    <a class="card" href="https://foreveryoungstudents.github.io/vocabulary-trainer/">
-      <span class="card-icon">🔊</span>
-      <span class="info">
-        <div class="title">Vocabulary Trainer</div>
-        <div class="desc">Английский словарь A1–C2: озвучка, транскрипция, произношение</div>
-      </span>
-      <span class="arrow">→</span>
-    </a>
+      <div class="item">
+        <a class="link" href="https://foreveryoungstudents.github.io/vocabulary-trainer/?group=tourism">
+          <span class="icon">🗺️</span>
+          <span class="info">
+            <span class="title">Туризм</span>
+            <span class="desc">Тренажёр</span>
+          </span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+      </div>
 
-<a class="card" href="https://foreveryoungstudents.github.io/vocabulary-trainer/?group=marketing">
-      <span class="card-icon">📣</span>
-      <span class="info">
-        <div class="title">Дизайн и маркетинг</div>
-        <div class="desc">Тренажер</div>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-<a class="card" href="https://foreveryoungstudents.github.io/vocabulary-trainer/?group=drone">
-      <span class="card-icon">✈️</span>
-      <span class="info">
-        <div class="title">Дроны</div>
-        <div class="desc">Тренажер</div>
-      </span>
-      <span class="arrow">→</span>
-    </a>
-    -->
+      <div class="item">
+        <a class="link" href="https://foreveryoungstudents.github.io/reader_dictation.html">
+          <span class="icon">📚</span>
+          <span class="info">
+            <span class="title">Читалка</span>
+            <span class="desc">Тренажёр для чтения текстов</span>
+          </span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+      </div>
 
-  </div>
+    </div>
+  </section>
 
-  <footer> Forever Young Students</footer>
+  <section>
+    <h2>Занятия и материалы</h2>
+    <div class="list">
+
+      <div class="item">
+        <a class="link" href="https://foreveryoungstudents.github.io/museum-tour-lesson.html">
+          <span class="icon">🏛️</span>
+          <span class="info">
+            <span class="title">Поход в музей</span>
+            <span class="desc">Занятие</span>
+          </span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <div class="item">
+        <a class="link" href="https://foreveryoungstudents.github.io/roman-shrines-reading.html">
+          <span class="icon">📜</span>
+          <span class="info">
+            <span class="title">Артефакты Рима</span>
+            <span class="desc">Занятие</span>
+          </span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+      </div>
+
+      <div class="item">
+        <a class="link" href="https://foreveryoungstudents.github.io/roman-shrines-handout.html">
+          <span class="icon">🔤</span>
+          <span class="info">
+            <span class="title">Артефакты Рима</span>
+            <span class="desc">Глоссарий</span>
+          </span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ВРЕМЕННО НЕ ИСПОЛНЯЕТСЯ
+  Vocabulary Trainer: https://foreveryoungstudents.github.io/vocabulary-trainer/
+  Дизайн и маркетинг: https://foreveryoungstudents.github.io/vocabulary-trainer/?group=marketing
+  Дроны: https://foreveryoungstudents.github.io/vocabulary-trainer/?group=drone
+  -->
+
+  <footer>Forever Young Students</footer>
 </main>
+
+<script>
+  // Сколько дней показывать бейдж «Новое» после даты создания карточки
+  const NEW_DAYS = 7;
+
+  (function () {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    document.querySelectorAll('.item[data-created]').forEach(function (item) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.dataset.created.trim());
+      if (!m) return;
+      const created = new Date(+m[1], +m[2] - 1, +m[3]);
+      const age = Math.round((today - created) / 86400000); // полных дней с создания
+      if (age < 0 || age >= NEW_DAYS) return;
+
+      const title = item.querySelector('.title');
+      if (!title) return;
+      const badge = document.createElement('span');
+      badge.className = 'badge-new';
+      badge.textContent = 'Новое';
+      title.appendChild(badge);
+    });
+  })();
+</script>
 </body>
 </html>
