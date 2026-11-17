@@ -139,6 +139,8 @@
   .update-date { font-weight: 400; color: var(--muted); }
   .update ul { margin: 0; padding-left: 16px; }
 
+  [hidden] { display: none !important; }
+
   footer {
     margin-top: 64px;
     font-size: 13px;
@@ -162,17 +164,20 @@
   </header>
 
   <!--
-    КАК ДОБАВИТЬ БЕЙДЖ «НОВОЕ»:
-    у карточки <div class="item"> укажите дату создания: data-created="ГГГГ-ММ-ДД".
-    Бейдж появится сам в этот день и исчезнет через NEW_DAYS дней (см. скрипт внизу).
-    Карточки без data-created бейдж не получают.
+    КАК ЭТО РАБОТАЕТ (всё автоматически, формат дат ГГГГ-ММ-ДД):
+    data-created — дата создания карточки: показывает бейдж «Новое».
+    data-updated — дата последнего обновления: показывает бейдж «Обновлено»
+                   и блок «Обновление» под карточкой.
+    Через NEW_DAYS дней (см. скрипт внизу) бейдж и блок исчезают сами.
+    Если у карточки есть и «новая», и «обновлённая» дата, показывается только «Новое».
+    Карточки без этих атрибутов остаются как есть.
   -->
 
   <section>
     <h2>Тренажёры</h2>
     <div class="list">
 
-      <div class="item">
+      <div class="item" data-updated="2026-11-17">
         <a class="link" href="https://foreveryoungstudents.github.io/Attention-Trainer/">
           <span class="icon">🧮</span>
           <span class="info">
@@ -190,7 +195,7 @@
         </div>
       </div>
 
-      <div class="item" data-created="2026-11-17">
+      <div class="item" data-created="2026-11-17" data-updated="2026-11-17">
         <a class="link" href="https://foreveryoungstudents.github.io/vocabulary-trainer/?group=beads">
           <span class="icon">🔊</span>
           <span class="info">
@@ -283,26 +288,39 @@
 </main>
 
 <script>
-  // Сколько дней показывать бейдж «Новое» после даты создания карточки
+  // Сколько дней показывать бейдж и блок обновления
   const NEW_DAYS = 7;
 
   (function () {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    document.querySelectorAll('.item[data-created]').forEach(function (item) {
-      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(item.dataset.created.trim());
-      if (!m) return;
-      const created = new Date(+m[1], +m[2] - 1, +m[3]);
-      const age = Math.round((today - created) / 86400000); // полных дней с создания
-      if (age < 0 || age >= NEW_DAYS) return;
+    // Сколько полных дней прошло с даты (null, если дата не указана или неверна)
+    function ageInDays(value) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((value || '').trim());
+      if (!m) return null;
+      const d = new Date(+m[1], +m[2] - 1, +m[3]);
+      return Math.round((today - d) / 86400000);
+    }
+    function isFresh(age) { return age !== null && age >= 0 && age < NEW_DAYS; }
 
+    document.querySelectorAll('.item').forEach(function (item) {
+      const isNew = isFresh(ageInDays(item.dataset.created));
+      const isUpdated = isFresh(ageInDays(item.dataset.updated));
+
+      // Бейдж: «Новое» важнее, чем «Обновлено»
+      const label = isNew ? 'Новое' : (isUpdated ? 'Обновлено' : null);
       const title = item.querySelector('.title');
-      if (!title) return;
-      const badge = document.createElement('span');
-      badge.className = 'badge-new';
-      badge.textContent = 'Обновление';
-      title.appendChild(badge);
+      if (label && title) {
+        const badge = document.createElement('span');
+        badge.className = 'badge-new';
+        badge.textContent = label;
+        title.appendChild(badge);
+      }
+
+      // Блок «Обновление» прячем, когда срок вышел (только если дата обновления указана)
+      const note = item.querySelector('.update');
+      if (note && item.dataset.updated && !isUpdated) note.hidden = true;
     });
   })();
 </script>
