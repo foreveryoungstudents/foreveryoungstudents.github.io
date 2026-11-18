@@ -439,6 +439,33 @@
       transform-origin: 35% 35%;
     }
 
+    /* Кнопка «Добавить на главный экран» + окно с инструкцией */
+    .install { margin-top: 38px; }
+    .install-btn { width: 100%; background: none; border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+    dialog#installDialog {
+      width: min(100% - 36px, 400px);
+      padding: 22px 20px 18px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, .35);
+    }
+    dialog#installDialog::backdrop { background: rgba(10, 12, 20, .55); }
+    #installDialog h2 { font-size: 18px; }
+    #installDialog .dlg-lead { margin: 14px 0 6px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    #installDialog ol { margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.55; }
+    #installDialog li + li { margin-top: 6px; }
+    #installDialog .dlg-note { margin: 12px 0 0; color: var(--muted); font-size: 13px; }
+    #installDialog .dlg-close {
+      display: block; width: 100%; margin-top: 18px; padding: 12px;
+      border: 0; border-radius: 12px; cursor: pointer;
+      background: var(--accent); color: var(--surface);
+      font: inherit; font-size: 14px; font-weight: 700;
+    }
+    :root[data-theme="light"] #installDialog .dlg-close { background: #14284b; color: #f1ead8; }
+    :root:not([data-theme="light"]) #installDialog .dlg-close { background: #cab181; color: #12264a; }
+
     @media (min-width: 600px) {
       main { padding-top: 54px; }
       header { margin-bottom: 34px; }
@@ -648,8 +675,58 @@
 
   </section>
 
+  <!-- УСТАНОВКА НА ГЛАВНЫЙ ЭКРАН -->
+  <section class="install" id="installSection" aria-label="Установка на телефон">
+    <div class="list">
+      <div class="item">
+        <button class="link install-btn" id="installBtn" type="button">
+          <span class="icon icon-svg" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></span>
+          <span class="info">
+            <span class="title">Добавить на главный экран</span>
+            <span class="desc">Ярлык на телефоне — откроется как приложение</span>
+          </span>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
   <footer>Forever Young Students</footer>
 </main>
+
+<dialog id="installDialog" aria-labelledby="installTitle">
+  <h2 id="installTitle">Ярлык на главный экран</h2>
+
+  <div id="installIOS" hidden>
+    <p class="dlg-lead">iPhone и iPad</p>
+    <ol>
+      <li>Откройте страницу в Safari.</li>
+      <li>Нажмите «Поделиться» (квадрат со стрелкой вверх).</li>
+      <li>Выберите «На экран “Домой”».</li>
+      <li>Нажмите «Добавить».</li>
+    </ol>
+  </div>
+
+  <div id="installAndroid" hidden>
+    <p class="dlg-lead">Android</p>
+    <ol>
+      <li>Откройте меню браузера (три точки в углу).</li>
+      <li>Выберите «Добавить на главный экран» или «Установить приложение».</li>
+      <li>Подтвердите — ярлык появится на экране.</li>
+    </ol>
+  </div>
+
+  <div id="installOther" hidden>
+    <p class="dlg-lead">Компьютер</p>
+    <ol>
+      <li>В адресной строке нажмите значок установки (монитор со стрелкой) или откройте меню браузера.</li>
+      <li>Выберите «Установить» или «Добавить ярлык».</li>
+    </ol>
+  </div>
+
+  <p class="dlg-note">Ярлык открывает сайт в отдельном окне, без адресной строки.</p>
+  <button class="dlg-close" id="installClose" type="button">Понятно</button>
+</dialog>
 
 <script>
   // Тёмная тема включена по умолчанию; выбор пользователя сохраняется.
@@ -723,6 +800,52 @@
         note.hidden = true;
       }
     });
+  })();
+</script>
+
+<script>
+  // Кнопка «Добавить на главный экран».
+  // Android/Chrome: если браузер разрешает — показываем системное окно установки,
+  // иначе (и на iPhone, где такого окна нет) — короткая инструкция.
+  (function () {
+    const section = document.getElementById('installSection');
+    const btn = document.getElementById('installBtn');
+    const dlg = document.getElementById('installDialog');
+    if (!section || !btn || !dlg) return;
+
+    const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+      || window.navigator.standalone === true;
+    if (standalone) { section.hidden = true; return; }   // уже открыто как приложение
+
+    let deferred = null;
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; });
+    window.addEventListener('appinstalled', function () { section.hidden = true; });
+
+    const ua = navigator.userAgent || '';
+    const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /android/i.test(ua);
+
+    function showHelp() {
+      document.getElementById('installIOS').hidden = !isIOS;
+      document.getElementById('installAndroid').hidden = !isAndroid;
+      document.getElementById('installOther').hidden = isIOS || isAndroid;
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    }
+
+    btn.addEventListener('click', async function () {
+      if (deferred) {
+        deferred.prompt();
+        try { await deferred.userChoice; } catch (e) {}
+        deferred = null;
+        return;
+      }
+      showHelp();
+    });
+
+    document.getElementById('installClose').addEventListener('click', function () {
+      if (dlg.close) dlg.close(); else dlg.removeAttribute('open');
+    });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg && dlg.close) dlg.close(); });
   })();
 </script>
 </body>
