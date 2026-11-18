@@ -424,7 +424,12 @@
       border-radius: 16px;
       background: #000;
     }
-    :root:not([data-theme="light"]) .logo-wrap { border-color: #2f5597; }
+    /* Тёмная тема: без обводки, чёрный фон логотипа растворяется в фоне страницы */
+    :root:not([data-theme="light"]) .logo-wrap {
+      border-color: transparent;
+      background: var(--bg);
+    }
+    :root:not([data-theme="light"]) .logo-wrap .logo { mix-blend-mode: lighten; }
     .logo-wrap .logo {
       display: block;
       width: 100%;
