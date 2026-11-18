@@ -417,13 +417,14 @@
     /* Логотип: чёрная скруглённая плитка, кадрирование убирает водяной знак в углу */
     .logo-wrap {
       flex: 0 0 auto;
-      width: 50px;
-      height: 50px;
+      width: 56px;
+      height: 56px;
       overflow: hidden;
-      border: 1px solid var(--line);
-      border-radius: 14px;
+      border: 3px solid #14284b;
+      border-radius: 16px;
       background: #000;
     }
+    :root:not([data-theme="light"]) .logo-wrap { border-color: #2f5597; }
     .logo-wrap .logo {
       display: block;
       width: 100%;
