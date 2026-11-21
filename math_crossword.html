@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Математический кроссворд</title>
+<style>
+:root{
+  --bg:#f6f5f1; --card:#ffffff; --text:#1f2326; --muted:#6b7177; --line:#d9d6cc;
+  --cell:#ffffff; --cell-given:#eef0ec; --accent:#2f7d4f; --accent-soft:#e3f1e8;
+  --op:#8a4b12; --op-soft:#fbeedd; --bad:#c0392b; --bad-soft:#fbe4e1; --ok:#2f7d4f; --hint:#e8eefb;
+  --cw:clamp(32px,9.4vw,52px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1e2327; --card:#262c31; --text:#eceff1; --muted:#9aa3aa; --line:#3a4249;
+    --cell:#1e2327; --cell-given:#2d343a; --accent:#6cc08b; --accent-soft:#223a2c;
+    --op:#f0b072; --op-soft:#3a2c1c; --bad:#ff8a7a; --bad-soft:#44241f; --ok:#6cc08b; --hint:#26324a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1e2327; --card:#262c31; --text:#eceff1; --muted:#9aa3aa; --line:#3a4249;
+  --cell:#1e2327; --cell-given:#2d343a; --accent:#6cc08b; --accent-soft:#223a2c;
+  --op:#f0b072; --op-soft:#3a2c1c; --bad:#ff8a7a; --bad-soft:#44241f; --ok:#6cc08b; --hint:#26324a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.mc-wrap{max-width:560px;margin:0 auto;padding:16px 12px 32px}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 14px}
+.levels{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.lvl{flex:1 1 0;min-width:70px;padding:8px 6px;border:1px solid var(--line);background:var(--card);color:var(--text);
+  border-radius:10px;font-size:13px;cursor:pointer;text-align:center}
+.lvl b{display:block;font-size:15px}
+.lvl.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600}
+.board{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 8px;overflow-x:auto}
+.grid{display:grid;grid-template-columns:repeat(9,var(--cw));grid-auto-rows:var(--cw);gap:3px;justify-content:center;width:max-content;max-width:100%;margin:0 auto}
+.c{display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:calc(var(--cw)*.42);font-weight:600;
+  font-variant-numeric:tabular-nums;user-select:none;min-width:0}
+.c.num{background:var(--cell-given);border:1px solid var(--line)}
+.c.op{color:var(--op);font-size:calc(var(--cw)*.5)}
+.c.eq{color:var(--muted);font-size:calc(var(--cw)*.5)}
+.c.void{background:transparent}
+.c input.scratch{border:2px dashed var(--line);background:transparent;font-weight:500;color:var(--muted);width:88%;height:88%;margin:auto}
+.c input.scratch:focus{border-color:var(--accent)}
+.c input.scratch.bad{border-color:var(--bad);background:var(--bad-soft)}
+.c input.scratch.hint{background:var(--hint);border-style:solid}
+.c input{width:100%;height:100%;border:2px solid var(--accent);border-radius:8px;background:var(--cell);color:var(--text);
+  text-align:center;font:inherit;padding:0;outline:none;-moz-appearance:textfield}
+.c input::-webkit-outer-spin-button,.c input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.c input:focus{box-shadow:0 0 0 3px var(--accent-soft)}
+.c input.bad,.c button.bad{border-color:var(--bad);background:var(--bad-soft)}
+.c input.hint{background:var(--hint);border-color:var(--line);color:var(--text)}
+.c input.ok,.c button.ok{border-color:var(--ok)}
+.c button{width:100%;height:100%;border:2px dashed var(--op);border-radius:8px;background:var(--op-soft);color:var(--op);
+  font:inherit;font-size:calc(var(--cw)*.5);cursor:pointer;padding:0}
+.c button.hint{border-style:solid;background:var(--hint);border-color:var(--line)}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{flex:1 1 0;min-width:96px;padding:11px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);
+  color:var(--text);font-size:14px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.msg{min-height:24px;margin-top:12px;font-size:14px;text-align:center}
+.msg.ok{color:var(--ok);font-weight:600}.msg.bad{color:var(--bad)}
+.stats{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-top:10px}
+.rules{color:var(--muted);font-size:13px;line-height:1.5;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="mc-wrap">
+  <h1>Математический кроссворд</h1>
+  <p class="sub">Заполните пустые клетки так, чтобы все примеры по строкам и столбцам были верными.</p>
+  <div class="levels" id="mc-levels"></div>
+  <div class="board"><div class="grid" id="mc-grid"></div></div>
+  <div class="msg" id="mc-msg"></div>
+  <p class="rules" id="mc-note" style="margin-top:0">Пунктирные окошки после «=» — для промежуточного результата первого действия. Их можно не заполнять, но если заполнили, то правильно.</p>
+  <div class="row-actions">
+    <button class="btn primary" id="mc-check">Проверить</button>
+    <button class="btn" id="mc-hint">Подсказка</button>
+    <button class="btn" id="mc-show">Ответ</button>
+    <button class="btn" id="mc-new">Новая сетка</button>
+  </div>
+  <div class="stats"><span>Решено: <b id="mc-solved">0</b></span><span>Подсказок: <b id="mc-hints">0</b></span><span id="mc-time">0:00</span></div>
+  <p class="rules">Читайте слева направо и сверху вниз. Знаки действий выполняются по порядку: сначала умножение и деление, потом сложение и вычитание (например, в «19 + ? − 6 : ?» сначала считается «6 : ?»). Нажмите на клетку со знаком «?», чтобы выбрать действие.</p>
+</div>
+<script>
+/* ===== Математический кроссворд: ядро (генератор + проверка) ===== */
+(function (root) {
+  const MAXV = 999;
+  const SYM = { '*': '×', '/': ':', '+': '+', '-': '−' };
+
+  // Настройки 4 уровней
+  const LEVELS = {
+    1: { name: 'Лёгкий',  K: 3, vcols: [0, 1, 3], scratch: true, ops: ['*', '/'],           startLo: 6, startHi: 40, lo: 2, hi: 12, hiddenNums: 6,  hiddenOps: 0, eqCap: 3, minRes: 6 },
+    2: { name: 'Средний', K: 4, vcols: [0, 2, 4], ops: ['*', '/', '+', '-'], startLo: 6, startHi: 60, lo: 2, hi: 20, hiddenNums: 9,  hiddenOps: 0, eqCap: 3, minRes: 6 },
+    3: { name: 'Сложный', K: 4, vcols: [0, 2, 4], ops: ['*', '/', '+', '-'], startLo: 8, startHi: 90, lo: 2, hi: 30, hiddenNums: 9, hiddenOps: 2, eqCap: 4, minRes: 8 },
+    4: { name: 'Экстрем', K: 4, vcols: [0, 2, 4], ops: ['*', '/', '+', '-'], startLo: 10, startHi: 150, lo: 2, hi: 50, hiddenNums: 10, hiddenOps: 4, eqCap: 4, minRes: 10 }
+  };
+
+  const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // x o y: только целые положительные результаты, деление нацело
+  function applyOp(x, o, y) {
+    let r;
+    if (o === '*') r = x * y;
+    else if (o === '/') { if (!y || x % y) return null; r = x / y; }
+    else if (o === '+') r = x + y;
+    else r = x - y;
+    return (r > 0 && r <= MAXV) ? r : null;
+  }
+
+  // Цепочка a o b o c o d с обычным приоритетом (× и : раньше + и −)
+  function evalChain(nums, ops) {
+    const terms = [nums[0]], adds = [];
+    for (let i = 0; i < ops.length; i++) {
+      const o = ops[i], n = nums[i + 1];
+      if (o === '*' || o === '/') {
+        const r = applyOp(terms[terms.length - 1], o, n);
+        if (r == null) return null;
+        terms[terms.length - 1] = r;
+      } else { adds.push(o); terms.push(n); }
+    }
+    let acc = terms[0];
+    for (let k = 0; k < adds.length; k++) {
+      acc = adds[k] === '+' ? acc + terms[k + 1] : acc - terms[k + 1];
+      if (acc <= 0 || acc > MAXV) return null;
+    }
+    return acc;
+  }
+
+  function divisors(t, lo, hi) {
+    const d = [];
+    for (let i = lo; i <= hi && i <= t; i++) if (t % i === 0) d.push(i);
+    return d;
+  }
+
+  // Строка: 4 числа + результат, 3 знака
+  function genChain(cfg) {
+    for (let t = 0; t < 200; t++) {
+      const ops = []; for (let i = 0; i < cfg.K - 1; i++) ops.push(pick(cfg.ops));
+      const nums = [rnd(cfg.startLo, cfg.startHi)];
+      let term = nums[0], ok = true;
+      for (let i = 0; i < cfg.K - 1; i++) {
+        const o = ops[i]; let n;
+        if (o === '*') { n = rnd(cfg.lo, cfg.hi); term *= n; }
+        else if (o === '/') {
+          const d = divisors(term, cfg.lo, cfg.hi);
+          if (!d.length) { ok = false; break; }
+          n = pick(d); term /= n;
+        } else { n = rnd(cfg.lo, cfg.hi); term = n; }
+        nums.push(n);
+      }
+      if (!ok) continue;
+      const res = evalChain(nums, ops);
+      if (res == null || res < cfg.minRes) continue;
+      return { nums: [...nums, res], ops };
+    }
+    return null;
+  }
+
+  function allCombos(ops, len) {
+    let out = [[]];
+    for (let i = 0; i < len; i++) { const nx = []; for (const p of out) for (const o of ops) nx.push([...p, o]); out = nx; }
+    return shuffle(out);
+  }
+
+  // Нижняя строка: известны числа в столбцах vcols (из вертикалей), остальные подбираем
+  function solveRow(cfg, z) {
+    const K = cfg.K, free = [];
+    for (let c = 0; c < K; c++) if (cfg.vcols.indexOf(c) < 0) free.push(c);
+    const base = new Array(K + 1);
+    cfg.vcols.forEach((c, j) => { base[c] = z[j]; });
+    const combos = allCombos(cfg.ops, K - 1);
+    const vals = []; for (let v = cfg.lo; v <= cfg.hi; v++) vals.push(v);
+    const tryFree = (idx, row, combo) => {
+      if (idx === free.length) return evalChain(row.slice(0, K), combo) === row[K] ? row.slice() : null;
+      const order = shuffle(vals.slice());
+      for (const v of order) { row[free[idx]] = v; const r = tryFree(idx + 1, row, combo); if (r) return r; }
+      return null;
+    };
+    for (const combo of combos) {
+      const r = tryFree(0, base.slice(), combo);
+      if (r) return { nums: r, ops: combo };
+    }
+    return null;
+  }
+
+
+  // Можно ли восстановить все скрытые клетки, решая равенства с одной неизвестной
+  function solvable(p, cfg, hid) {
+    const K = cfg.K, N = K + 1, VC = cfg.vcols;
+    const kN = hid.n.map(r => r.map(h => !h));
+    const kH = hid.h.map(r => r.map(h => !h));
+    const kV = hid.v.map(h => !h);
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (let r = 0; r < 3; r++) {
+        const unN = [], unO = [];
+        for (let c = 0; c < N; c++) if (!kN[r][c]) unN.push(c);
+        for (let k = 0; k < K - 1; k++) if (!kH[r][k]) unO.push(k);
+        if (unN.length + unO.length !== 1) continue;
+        const nums = p.nums[r].slice(0, K), ops = p.hops[r].slice(), res = p.nums[r][K];
+        if (unN.length) {
+          const c = unN[0]; let cnt = 0;
+          for (let v = 1; v <= MAXV; v++) {
+            let ok;
+            if (c === K) ok = evalChain(nums, ops) === v;
+            else { const t = nums.slice(); t[c] = v; ok = evalChain(t, ops) === res; }
+            if (ok && ++cnt > 1) break;
+          }
+          if (cnt === 1) { kN[r][c] = true; changed = true; }
+        } else {
+          const k = unO[0]; let cnt = 0;
+          for (const o of cfg.ops) { const t = ops.slice(); t[k] = o; if (evalChain(nums, t) === res) cnt++; }
+          if (cnt === 1) { kH[r][k] = true; changed = true; }
+        }
+      }
+      for (let j = 0; j < 3; j++) {
+        const c = VC[j];
+        const unN = [], unO = [];
+        for (let r = 0; r < 3; r++) if (!kN[r][c]) unN.push(r);
+        if (!kV[j]) unO.push(0);
+        if (unN.length + unO.length !== 1) continue;
+        const x = p.nums[0][c], y = p.nums[1][c], z = p.nums[2][c], o = p.vops[j];
+        if (unN.length) {
+          const r = unN[0]; let cnt = 0;
+          for (let v = 1; v <= MAXV; v++) {
+            const X = r === 0 ? v : x, Y = r === 1 ? v : y, Z = r === 2 ? v : z;
+            if (applyOp(X, o, Y) === Z && ++cnt > 1) break;
+          }
+          if (cnt === 1) { kN[r][c] = true; changed = true; }
+        } else {
+          let cnt = 0;
+          for (const oo of cfg.ops) if (applyOp(x, oo, y) === z) cnt++;
+          if (cnt === 1) { kV[j] = true; changed = true; }
+        }
+      }
+    }
+    return kN.every(r => r.every(Boolean)) && kH.every(r => r.every(Boolean)) && kV.every(Boolean);
+  }
+
+  // Считает решения головоломки с пропусками (до 2). Возвращает 0, 1 или 2 (2 = «несколько или не удалось доказать»).
+  function countSolutions(p, cfg, hid) {
+    const K = cfg.K, N = K + 1, VC = cfg.vcols;
+    let nodes = 0, sols = 0, aborted = false;
+    const st0 = {
+      n: p.nums.map((r, i) => r.map((v, c) => hid.n[i][c] ? 0 : v)),
+      h: p.hops.map((r, i) => r.map((o, k) => hid.h[i][k] ? null : o)),
+      v: p.vops.map((o, j) => hid.v[j] ? null : o)
+    };
+    const clone = s => ({ n: s.n.map(r => r.slice()), h: s.h.map(r => r.slice()), v: s.v.slice() });
+
+    // Все равенства: строки и столбцы; возвращает список неизвестных каждого
+    function unknownsOf(s) {
+      const eqs = [];
+      for (let r = 0; r < 3; r++) {
+        const u = [];
+        for (let c = 0; c < N; c++) if (!s.n[r][c]) u.push({ t: 'n', r, c });
+        for (let k = 0; k < K - 1; k++) if (!s.h[r][k]) u.push({ t: 'h', r, k });
+        eqs.push({ kind: 'row', r, u });
+      }
+      for (let j = 0; j < 3; j++) {
+        const u = [];
+        for (let r = 0; r < 3; r++) if (!s.n[r][VC[j]]) u.push({ t: 'n', r, c: VC[j] });
+        if (!s.v[j]) u.push({ t: 'v', j });
+        eqs.push({ kind: 'col', j, u });
+      }
+      return eqs;
+    }
+    function holds(s, e) {
+      if (e.kind === 'row') return evalChain(s.n[e.r].slice(0, K), s.h[e.r]) === s.n[e.r][K];
+      const c = VC[e.j];
+      return applyOp(s.n[0][c], s.v[e.j], s.n[1][c]) === s.n[2][c];
+    }
+    const setCell = (s, x, val) => { if (x.t === 'n') s.n[x.r][x.c] = val; else if (x.t === 'h') s.h[x.r][x.k] = val; else s.v[x.j] = val; };
+    const domain = x => x.t === 'n' ? null : cfg.ops;
+
+    // Выводим всё, что можно, из равенств с одной неизвестной. false — противоречие.
+    function propagate(s) {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const e of unknownsOf(s)) {
+          if (e.u.length === 0) { if (!holds(s, e)) return false; continue; }
+          if (e.u.length !== 1) continue;
+          const x = e.u[0], found = [];
+          if (x.t === 'n') { for (let v = 1; v <= MAXV && found.length < 2; v++) { setCell(s, x, v); if (holds(s, e)) found.push(v); } }
+          else for (const o of cfg.ops) { setCell(s, x, o); if (holds(s, e)) found.push(o); }
+          setCell(s, x, x.t === 'n' ? 0 : null);
+          if (found.length === 0) return false;
+          if (found.length === 1) { setCell(s, x, found[0]); changed = true; }
+        }
+      }
+      return true;
+    }
+
+    function solve(s) {
+      if (aborted || sols >= 2) return;
+      if (++nodes > 400) { aborted = true; return; }
+      if (!propagate(s)) return;
+      const eqs = unknownsOf(s).filter(e => e.u.length > 0);
+      if (!eqs.length) { sols++; return; }
+      // ветвимся по знакам, если есть; иначе по числу из самого «короткого» равенства
+      let cell = null;
+      for (const e of eqs) for (const x of e.u) if (x.t !== 'n') { cell = x; break; }
+      if (!cell) { eqs.sort((a, b) => a.u.length - b.u.length); cell = eqs[0].u[0]; }
+      const vals = cell.t === 'n' ? Array.from({ length: MAXV }, (_, i) => i + 1) : cfg.ops;
+      for (const val of vals) {
+        const t = clone(s); setCell(t, cell, val);
+        // быстрый отсев: равенства, где клетка участвует
+        solve(t);
+        if (aborted || sols >= 2) return;
+      }
+    }
+    solve(clone(st0));
+    if (aborted) return 2;
+    return sols;
+  }
+
+  // Прячем клетки так, чтобы решение было единственным
+  function dig(p, cfg) {
+    const K = cfg.K, N = K + 1;
+    const hid = { n: [0, 1, 2].map(() => new Array(N).fill(false)),
+                  h: [0, 1, 2].map(() => new Array(K - 1).fill(false)), v: [false, false, false] };
+    const cells = [];
+    for (let r = 0; r < 3; r++) for (let c = 0; c < N; c++) cells.push({ t: 'n', r, c });
+    for (let r = 0; r < 3; r++) for (let k = 0; k < K - 1; k++) cells.push({ t: 'h', r, k });
+    for (let j = 0; j < 3; j++) cells.push({ t: 'v', j });
+    const set = (x, val) => { if (x.t === 'n') hid.n[x.r][x.c] = val; else if (x.t === 'h') hid.h[x.r][x.k] = val; else hid.v[x.j] = val; };
+    let nN = 0, nO = 0;
+    shuffle(cells);
+    // сначала дешёвая логическая проверка, затем полный подсчёт решений
+    for (const x of cells) {
+      const isN = x.t === 'n';
+      if (isN ? nN >= cfg.hiddenNums : nO >= cfg.hiddenOps) continue;
+      set(x, true);
+      if (solvable(p, cfg, hid) || countSolutions(p, cfg, hid) === 1) { if (isN) nN++; else nO++; }
+      else set(x, false);
+    }
+    return hid;
+  }
+
+  function generate(level) {
+    const cfg = LEVELS[level];
+    for (let att = 0; att < 40000; att++) {
+      const r0 = genChain(cfg), r1 = genChain(cfg);
+      if (!r0 || !r1) continue;
+      const vops = [], z = []; let good = true;
+      for (const c of cfg.vcols) {
+        const cand = cfg.ops.filter(o => { const q = applyOp(r0.nums[c], o, r1.nums[c]); return q != null && q >= 4; });
+        if (!cand.length) { good = false; break; }
+        const o = pick(cand);
+        vops.push(o); z.push(applyOp(r0.nums[c], o, r1.nums[c]));
+      }
+      if (!good) continue;
+      const r2 = solveRow(cfg, z);
+      if (!r2) continue;
+      const p = { level, ops: cfg.ops, K: cfg.K, vcols: cfg.vcols, scratch: !!cfg.scratch,
+        nums: [r0.nums, r1.nums, r2.nums], hops: [r0.ops, r1.ops, r2.ops], vops };
+      p.hidden = dig(p, cfg);
+      return p;
+    }
+    return null;
+  }
+
+  // Проверка заполненной сетки: любое решение, где все равенства верны
+  function check(nums, hops, vops, K, vcols) {
+    const rows = [0, 1, 2].map(r => evalChain(nums[r].slice(0, K), hops[r]) === nums[r][K]);
+    const cols = [0, 1, 2].map(j => applyOp(nums[0][vcols[j]], vops[j], nums[1][vcols[j]]) === nums[2][vcols[j]]);
+    return { rows, cols, ok: rows.every(Boolean) && cols.every(Boolean) };
+  }
+
+  root.MathCrossword = { LEVELS, SYM, generate, check, evalChain, applyOp };
+  if (typeof module !== 'undefined') module.exports = root.MathCrossword;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ===== Интерфейс упражнения ===== */
+(function () {
+  const M = window.MathCrossword;
+  const $ = id => document.getElementById(id);
+  let level = 1, puz = null, solvedCount = 0, hints = 0, t0 = 0, timer = null, finished = false;
+  let opState = {};   // "h-r-k" / "v-j" -> выбранный знак ('' если не выбран)
+
+  // Раскладка: 9 колонок. Числа в чётных колонках; на уровне 1 между вторым и третьим числом
+  // стоит окошко для промежуточного результата первого действия.
+  function build() {
+    const K = puz.K, N = K + 1;
+    const g = $('mc-grid'); g.innerHTML = '';
+    const cells = [];
+    for (let R = 0; R < 5; R++) for (let C = 0; C < 9; C++) {
+      const d = document.createElement('div'); d.className = 'c void'; g.appendChild(d); cells.push(d);
+    }
+    const at = (R, C) => cells[R * 9 + C];
+    const setStatic = (el, cls, txt) => { el.className = 'c ' + cls; el.textContent = txt; };
+    // логический столбец -> колонка сетки; знак k -> колонка сетки; колонка последнего «=»
+    const numCol = puz.scratch ? [0, 2, 6, 8] : [0, 2, 4, 6, 8];
+    const opCol = puz.scratch ? [1, 5] : [1, 3, 5];
+    const eqCol = 7;
+
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < N; c++) {
+        const el = at(r * 2, numCol[c]);
+        if (puz.hidden.n[r][c]) makeInput(el, 'n-' + r + '-' + c);
+        else setStatic(el, 'num', puz.nums[r][c]);
+      }
+      for (let k = 0; k < K - 1; k++) {
+        const el = at(r * 2, opCol[k]);
+        if (puz.hidden.h[r][k]) makeOp(el, 'h-' + r + '-' + k);
+        else setStatic(el, 'op', M.SYM[puz.hops[r][k]]);
+      }
+      setStatic(at(r * 2, eqCol), 'eq', '=');
+      if (puz.scratch) {
+        setStatic(at(r * 2, 3), 'eq', '=');
+        const el = at(r * 2, 4); makeScratch(el, 'm-' + r);
+      }
+    }
+    puz.vcols.forEach((c, j) => {
+      const C = numCol[c];
+      const el = at(1, C);
+      if (puz.hidden.v[j]) makeOp(el, 'v-' + j); else setStatic(el, 'op', M.SYM[puz.vops[j]]);
+      setStatic(at(3, C), 'eq', '=');
+    });
+    $('mc-note').style.display = puz.scratch ? '' : 'none';
+  }
+
+  function makeScratch(el, key) {
+    el.className = 'c';
+    const i = document.createElement('input');
+    i.type = 'text'; i.inputMode = 'numeric'; i.maxLength = 3; i.autocomplete = 'off';
+    i.dataset.key = key; i.className = 'scratch'; i.placeholder = '·'; i.title = 'Промежуточный результат (по желанию)';
+    i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, '').slice(0, 3); clearMarks(); setMsg(''); });
+    i.addEventListener('keydown', e => { if (e.key === 'Enter') doCheck(); });
+    el.appendChild(i);
+  }
+
+  function makeInput(el, key) {
+    el.className = 'c';
+    const i = document.createElement('input');
+    i.type = 'text'; i.inputMode = 'numeric'; i.maxLength = 3; i.autocomplete = 'off';
+    i.dataset.key = key;
+    i.addEventListener('input', () => {
+      i.value = i.value.replace(/\D/g, '').slice(0, 3);
+      clearMarks(); setMsg('');
+    });
+    i.addEventListener('keydown', e => { if (e.key === 'Enter') doCheck(); });
+    el.appendChild(i);
+  }
+
+  function makeOp(el, key) {
+    el.className = 'c';
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = '?'; b.dataset.key = key; opState[key] = '';
+    b.addEventListener('click', () => {
+      if (b.classList.contains('hint')) return;
+      const list = puz.ops, cur = list.indexOf(opState[key]);
+      opState[key] = list[(cur + 1) % list.length];
+      b.textContent = M.SYM[opState[key]];
+      clearMarks(); setMsg('');
+    });
+    el.appendChild(b);
+  }
+
+  function clearMarks() {
+    document.querySelectorAll('#mc-grid .bad,#mc-grid .ok').forEach(e => e.classList.remove('bad', 'ok'));
+  }
+  function setMsg(t, cls) { const m = $('mc-msg'); m.textContent = t; m.className = 'msg ' + (cls || ''); }
+
+  // Текущие значения (null — клетка не заполнена)
+  function readValues() {
+    const nums = puz.nums.map(r => r.slice()), hops = puz.hops.map(r => r.slice()), vops = puz.vops.slice();
+    let empty = 0;
+    document.querySelectorAll('#mc-grid input[data-key^="n-"]').forEach(i => {
+      const [, r, c] = i.dataset.key.split('-').map((x, n) => n ? +x : x);
+      if (i.value === '') { empty++; nums[r][c] = null; } else nums[r][c] = +i.value;
+    });
+    Object.keys(opState).forEach(k => {
+      const p = k.split('-');
+      if (!opState[k]) { empty++; return; }
+      if (p[0] === 'h') hops[+p[1]][+p[2]] = opState[k]; else vops[+p[1]] = opState[k];
+    });
+    return { nums, hops, vops, empty };
+  }
+
+  function doCheck() {
+    if (finished) return;
+    const v = readValues();
+    if (v.empty) { setMsg('Заполните все пустые клетки (' + v.empty + ' осталось)'); return; }
+    const res = M.check(v.nums, v.hops, v.vops, puz.K, puz.vcols);
+    clearMarks();
+    // окошки промежуточных результатов: если заполнены, должны совпасть с первым действием
+    let badScratch = 0;
+    if (puz.scratch) for (let r = 0; r < 3; r++) {
+      const e = document.querySelector('#mc-grid [data-key="m-' + r + '"]');
+      if (e && e.value !== '' && +e.value !== M.applyOp(v.nums[r][0], v.hops[r][0], v.nums[r][1])) { e.classList.add('bad'); badScratch++; }
+    }
+    if (res.ok && !badScratch) { win(); return; }
+    // подсвечиваем пустые клетки в неверных равенствах
+    const mark = key => { const e = document.querySelector('#mc-grid [data-key="' + key + '"]'); if (e) e.classList.add('bad'); };
+    res.rows.forEach((ok, r) => { if (!ok) {
+      for (let c = 0; c <= puz.K; c++) mark('n-' + r + '-' + c);
+      for (let k = 0; k < puz.K - 1; k++) mark('h-' + r + '-' + k);
+    }});
+    res.cols.forEach((ok, j) => { if (!ok) {
+      for (let r = 0; r < 3; r++) mark('n-' + r + '-' + puz.vcols[j]);
+      mark('v-' + j);
+    }});
+    const wrong = res.rows.filter(x => !x).length + res.cols.filter(x => !x).length;
+    if (wrong) setMsg('Неверных примеров: ' + wrong + '. Красным выделены клетки из них.', 'bad');
+    else setMsg('Примеры верны, но в промежуточных окошках ошибка. Исправьте или очистите их.', 'bad');
+  }
+
+  function win() {
+    finished = true; solvedCount++; $('mc-solved').textContent = solvedCount;
+    clearInterval(timer);
+    document.querySelectorAll('#mc-grid input,#mc-grid button').forEach(e => e.classList.add('ok'));
+    setMsg('Верно! Время: ' + fmt(Date.now() - t0), 'ok');
+  }
+
+  function fillAnswer(onlyOne) {
+    const targets = [];
+    document.querySelectorAll('#mc-grid input[data-key^="n-"]').forEach(i => { if (!i.classList.contains('hint')) targets.push(i); });
+    document.querySelectorAll('#mc-grid button').forEach(b => { if (!b.classList.contains('hint')) targets.push(b); });
+    const list = onlyOne ? [targets[Math.floor(Math.random() * targets.length)]].filter(Boolean) : targets;
+    list.forEach(el => {
+      const p = el.dataset.key.split('-');
+      if (el.tagName === 'INPUT') { el.value = puz.nums[+p[1]][+p[2]]; el.readOnly = true; }
+      else { const o = p[0] === 'h' ? puz.hops[+p[1]][+p[2]] : puz.vops[+p[1]]; opState[el.dataset.key] = o; el.textContent = M.SYM[o]; }
+      el.classList.add('hint');
+    });
+    if (!onlyOne && puz.scratch) for (let r = 0; r < 3; r++) {
+      const e = document.querySelector('#mc-grid [data-key="m-' + r + '"]');
+      if (e) { e.value = M.applyOp(puz.nums[r][0], puz.hops[r][0], puz.nums[r][1]); e.readOnly = true; e.classList.add('hint'); }
+    }
+    return list.length;
+  }
+
+  function fmt(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+  function newPuzzle() {
+    puz = M.generate(level);
+    finished = false; hints = 0; opState = {};
+    $('mc-hints').textContent = 0; setMsg('');
+    build();
+    t0 = Date.now(); clearInterval(timer);
+    timer = setInterval(() => { $('mc-time').textContent = fmt(Date.now() - t0); }, 500);
+    $('mc-time').textContent = '0:00';
+    const first = document.querySelector('#mc-grid input[data-key^="n-"]'); if (first) first.focus();
+  }
+
+  function drawLevels() {
+    const box = $('mc-levels'); box.innerHTML = '';
+    for (let l = 1; l <= 4; l++) {
+      const b = document.createElement('button');
+      b.className = 'lvl' + (l === level ? ' on' : '');
+      b.innerHTML = '<b>' + l + '</b>' + M.LEVELS[l].name;
+      b.onclick = () => { level = l; drawLevels(); newPuzzle(); };
+      box.appendChild(b);
+    }
+  }
+
+  $('mc-check').onclick = doCheck;
+  $('mc-new').onclick = newPuzzle;
+  $('mc-hint').onclick = () => {
+    if (finished) return;
+    if (fillAnswer(true)) { hints++; $('mc-hints').textContent = hints; clearMarks(); setMsg(''); }
+  };
+  $('mc-show').onclick = () => {
+    if (finished) return;
+    fillAnswer(false); finished = true; clearInterval(timer);
+    setMsg('Вот решение. Попробуйте новую сетку!');
+  };
+
+  drawLevels(); newPuzzle();
+})();
+</script>
+</body>
+</html>
