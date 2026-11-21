@@ -70,6 +70,14 @@ header { padding: 2rem 1.5rem 1.25rem; }
 .h-back, .theme-btn { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; white-space: nowrap; text-decoration: none; transition: border-color .15s, color .15s; }
 .h-back:hover, .theme-btn:hover { border-color: var(--text3); color: var(--text); }
 
+
+.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; }
+.seg-btn { background: none; border: none; padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; transition: background .15s, color .15s; }
+.seg-btn + .seg-btn { border-left: 1px solid var(--border2); }
+.seg-btn:hover { color: var(--text); }
+.seg-btn.on { background: var(--btn-bg); color: var(--btn-text); }
+@media (max-width: 760px) { .seg-btn { padding: 10px 14px; } }
+
 /* ─── Toolbar ─── */
 .toolbar { background: var(--bg); border-bottom: 1px solid var(--border); padding: .75rem 1.5rem; position: sticky; top: 0; z-index: 40; }
 .tb1 { max-width: 1100px; margin: 0 auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -175,7 +183,7 @@ textarea:focus { border-color: var(--text3); }
 }
 
 </style>
-<script>try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script>(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}if(t!=="dark"&&t!=="light")t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
 </head>
 <body>
 
@@ -186,8 +194,7 @@ textarea:focus { border-color: var(--text3); }
       <span>35 terms · vocabulary map</span>
     </div>
     <div class="h-actions">
-      <button class="theme-btn" id="themeBtn" type="button">🌓 Theme</button>
-      <a class="h-back" href="english_vocab_hub.html">← All maps</a>
+      <div class="seg" role="group" aria-label="Theme"><button type="button" class="seg-btn" data-theme-set="light">Light</button><button type="button" class="seg-btn" data-theme-set="dark">Dark</button></div>
     </div>
   </div>
 </header>
@@ -297,12 +304,22 @@ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 /* TTS */
 function loadVoices(){
   if(!window.speechSynthesis)return;
-  voices=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('en'));
-  const s=document.getElementById('vs');s.innerHTML='';
+  const s=document.getElementById('vs');
+  const prev=voices[+s.value];
+  const L=v=>v.lang.replace('_','-');
+  const isG=v=>/google/i.test(v.name);
+  const rank=v=>(isG(v)?0:10)+(L(v)==='en-GB'?0:L(v)==='en-US'?1:2);
+  voices=speechSynthesis.getVoices().filter(v=>L(v).toLowerCase().startsWith('en')).sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name));
+  s.innerHTML='';
   if(!voices.length){s.innerHTML='<option>No EN voices</option>';return;}
-  voices.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.textContent=v.name+(v.default?' ★':'');s.appendChild(o);});
-  const p=voices.findIndex(v=>v.name.toLowerCase().includes('daniel')||v.lang==='en-GB');
-  if(p>=0)s.value=p;
+  const gG=document.createElement('optgroup');gG.label='Google';
+  const gO=document.createElement('optgroup');gO.label='Other voices';
+  voices.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.textContent=v.name+(v.default?' ★':'');(isG(v)?gG:gO).appendChild(o);});
+  if(gG.children.length)s.appendChild(gG);
+  if(gO.children.length)s.appendChild(gO);
+  let p=prev?voices.findIndex(v=>v.name===prev.name):-1;
+  if(p<0)p=0;
+  s.value=p;
 }
 function tts(text,btn){
   if(!window.speechSynthesis)return;
@@ -327,7 +344,7 @@ function mic(target,btn){
   if(curMic===btn){btn.classList.remove('listening');btn.textContent='🎤';curMic=null;closePanel();return;}
   recog=new SR();recog.lang='en-US';recog.interimResults=false;recog.maxAlternatives=3;
   btn.classList.add('listening');btn.textContent='⏹';curMic=btn;
-  openPanel('Listening… speak now','');
+  openPanel('Say the sentence: <i>'+target+'</i>','');
   recog.onresult=e=>{
     const heard=e.results[0][0].transcript.trim().toLowerCase();
     showResult(target,heard);
@@ -344,14 +361,15 @@ function openPanel(msg,cls){
 }
 function closePanel(){document.getElementById('spBox').classList.remove('open');}
 function showResult(target,heard){
-  const tWords=target.toLowerCase().replace(/[…\.,']/g,'').split(' ');
-  const hWords=heard.split(' ');
-  const hl=hWords.map(w=>{const c=w.replace(/[^a-z]/g,'');return tWords.includes(c)?`<b>${w}</b>`:`<s>${w}</s>`;}).join(' ');
+  const norm=t=>t.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(Boolean);
+  const tWords=norm(target),hWords=heard.split(/\s+/).filter(Boolean);
+  const tSet=new Set(tWords),hSet=new Set(norm(heard));
+  const hl=hWords.map(w=>{const c=norm(w)[0]||'';return tSet.has(c)?`<b>${w}</b>`:`<s>${w}</s>`;}).join(' ');
   document.getElementById('spH').innerHTML=`You said: "${hl}"`;
-  const score=hWords.filter(w=>tWords.includes(w.replace(/[^a-z]/g,''))).length/Math.max(tWords.length,1);
+  const score=tWords.filter(w=>hSet.has(w)).length/Math.max(tWords.length,1);
   const v=document.getElementById('spV');
-  if(score>=0.75){v.textContent='✓ Great pronunciation!';v.className='sp-verdict good';}
-  else if(score>=0.4){v.textContent='Almost — try once more.';v.className='sp-verdict mid';}
+  if(score>=0.8){v.textContent='✓ Great pronunciation!';v.className='sp-verdict good';}
+  else if(score>=0.5){v.textContent='Almost — try once more.';v.className='sp-verdict mid';}
   else{v.textContent='Listen first, then speak slowly.';v.className='sp-verdict bad';}
   document.getElementById('spBox').classList.add('open');
 }
@@ -382,7 +400,7 @@ function render(){
         <span class="slb">word</span>
         <button class="sb" title="Hear example" onclick="tts('${es}',this)">▶</button>
         <span class="slb">example</span>
-        <button class="sb" title="Practise pronunciation" onclick="mic('${ws}',this)">🎤</button>
+        <button class="sb" title="Say the example sentence" onclick="mic('${es}',this)">🎤</button>
         <span class="slb">say it</span>
       </div></td>
     </tr>`;
@@ -412,10 +430,12 @@ document.head.appendChild(sty);
 render();
 </script>
 <script>
-document.getElementById('themeBtn').addEventListener('click',function(){
-  var r=document.documentElement,cur=r.getAttribute('data-theme')||(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
-  var n=cur==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}
-});
+(function(){
+  var btns=document.querySelectorAll('[data-theme-set]');
+  function mark(){var cur=document.documentElement.getAttribute('data-theme');btns.forEach(function(b){var on=b.dataset.themeSet===cur;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
+  btns.forEach(function(b){b.addEventListener('click',function(){document.documentElement.setAttribute('data-theme',b.dataset.themeSet);try{localStorage.setItem('theme',b.dataset.themeSet)}catch(e){}mark()})});
+  mark();
+})();
 </script>
 </body>
 </html>
