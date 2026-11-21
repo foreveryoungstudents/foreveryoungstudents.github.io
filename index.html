@@ -483,6 +483,7 @@
       text-decoration-color: var(--accent-2); text-decoration-thickness: 2px; text-underline-offset: 6px;
     }
     .fb-word.say { font-size: 13px; font-weight: 500; text-decoration: underline dotted; text-underline-offset: 4px; }
+    .fb-word[data-say^="★"] { color: var(--accent-2); text-decoration: none; letter-spacing: 2px; }
     .fb-word:focus-visible, .fb-send:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
     @media (hover: hover) { .fb-word:hover { color: var(--hover-text); } }
     .fb-attach { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 12px; }
@@ -908,6 +909,7 @@
         <button type="button" class="fb-word" data-t="Предложение" data-ph="Что бы вы хотели добавить или улучшить?">Предложить</button>
         <button type="button" class="fb-word say" data-say="Спасибо!">Спасибо!</button>
         <button type="button" class="fb-word say" data-say="Большое спасибо!">Большое спасибо!</button>
+        <button type="button" class="fb-word say" data-say="★★★★★" aria-label="Пять звёзд">★★★★★</button>
       </div>
       <textarea id="fbTxt" maxlength="1000" aria-label="Сообщение"></textarea>
       <div class="fb-attach">
@@ -1087,11 +1089,14 @@
       return new Promise(function (ok, no) {
         var im = new Image(), u = URL.createObjectURL(file);
         im.onload = function () {
-          var k = Math.min(1, 1400 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+          var k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement('canvas'), x;
           c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
-          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+          x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+          x.drawImage(im, 0, 0, c.width, c.height);
           URL.revokeObjectURL(u);
-          ok(c.toDataURL('image/jpeg', .8).split(',')[1]);
+          var q = .8, out;
+          do { out = c.toDataURL('image/jpeg', q).split(',')[1]; q -= .1; } while (out.length > 1200000 && q > .3);
+          ok(out);
         };
         im.onerror = function () { no(new Error('img')); };
         im.src = u;
