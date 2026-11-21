@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moscow · Vocabulary Map</title>
+<title>Vocabulary Map — Moscow · Forever Young Students</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&display=swap" rel="stylesheet">
 <style>
@@ -14,26 +14,16 @@
   --text: #2a2320; --text2: #46585a; --text3: #556462;
   --title: #14284b; --subtitle: #556853;
   --btn-bg: #14284b; --btn-text: #f1ead8; --btn-border: #14284b;
-  --stripe: #a14534; --hover-text: #7a6339;
-  /* верно — приглушённый зелёный, ошибка — кирпичный,
-     выбор — сланцевый, подсказка — песочный/терракота */
+  --stripe: #a14534;
   --green: #3f5a3e; --green-bg: #dfe5d3; --green-bd: #7d8b7c;
-  --red: #7c3a0c;   --red-bg: #f6dcbf;   --red-bd: #c2661c;   /* ошибка: оранжевый, не розовый */
+  --red: #7c3a0c;   --red-bg: #f6dcbf;   --red-bd: #c2661c;
   --blue: #14284b;  --blue-bg: #cfd9d9;  --blue-bd: #77898b;
   --amber: #6b4a1c; --amber-bg: #ecdcb8; --amber-bd: #c85f31;
-  --teal-bd: #7d8b7c;
-  /* цвета уровней (точки на главной) — единственное место, где они заданы */
-  --lvl-1: #7d8b7c; --lvl-2: #cab181; --lvl-3: #c9835f; --lvl-4: #a14534;
-  /* «Внимание к тексту»: верно / отчасти / не верно / отметка в тексте.
-     На светлом фоне песочный бледный, поэтому «отчасти» и отметка темнее */
-  --res-ok: var(--lvl-1); --res-part: #a58437; --res-bad: var(--lvl-3); --res-mark: #8a6a2c;
-  --font-read: 'Literata', Georgia, 'Times New Roman', serif;   /* шрифт отрывков для чтения */
-  --tr-line: var(--border2);   /* черта слева у отрывка: светлая тема — цвет рамки кнопок */
+  --lvl-2: #cab181;
+  --font-read: 'Literata', Georgia, 'Times New Roman', serif;
   --radius: 12px; --radius-lg: 14px;
   --shadow: 0 7px 24px rgba(84, 60, 40, .12);
 }
-
-/* ─── Тёмная тема: атрибут data-theme ставит js/theme.js ─── */
 :root[data-theme="light"] { color-scheme: light; }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -42,52 +32,42 @@
   --text: #f1ead8; --text2: #bcc8c2; --text3: #93a39d;
   --title: #f1ead8; --subtitle: #a9bba8;
   --btn-bg: #212830; --btn-text: #e9e1cf; --btn-border: #3d444d;
-  --stripe: #7e4733; --hover-text: #e3c4a8;
+  --stripe: #7e4733;
   --green: #b9cdb0; --green-bg: #1a261d; --green-bd: #7d8b7c;
-  --red:   #f2bb86; --red-bg:   #2e1c0d; --red-bd:   #c2661c;
-  --blue:  #c9d3dc; --blue-bg:  #1c2430; --blue-bd:  #6f7f8a;
+  --red: #f2bb86; --red-bg: #2e1c0d; --red-bd: #c2661c;
+  --blue: #c9d3dc; --blue-bg: #1c2430; --blue-bd: #6f7f8a;
   --amber: #e3cd9c; --amber-bg: #2a2314; --amber-bd: #cab181;
-  --teal-bd: #7d8b7c;
-  --tr-line: var(--lvl-3);
-  --res-part: var(--lvl-2); --res-mark: var(--lvl-2);
   --shadow: 0 7px 24px rgba(0, 0, 0, .35);
 }
 
-/* ─── Base (как в основном приложении) ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
 body::before { content: ""; display: block; height: 6px; background: var(--stripe); }
 button { font-family: inherit; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
 
-/* ─── Header ─── */
+/* Header */
 header { padding: 2rem 1.5rem 1.25rem; }
 .h-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .h-title { display: flex; flex-direction: column; gap: 4px; }
 .h-title h1 { font-size: clamp(24px, 5vw, 30px); font-weight: 800; letter-spacing: -.035em; line-height: 1.2; color: var(--title); }
 .h-title span { font-size: 14px; font-weight: 700; color: var(--subtitle); }
 .h-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.h-back, .theme-btn { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; white-space: nowrap; text-decoration: none; transition: border-color .15s, color .15s; }
-.h-back:hover, .theme-btn:hover { border-color: var(--text3); color: var(--text); }
+.h-back, .theme-btn { background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; white-space: nowrap; text-decoration: none; transition: color .15s; }
+.h-back:hover, .theme-btn:hover { color: var(--text); }
 
-
-.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; overflow: hidden; }
-.seg-btn { background: none; border: none; padding: 12px 18px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; transition: background .15s, color .15s; }
-.seg-btn + .seg-btn { border-left: 1px solid var(--border2); }
-.seg-btn:hover { color: var(--text); }
-.seg-btn.on { background: var(--btn-bg); color: var(--btn-text); }
-@media (max-width: 760px) { .seg-btn { padding: 10px 14px; } }
-
-/* ─── Toolbar ─── */
+/* Toolbar */
 .toolbar { background: var(--bg); border-bottom: 1px solid var(--border); padding: .75rem 1.5rem; position: sticky; top: 0; z-index: 40; }
 .tb1 { max-width: 1100px; margin: 0 auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .tb2 { max-width: 1100px; margin: .6rem auto 0; display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap; }
 input[type=text] { flex: 1; min-width: 180px; background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 10px 14px; font-family: inherit; font-size: 15px; color: var(--text); outline: none; transition: border-color .15s; }
 input[type=text]::placeholder { color: var(--text3); }
 input[type=text]:focus { border-color: var(--text3); }
-.pill { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 16px; font-family: inherit; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; transition: all .15s; white-space: nowrap; }
-.pill:hover { border-color: var(--text3); color: var(--text); }
-.pill.on { background: var(--btn-bg); border-color: var(--btn-border); color: var(--btn-text); }
+.pill { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 16px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; transition: color .15s; white-space: nowrap; }
+.pill:hover { color: var(--text); }
+.pill.on, .pill.on:hover { background: var(--btn-bg); border-color: var(--btn-border); color: var(--btn-text); }
 .tb-ct { font-size: 13px; font-weight: 500; color: var(--text3); margin-left: auto; }
 .ctl { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--text3); }
 input[type=range] { width: 110px; height: 4px; -webkit-appearance: none; appearance: none; background: var(--border2); border-radius: 2px; cursor: pointer; outline: none; }
@@ -96,26 +76,32 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 
 .rv { color: var(--text); font-weight: 700; min-width: 30px; font-size: 13px; }
 select { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; color: var(--text2); font-family: inherit; font-size: 13px; padding: 6px 10px; cursor: pointer; max-width: 200px; }
 
-/* ─── Speech panel ─── */
-.sp-wrap { max-width: 1100px; margin: 1rem auto 0; padding: 0 1.5rem; }
-.sp-box { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--green-bd); border-radius: var(--radius); padding: 12px 16px; box-shadow: var(--shadow); display: none; animation: fadeUp .2s; }
+/* Панель проверки произношения — в шапке, на месте поиска */
+.tb-slot { flex: 1; min-width: 180px; display: flex; }
+.toolbar.sp-on #search { display: none; }
+.toolbar.sp-on { position: sticky; top: 0; }
+.sp-box { display: none; flex: 1; position: relative; min-height: 92px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--green-bd); border-radius: var(--radius); padding: 10px 44px 10px 16px; }
 .sp-box.open { display: block; }
+.sp-box[data-s="good"] { border-left-color: var(--green-bd); }
+.sp-box[data-s="mid"] { border-left-color: var(--amber-bd); }
+.sp-box[data-s="bad"] { border-left-color: var(--red-bd); }
 .sp-lbl { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text2); margin-bottom: 4px; }
-.sp-heard { font-size: 16px; color: var(--text); margin-bottom: 4px; min-height: 1.3rem; }
+.sp-heard { font-size: 15px; line-height: 1.35; min-height: 2.7em; max-height: 2.7em; overflow-y: auto; margin-bottom: 4px; color: var(--text); }
 .sp-heard b { color: var(--green); }
 .sp-heard s { color: var(--red); text-decoration-color: var(--red-bd); }
-.sp-verdict { font-size: 14px; font-weight: 500; }
+.sp-verdict { font-size: 14px; font-weight: 500; min-height: 1.3em; }
 .sp-verdict.good { color: var(--green); }
 .sp-verdict.bad { color: var(--red); }
 .sp-verdict.mid { color: var(--amber); }
+.sp-x { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border: 1px solid var(--border2); border-radius: 8px; background: var(--surface); color: var(--text2); font-size: 18px; line-height: 1; cursor: pointer; }
+.sp-x:hover { color: var(--text); }
 
-/* ─── Table ─── */
+/* Table */
 .wrap { max-width: 1100px; margin: 1.25rem auto 1.5rem; padding: 0 1.5rem; }
 table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
 th { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text2); padding: 12px 16px; border-bottom: 1px solid var(--border); text-align: left; background: var(--surface2); }
 td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--surface2); }
 .cw { width: 23%; } .ci { width: 16%; } .cr { width: 14%; } .ce { width: 39%; } .cs { width: 8%; text-align: center; }
 .wn { font-size: 16px; font-weight: 700; color: var(--title); margin-bottom: 6px; line-height: 1.3; letter-spacing: -.01em; }
 .badge { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 6px; border: 1px solid; display: inline-block; }
@@ -127,15 +113,14 @@ tr:hover td { background: var(--surface2); }
 .ee { font-family: var(--font-read); font-size: 15px; color: var(--text); line-height: 1.55; margin-bottom: 4px; }
 .er { font-size: 13px; font-weight: 500; color: var(--text3); line-height: 1.5; }
 .btn-col { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.sb { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; width: 34px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--text2); transition: all .15s; padding: 0; }
-.sb:hover { background: var(--surface2); border-color: var(--text3); color: var(--text); }
+.sb { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; width: 34px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: var(--text2); transition: color .15s; padding: 0; }
+.sb:hover { color: var(--text); }
 .sb.playing { border-color: var(--amber-bd); color: var(--amber); background: var(--amber-bg); }
 .sb.listening { border-color: var(--red-bd); color: var(--red); background: var(--red-bg); animation: pulse .7s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
 .slb { font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: .05em; text-transform: uppercase; }
 .no-r { text-align: center; padding: 2.5rem; color: var(--text3); font-weight: 500; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
 
-/* ─── Feedback ─── */
+/* Feedback */
 .fb-wrap { max-width: 1100px; margin: 0 auto 3rem; padding: 0 1.5rem; }
 .fb-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; box-shadow: var(--shadow); }
 .fb-h { font-size: 12px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text2); margin-bottom: .8rem; }
@@ -144,26 +129,28 @@ tr:hover td { background: var(--surface2); }
 .star:hover, .star.on { opacity: 1; color: var(--amber-bd); }
 .star:hover { transform: scale(1.15); }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: .9rem; }
-.chip { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 14px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; font-family: inherit; transition: all .15s; }
-.chip:hover { border-color: var(--text3); color: var(--text); }
-.chip.on { background: var(--btn-bg); border-color: var(--btn-border); color: var(--btn-text); }
+.chip { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 8px 14px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; transition: color .15s; }
+.chip:hover { color: var(--text); }
+.chip.on, .chip.on:hover { background: var(--btn-bg); border-color: var(--btn-border); color: var(--btn-text); }
 textarea { width: 100%; background: var(--bg); border: 1px solid var(--border2); border-radius: 10px; padding: 10px 14px; font-family: inherit; font-size: 15px; color: var(--text); resize: vertical; min-height: 80px; outline: none; transition: border-color .15s; margin-bottom: .9rem; display: block; }
 textarea::placeholder { color: var(--text3); }
 textarea:focus { border-color: var(--text3); }
 .fb-row { display: flex; align-items: center; gap: 1rem; }
-.fb-btn { background: var(--btn-bg); color: var(--btn-text); border: none; border-radius: 10px; padding: 10px 24px; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity .15s; }
-.fb-btn:hover { opacity: .85; }
+.fb-btn { background: var(--btn-bg); color: var(--btn-text); border: none; border-radius: 10px; padding: 10px 24px; font-size: 15px; font-weight: 500; cursor: pointer; transition: color .15s; }
+.fb-btn:hover { color: #fff; }
 .fb-ok { font-size: 15px; color: var(--green); font-weight: 700; display: none; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+.fb-err { font-size: 14px; color: var(--red); font-weight: 500; display: none; }
+.fb-btn:disabled { opacity: .6; cursor: default; }
 
-/* ─── Телефон: строки таблицы становятся карточками ─── */
+/* Телефон: строки таблицы становятся карточками */
 @media (max-width: 760px) {
   header { padding: 1.25rem 1rem .75rem; }
   .toolbar { padding: .6rem 1rem; position: static; }
-  .sp-wrap, .wrap, .fb-wrap { padding: 0 1rem; }
+  .toolbar.sp-on { position: sticky; top: 0; }
+  .wrap, .fb-wrap { padding: 0 1rem; }
+  .tb-slot { flex: 1 1 100%; min-width: 0; }
   input[type=text] { flex: 1 1 100%; min-width: 0; }
   .pill { padding: 8px 12px; font-size: 13px; }
-  .tb-ct { margin-left: auto; }
   .tb2 { gap: .5rem 1rem; }
   select { max-width: 150px; }
   .h-back, .theme-btn { padding: 10px 14px; }
@@ -171,17 +158,15 @@ textarea:focus { border-color: var(--text3); }
   thead { display: none; }
   tr { display: block; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 14px 16px; margin-bottom: 12px; }
   td { display: block; padding: 3px 0; border: none; width: auto !important; text-align: left !important; }
-  tr:hover td { background: none; }
   .cw { padding-bottom: 6px; } .ci { padding-bottom: 2px; }
   .ce { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
   .cs { margin-top: 10px; }
   .btn-col { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; gap: 6px; }
   .sb { width: 40px; height: 38px; font-size: 16px; }
-  .slb { font-size: 10px; margin-right: 8px; }
+  .slb { margin-right: 8px; }
   .fb-box { padding: 1rem; }
   .chips .chip { padding: 8px 12px; }
 }
-
 </style>
 <script>(function(){var t=null;try{t=localStorage.getItem("theme")}catch(e){}if(t!=="dark"&&t!=="light")t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
 </head>
@@ -190,73 +175,77 @@ textarea:focus { border-color: var(--text3); }
 <header>
   <div class="h-inner">
     <div class="h-title">
-      <h1>Moscow — City Overview</h1>
-      <span>35 terms · vocabulary map</span>
+      <h1>Vocabulary Map — Moscow</h1>
+      <span>35 терминов · Прогулки по Москве</span>
     </div>
     <div class="h-actions">
-      <div class="seg" role="group" aria-label="Theme"><button type="button" class="seg-btn" data-theme-set="light">Light</button><button type="button" class="seg-btn" data-theme-set="dark">Dark</button></div>
+      <a class="h-back" href="https://foreveryoungstudents.github.io/">← На главную</a>
+      <button type="button" class="theme-btn" id="themeBtn" aria-label="Тема">Авто</button>
     </div>
   </div>
 </header>
 
-<div class="toolbar">
+<div class="toolbar" id="toolbar">
   <div class="tb1">
-    <input type="text" id="search" placeholder="Search word, translation or example…" oninput="render()">
-    <button class="pill on" onclick="setF('all',this)">All</button>
-    <button class="pill" onclick="setF('vocab',this)">Vocabulary</button>
-    <button class="pill" onclick="setF('cliche',this)">Clichés</button>
-    <button class="pill" onclick="setF('phrase',this)">Phrases</button>
+    <div class="tb-slot">
+      <input type="text" id="search" placeholder="Слово, перевод или пример…" oninput="render()">
+      <div class="sp-box" id="spBox">
+        <button class="sp-x" type="button" onclick="closePanel()" aria-label="Закрыть">×</button>
+        <div class="sp-lbl">Проверка произношения</div>
+        <div class="sp-heard" id="spH">Слушаю…</div>
+        <div class="sp-verdict" id="spV"></div>
+      </div>
+    </div>
+    <button class="pill on" onclick="setF('all',this)">Все</button>
+    <button class="pill" onclick="setF('vocab',this)">Лексика</button>
+    <button class="pill" onclick="setF('cliche',this)">Клише</button>
+    <button class="pill" onclick="setF('phrase',this)">Фразы</button>
     <span class="tb-ct" id="ct"></span>
   </div>
   <div class="tb2">
-    <div class="ctl"><label>Speed</label>
+    <div class="ctl"><label>Скорость</label>
       <input type="range" id="rs" min="0.5" max="1.5" step="0.1" value="0.85"
         oninput="document.getElementById('rv').textContent=parseFloat(this.value).toFixed(1)+'×'">
       <span class="rv" id="rv">0.9×</span>
     </div>
-    <div class="ctl"><label>Voice</label><select id="vs"></select></div>
+    <div class="ctl"><label>Голос</label><select id="vs"></select></div>
   </div>
 </div>
-
-<div class="sp-wrap"><div class="sp-box" id="spBox">
-  <div class="sp-lbl">Pronunciation check</div>
-  <div class="sp-heard" id="spH">Listening…</div>
-  <div class="sp-verdict" id="spV"></div>
-</div></div>
 
 <div class="wrap">
   <table>
     <thead><tr>
-      <th class="cw">Word / Phrase</th>
+      <th class="cw">Слово / фраза</th>
       <th class="ci">IPA</th>
-      <th class="cr">RU</th>
-      <th class="ce">Example</th>
-      <th class="cs">Listen · Say</th>
+      <th class="cr">Перевод</th>
+      <th class="ce">Пример</th>
+      <th class="cs">Слушать · Сказать</th>
     </tr></thead>
     <tbody id="tb"></tbody>
   </table>
-  <div class="no-r" id="nr" style="display:none">No entries found.</div>
+  <div class="no-r" id="nr" style="display:none">Ничего не найдено.</div>
 </div>
 
 <div class="fb-wrap"><div class="fb-box">
-  <div class="fb-h">Was this map useful?</div>
+  <div class="fb-h">Была ли карта полезной?</div>
   <div class="stars" id="stars">
     <span class="star" data-v="1">★</span><span class="star" data-v="2">★</span>
     <span class="star" data-v="3">★</span><span class="star" data-v="4">★</span>
     <span class="star" data-v="5">★</span>
   </div>
   <div class="chips" id="chips">
-    <button class="chip" onclick="this.classList.toggle('on')">Easy to read</button>
-    <button class="chip" onclick="this.classList.toggle('on')">Audio helped</button>
-    <button class="chip" onclick="this.classList.toggle('on')">Good examples</button>
-    <button class="chip" onclick="this.classList.toggle('on')">Too many words</button>
-    <button class="chip" onclick="this.classList.toggle('on')">Need more context</button>
-    <button class="chip" onclick="this.classList.toggle('on')">Want more clichés</button>
+    <button class="chip" onclick="this.classList.toggle('on')">Удобно читать</button>
+    <button class="chip" onclick="this.classList.toggle('on')">Помогло аудио</button>
+    <button class="chip" onclick="this.classList.toggle('on')">Хорошие примеры</button>
+    <button class="chip" onclick="this.classList.toggle('on')">Слишком много слов</button>
+    <button class="chip" onclick="this.classList.toggle('on')">Нужно больше контекста</button>
+    <button class="chip" onclick="this.classList.toggle('on')">Хочу больше клише</button>
   </div>
-  <textarea id="fbTxt" placeholder="Any comments for your teacher (optional)…"></textarea>
+  <textarea id="fbTxt" placeholder="Комментарий для преподавателя (необязательно)…"></textarea>
   <div class="fb-row">
-    <button class="fb-btn" onclick="submitFb()">Send feedback</button>
-    <span class="fb-ok" id="fbOk">✓ Thank you!</span>
+    <button class="fb-btn" onclick="submitFb()">Отправить</button>
+    <span class="fb-ok" id="fbOk">✓ Спасибо!</span>
+    <span class="fb-err" id="fbErr"></span>
   </div>
 </div></div>
 
@@ -311,9 +300,9 @@ function loadVoices(){
   const rank=v=>(isG(v)?0:10)+(L(v)==='en-GB'?0:L(v)==='en-US'?1:2);
   voices=speechSynthesis.getVoices().filter(v=>L(v).toLowerCase().startsWith('en')).sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name));
   s.innerHTML='';
-  if(!voices.length){s.innerHTML='<option>No EN voices</option>';return;}
+  if(!voices.length){s.innerHTML='<option>Нет английских голосов</option>';return;}
   const gG=document.createElement('optgroup');gG.label='Google';
-  const gO=document.createElement('optgroup');gO.label='Other voices';
+  const gO=document.createElement('optgroup');gO.label='Другие голоса';
   voices.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.textContent=v.name+(v.default?' ★':'');(isG(v)?gG:gO).appendChild(o);});
   if(gG.children.length)s.appendChild(gG);
   if(gO.children.length)s.appendChild(gO);
@@ -337,41 +326,67 @@ function tts(text,btn){
 }
 
 /* STT */
+const inApp=/(telegram|instagram|fbav|fban|vkclient|vkontakte|; wv\)|miuibrowser)/i.test(navigator.userAgent);
+function norm(t){return t.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(Boolean);}
+function scoreOf(target,heard){const t=norm(target),h=new Set(norm(heard));return t.filter(w=>h.has(w)).length/Math.max(t.length,1);}
+function bestAlt(target,alts){return alts.slice().sort((x,y)=>scoreOf(target,y)-scoreOf(target,x))[0]||'';}
+function resetMic(){if(curMic){curMic.classList.remove('listening');curMic.textContent='🎤';curMic=null;}}
+function micErr(code){
+  return ({
+    'not-allowed':'Микрофон заблокирован. Разрешите доступ к микрофону для этого сайта в настройках браузера и попробуйте снова.',
+    'service-not-allowed':'Распознавание речи отключено на устройстве. На iPhone: Настройки → Основные → Клавиатура → Включить диктовку, и разрешите «Siri и диктовку» для браузера.',
+    'no-speech':'Ничего не слышно. Нажмите 🎤 и начинайте говорить сразу.',
+    'audio-capture':'Микрофон не найден. Проверьте подключение и что его не занимает другое приложение.',
+    'network':'Для распознавания речи нужен интернет. Проверьте соединение и попробуйте снова.',
+    'language-not-supported':'Распознавание английской речи недоступно на этом устройстве.'
+  })[code]||('Ошибка распознавания ('+code+'). Попробуйте ещё раз.');
+}
 function mic(target,btn){
-  if(!SR){alert('Speech recognition needs Chrome or Edge.');return;}
-  if(recog){recog.abort();recog=null;}
-  if(curMic&&curMic!==btn){curMic.classList.remove('listening');curMic.textContent='🎤';}
-  if(curMic===btn){btn.classList.remove('listening');btn.textContent='🎤';curMic=null;closePanel();return;}
-  recog=new SR();recog.lang='en-US';recog.interimResults=false;recog.maxAlternatives=3;
+  if(!SR){
+    openPanel(inApp?'Этот встроенный браузер не умеет записывать речь. Откройте страницу в Chrome или Safari.'
+      :(location.protocol==='file:'?'Распознавание речи не работает из локального файла. Откройте страницу по https-адресу.'
+      :'Распознавание речи не поддерживается в этом браузере. Используйте Chrome или Edge (компьютер, Android) или Safari (iPhone).'),'bad');
+    return;
+  }
+  if(curMic===btn){if(recog){try{recog.abort();}catch(e){}recog=null;}resetMic();closePanel();return;}
+  if(recog){try{recog.abort();}catch(e){}recog=null;}
+  resetMic();
+  if(window.speechSynthesis){speechSynthesis.cancel();if(curBtn){curBtn.classList.remove('playing');curBtn.textContent=curBtn.dataset.orig||'🔊';curBtn=null;}}
+  const r=new SR();recog=r;r.lang='en-US';r.interimResults=false;r.continuous=false;r.maxAlternatives=3;
+  let got=false,done=false,timer=null;
+  const finish=()=>{if(done)return;done=true;clearTimeout(timer);if(recog===r)recog=null;if(curMic===btn)resetMic();};
   btn.classList.add('listening');btn.textContent='⏹';curMic=btn;
-  openPanel('Say the sentence: <i>'+target+'</i>','');
-  recog.onresult=e=>{
-    const heard=e.results[0][0].transcript.trim().toLowerCase();
-    showResult(target,heard);
-    btn.classList.remove('listening');btn.textContent='🎤';curMic=null;
-  };
-  recog.onerror=()=>{openPanel('Could not hear clearly. Try again.','mid');btn.classList.remove('listening');btn.textContent='🎤';curMic=null;};
-  recog.onend=()=>{if(curMic===btn){btn.classList.remove('listening');btn.textContent='🎤';curMic=null;}};
-  recog.start();
+  openPanel('Произнесите: <i>'+target+'</i>','');
+  r.onresult=e=>{got=true;const alts=Array.from(e.results[0]).map(x=>x.transcript.trim().toLowerCase());showResult(target,bestAlt(target,alts));finish();};
+  r.onerror=e=>{if(e.error==='aborted'){finish();return;}got=true;openPanel(micErr(e.error),'bad');finish();};
+  r.onend=()=>{if(!got&&!done)openPanel(micErr('no-speech'),'mid');finish();};
+  timer=setTimeout(()=>{if(!done){try{r.abort();}catch(e){}if(!got)openPanel(micErr('no-speech'),'mid');finish();}},12000);
+  try{r.start();}catch(e){openPanel('Не удалось включить микрофон. Попробуйте ещё раз.','bad');finish();}
 }
 function openPanel(msg,cls){
-  const b=document.getElementById('spBox');b.classList.add('open');
+  const b=document.getElementById('spBox');b.classList.add('open');b.dataset.s=cls||'';
+  document.getElementById('toolbar').classList.add('sp-on');
   document.getElementById('spH').innerHTML=msg;
   const v=document.getElementById('spV');v.textContent='';v.className='sp-verdict'+(cls?' '+cls:'');
 }
-function closePanel(){document.getElementById('spBox').classList.remove('open');}
+function closePanel(){
+  document.getElementById('spBox').classList.remove('open');
+  document.getElementById('toolbar').classList.remove('sp-on');
+  if(recog){try{recog.abort();}catch(e){}recog=null;}
+  resetMic();
+}
 function showResult(target,heard){
-  const norm=t=>t.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(Boolean);
   const tWords=norm(target),hWords=heard.split(/\s+/).filter(Boolean);
-  const tSet=new Set(tWords),hSet=new Set(norm(heard));
+  const tSet=new Set(tWords);
   const hl=hWords.map(w=>{const c=norm(w)[0]||'';return tSet.has(c)?`<b>${w}</b>`:`<s>${w}</s>`;}).join(' ');
-  document.getElementById('spH').innerHTML=`You said: "${hl}"`;
-  const score=tWords.filter(w=>hSet.has(w)).length/Math.max(tWords.length,1);
-  const v=document.getElementById('spV');
-  if(score>=0.8){v.textContent='✓ Great pronunciation!';v.className='sp-verdict good';}
-  else if(score>=0.5){v.textContent='Almost — try once more.';v.className='sp-verdict mid';}
-  else{v.textContent='Listen first, then speak slowly.';v.className='sp-verdict bad';}
-  document.getElementById('spBox').classList.add('open');
+  document.getElementById('spH').innerHTML=`Вы сказали: «${hl}»`;
+  const score=scoreOf(target,heard);
+  const v=document.getElementById('spV'),bx=document.getElementById('spBox');
+  if(score>=0.8){v.textContent='✓ Отличное произношение!';v.className='sp-verdict good';bx.dataset.s='good';}
+  else if(score>=0.5){v.textContent='Почти — попробуйте ещё раз.';v.className='sp-verdict mid';bx.dataset.s='mid';}
+  else{v.textContent='Сначала послушайте, потом говорите медленнее.';v.className='sp-verdict bad';bx.dataset.s='bad';}
+  bx.classList.add('open');
+  document.getElementById('toolbar').classList.add('sp-on');
 }
 
 /* TABLE */
@@ -386,7 +401,7 @@ function render(){
   document.getElementById('ct').textContent=`${rows.length} / ${D.length}`;
   document.getElementById('nr').style.display=rows.length?'none':'block';
   const bc=t=>t==='vocab'?'bv':t==='cliche'?'bc':'bp';
-  const bl=t=>t==='vocab'?'Vocabulary':t==='cliche'?'Cliché':'Phrase';
+  const bl=t=>t==='vocab'?'Лексика':t==='cliche'?'Клише':'Фраза';
   document.getElementById('tb').innerHTML=rows.map((d,i)=>{
     const ws=d.w.replace(/'/g,"\\'").replace(/[…]/g,'');
     const es=d.e.replace(/'/g,"\\'");
@@ -396,12 +411,12 @@ function render(){
       <td class="cr ru">${d.r}</td>
       <td class="ce"><div class="ee">${d.e}</div><div class="er">${d.r2}</div></td>
       <td class="cs"><div class="btn-col">
-        <button class="sb" title="Hear word" onclick="tts('${ws}',this)">🔊</button>
-        <span class="slb">word</span>
-        <button class="sb" title="Hear example" onclick="tts('${es}',this)">▶</button>
-        <span class="slb">example</span>
-        <button class="sb" title="Say the example sentence" onclick="mic('${es}',this)">🎤</button>
-        <span class="slb">say it</span>
+        <button class="sb" title="Послушать слово" onclick="tts('${ws}',this)">🔊</button>
+        <span class="slb">слово</span>
+        <button class="sb" title="Послушать пример" onclick="tts('${es}',this)">▶</button>
+        <span class="slb">пример</span>
+        <button class="sb" title="Произнести пример" onclick="mic('${es}',this)">🎤</button>
+        <span class="slb">сказать</span>
       </div></td>
     </tr>`;
   }).join('');
@@ -413,28 +428,51 @@ document.getElementById('stars').addEventListener('click',e=>{
   fbRating=+e.target.dataset.v;
   document.querySelectorAll('.star').forEach(s=>s.classList.toggle('on',+s.dataset.v<=fbRating));
 });
-function submitFb(){
+/* Адрес веб-приложения Google Apps Script вида https://script.google.com/macros/s/.../exec — вставьте свой между кавычками */
+const SHEET_URL='https://script.google.com/macros/s/AKfycbwv2yx_w5ga6TQtOAExy-KU_bU0JY-DMgdp110SOhEBs0N41hry0Z77FH2tbpWP4YA/exec';
+async function submitFb(){
+  const btn=document.querySelector('.fb-btn'),ok=document.getElementById('fbOk'),err=document.getElementById('fbErr');
   const chips=[...document.querySelectorAll('.chip.on')].map(c=>c.textContent);
   const text=document.getElementById('fbTxt').value.trim();
-  console.log('Feedback:',{rating:fbRating,chips,text,map:'Moscow'});
-  document.getElementById('fbOk').style.display='inline';
-  document.querySelector('.fb-btn').style.display='none';
+  if(!fbRating&&!chips.length&&!text){err.textContent='Поставьте оценку или напишите комментарий.';err.style.display='inline';return;}
+  err.style.display='none';
+  const data={page:'Moscow',rating:fbRating||'',chips:chips.join(', '),text};
+  btn.disabled=true;btn.textContent='Отправляю…';
+  try{
+    if(SHEET_URL){
+      /* Apps Script не отдаёт CORS-заголовки, поэтому no-cors: ответ не читается, об ошибке сети узнаём по исключению */
+      await fetch(SHEET_URL,{method:'POST',mode:'no-cors',body:new URLSearchParams(data)});
+    }else{console.log('Feedback (SHEET_URL не задан):',data);}
+    ok.style.display='inline';btn.style.display='none';
+  }catch(e){
+    err.textContent='Не удалось отправить. Проверьте интернет и попробуйте ещё раз.';err.style.display='inline';
+    btn.disabled=false;btn.textContent='Отправить';
+  }
 }
 
 /* INIT */
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=loadVoices;loadVoices();setTimeout(loadVoices,500);}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&recog)recog.abort();});
-const sty=document.createElement('style');
-sty.textContent='@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}';
-document.head.appendChild(sty);
 render();
 </script>
 <script>
+/* Тема: Авто → Светлая → Тёмная (по кругу), как на главной */
 (function(){
-  var btns=document.querySelectorAll('[data-theme-set]');
-  function mark(){var cur=document.documentElement.getAttribute('data-theme');btns.forEach(function(b){var on=b.dataset.themeSet===cur;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
-  btns.forEach(function(b){b.addEventListener('click',function(){document.documentElement.setAttribute('data-theme',b.dataset.themeSet);try{localStorage.setItem('theme',b.dataset.themeSet)}catch(e){}mark()})});
-  mark();
+  var root=document.documentElement,btn=document.getElementById('themeBtn');
+  var L={auto:'Авто',light:'Светлая',dark:'Тёмная'},order=['auto','light','dark'];
+  var mq=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+  function saved(){var t=null;try{t=localStorage.getItem('theme')}catch(e){}return t==='dark'||t==='light'?t:'auto'}
+  function apply(m){
+    root.setAttribute('data-theme',m==='auto'?(mq&&mq.matches?'dark':'light'):m);
+    btn.textContent=L[m];btn.setAttribute('aria-label','Тема: '+L[m]);
+  }
+  btn.addEventListener('click',function(){
+    var m=order[(order.indexOf(saved())+1)%3];
+    try{if(m==='auto')localStorage.removeItem('theme');else localStorage.setItem('theme',m)}catch(e){}
+    apply(m);
+  });
+  if(mq&&mq.addEventListener)mq.addEventListener('change',function(){if(saved()==='auto')apply('auto')});
+  apply(saved());
 })();
 </script>
 </body>
