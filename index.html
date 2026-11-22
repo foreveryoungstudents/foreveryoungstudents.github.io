@@ -483,28 +483,60 @@
       text-decoration-color: var(--accent-2); text-decoration-thickness: 2px; text-underline-offset: 6px;
     }
     .fb-word.say { font-size: 13px; font-weight: 500; text-decoration: underline dotted; text-underline-offset: 4px; }
-    .fb-word[data-say^="★"] { color: var(--accent-2); text-decoration: none; letter-spacing: 2px; }
-    .fb-word:focus-visible, .fb-send:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-    @media (hover: hover) { .fb-word:hover { color: var(--hover-text); } }
-    .fb-attach { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 12px; }
-    .fb-attach .fb-word { font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
-    #fbFileName { color: var(--muted); font-size: 13px; font-weight: 500; word-break: break-all; }
+    .fb-word:focus-visible, .fb-star:focus-visible, .fb-send:focus-visible, .fb-thumb button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+    @media (hover: hover) { .fb-word:hover, .fb-star:hover { color: var(--hover-text); } }
+
     .fb-card textarea, .fb-card input[type=text] {
-      display: block; width: 100%; margin-bottom: 12px; padding: 10px 13px;
+      display: block; width: 100%; margin-bottom: 10px; padding: 11px 13px;
       background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
-      font: inherit; font-size: 16px; outline: none;
+      font: inherit; font-size: 17px; line-height: 1.45; outline: none;
     }
-    .fb-card textarea { min-height: 96px; resize: vertical; }
-    .fb-card textarea::placeholder, .fb-card input::placeholder { color: var(--muted); }
+    .fb-card textarea { min-height: 110px; resize: vertical; }
+    .fb-card textarea::placeholder, .fb-card input::placeholder { color: var(--muted); opacity: .75; font-weight: 400; }
     .fb-card textarea:focus-visible, .fb-card input[type=text]:focus-visible { border-color: var(--accent); }
+    @media (min-width: 601px) {
+      .fb-card textarea, .fb-card input[type=text] { font-size: 14.5px; line-height: 1.5; padding: 10px 13px; }
+      .fb-card textarea { min-height: 96px; }
+    }
+    .fb-count { margin: -4px 0 8px; text-align: right; color: var(--muted); font-size: 12px; }
+
+    .fb-quick { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-bottom: 12px; }
+    .fb-lbl { color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .fb-stars { display: inline-flex; gap: 0; }
+    .fb-star {
+      background: none; border: 0; padding: 2px 3px; margin: 0; font: inherit; font-size: 24px; line-height: 1;
+      color: var(--muted); opacity: .45; cursor: pointer; transition: color .2s ease, opacity .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .fb-star.on { color: var(--accent-2); opacity: 1; }
+
+    .fb-attach { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 10px; }
+    .fb-attach .fb-word { font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
+    .fb-hint { color: var(--muted); font-size: 12px; opacity: .8; }
+    @media (hover: none) { .fb-hint { display: none; } }
+    .fb-card.drag { outline: 2px dashed var(--accent-2); outline-offset: -6px; }
+    .fb-thumb { position: relative; display: inline-block; margin-bottom: 12px; }
+    .fb-thumb img { display: block; max-width: 160px; max-height: 110px; border: 1px solid var(--line); border-radius: 10px; }
+    .fb-thumb button {
+      position: absolute; top: -8px; right: -8px; width: 26px; height: 26px; padding: 0; line-height: 1;
+      border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--text);
+      font-size: 16px; cursor: pointer;
+    }
+    .fb-trap { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; opacity: 0; }
+
     .fb-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-    .fb-send { border: 0; border-radius: 12px; padding: 11px 24px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: color .2s ease; }
+    .fb-send {
+      border: 1px solid var(--accent-2); border-radius: 12px; padding: 9px 22px; font: inherit; font-size: 14px;
+      font-weight: 700; cursor: pointer; transition: color .2s ease;
+    }
     .fb-send:disabled { opacity: .6; cursor: default; }
-    :root[data-theme="light"] .fb-send { background: #14284b; color: #f1ead8; }
-    :root:not([data-theme="light"]) .fb-send { background: #212830; color: #e9e1cf; border: 1px solid #3d444d; }
+    :root[data-theme="light"] .fb-send { background: #14284b; border-color: #14284b; color: #f1ead8; }
+    :root:not([data-theme="light"]) .fb-send { background: #212830; border-color: #cab181; color: #e9e1cf; }
     @media (hover: hover) { .fb-send:not(:disabled):hover { color: #fff; } }
     #fbMsg { color: var(--muted); font-size: 13px; font-weight: 500; }
     .fb-note { margin: 12px 0 0; color: var(--muted); font-size: 12px; }
+    #fbDone p { margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+    #fbDone .fb-word { font-size: 14px; text-decoration: underline; text-underline-offset: 4px; }
 
     @media (min-width: 600px) {
       main { padding-top: 54px; }
@@ -690,7 +722,25 @@
     </div>
     <p class="topic-description">Внимание, память и мышление</p>
 
- 
+    <div class="subsection">
+      <h3>Занятия и материалы</h3>
+      <div class="list">
+        <details class="lesson" open>
+          <summary>
+            <span class="icon icon-svg" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg></span>
+            <span class="info">
+              <span class="title">Занятия MindFitness</span>
+              <span class="desc">Материалы и задания по темам</span>
+            </span>
+            <svg class="summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+          </summary>
+          <div class="lesson-links">
+            <p class="empty-note">Материалы к занятиям скоро появятся.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+
     <div class="subsection">
       <h3>Приложения и тренажёры</h3>
       <div class="list">
@@ -731,25 +781,6 @@
         </div>
       </div>
     </div>
-       <div class="subsection">
-      <h3>Занятия и материалы</h3>
-      <div class="list">
-        <details class="lesson" open>
-          <summary>
-            <span class="icon icon-svg" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg></span>
-            <span class="info">
-              <span class="title">Занятия MindFitness</span>
-              <span class="desc">Материалы и задания по темам</span>
-            </span>
-            <svg class="summary-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-          </summary>
-          <div class="lesson-links">
-            <p class="empty-note">Материалы к занятиям скоро появятся.</p>
-          </div>
-        </details>
-      </div>
-    </div>
-
   </section>
 
   <!-- ENGLISH -->
@@ -904,27 +935,48 @@
     </div>
     <p class="topic-description">Нашли ошибку, есть вопрос или идея — напишите</p>
     <div class="list fb-card" id="fbCard">
-      <div class="fb-words" role="group" aria-label="Тип обращения">
-        <button type="button" class="fb-word on" data-t="Скриншот проблемы" data-ph="Что пошло не так: где, что нажали, что ожидали увидеть? Скриншот можно прикрепить ниже.">Отправить скриншот</button>
-        <button type="button" class="fb-word" data-t="Вопрос" data-ph="Ваш вопрос…">Спросить</button>
-        <button type="button" class="fb-word" data-t="Предложение" data-ph="Что бы вы хотели добавить или улучшить?">Предложить</button>
-        <button type="button" class="fb-word say" data-say="Спасибо!">Спасибо!</button>
-        <button type="button" class="fb-word say" data-say="Большое спасибо!">Большое спасибо!</button>
-        <button type="button" class="fb-word say" data-say="★★★★★" aria-label="Пять звёзд">★★★★★</button>
+      <div id="fbForm">
+        <div class="fb-words" role="group" aria-label="Тип обращения">
+          <button type="button" class="fb-word on" aria-pressed="true" data-t="Скриншот проблемы" data-contact="1">Отправить скриншот</button>
+          <button type="button" class="fb-word" aria-pressed="false" data-t="Вопрос" data-contact="1">Спросить</button>
+          <button type="button" class="fb-word" aria-pressed="false" data-t="Предложение">Предложить</button>
+        </div>
+        <textarea id="fbTxt" maxlength="1000" placeholder="Текст сообщения" aria-label="Текст сообщения"></textarea>
+        <div class="fb-count" id="fbCount" hidden></div>
+        <div class="fb-quick">
+          <span class="fb-lbl">Быстро:</span>
+          <button type="button" class="fb-word say" data-say="Спасибо!">Спасибо!</button>
+          <button type="button" class="fb-word say" data-say="Большое спасибо!">Большое спасибо!</button>
+          <span class="fb-lbl">Оценка:</span>
+          <span class="fb-stars" role="group" aria-label="Оценка от 1 до 5">
+            <button type="button" class="fb-star" data-v="1" aria-pressed="false" aria-label="1 из 5">★</button>
+            <button type="button" class="fb-star" data-v="2" aria-pressed="false" aria-label="2 из 5">★</button>
+            <button type="button" class="fb-star" data-v="3" aria-pressed="false" aria-label="3 из 5">★</button>
+            <button type="button" class="fb-star" data-v="4" aria-pressed="false" aria-label="4 из 5">★</button>
+            <button type="button" class="fb-star" data-v="5" aria-pressed="false" aria-label="5 из 5">★</button>
+          </span>
+        </div>
+        <div class="fb-attach">
+          <button type="button" class="fb-word" id="fbAttach">Прикрепить скриншот</button>
+          <span class="fb-hint">или вставьте (Ctrl+V) / перетащите сюда</span>
+          <input type="file" id="fbFile" accept="image/*" hidden>
+        </div>
+        <div class="fb-thumb" id="fbThumb" hidden>
+          <img id="fbImg" alt="Прикреплённый скриншот">
+          <button type="button" id="fbClear" aria-label="Убрать скриншот">×</button>
+        </div>
+        <div id="fbContactRow"><input type="text" id="fbContact" maxlength="100" placeholder="Как с вами связаться (по желанию)" aria-label="Как с вами связаться"></div>
+        <input type="text" id="fbWeb" class="fb-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="fb-row">
+          <button type="button" class="fb-send" id="fbSend">Отправить</button>
+          <span id="fbMsg" role="status"></span>
+        </div>
+        <p class="fb-note">Не прикладывайте скриншоты с личными данными.</p>
       </div>
-      <textarea id="fbTxt" maxlength="1000" aria-label="Сообщение"></textarea>
-      <div class="fb-attach">
-        <button type="button" class="fb-word" id="fbAttach">Прикрепить файл</button>
-        <span id="fbFileName"></span>
-        <button type="button" class="fb-word" id="fbClear" hidden>убрать</button>
-        <input type="file" id="fbFile" accept="image/*" hidden>
+      <div id="fbDone" hidden>
+        <p>✓ Спасибо! Получили.</p>
+        <button type="button" class="fb-word" id="fbAgain">Отправить ещё</button>
       </div>
-      <input type="text" id="fbContact" maxlength="100" placeholder="Как с вами связаться (по желанию)">
-      <div class="fb-row">
-        <button type="button" class="fb-send" id="fbSend">Отправить</button>
-        <span id="fbMsg" role="status"></span>
-      </div>
-      <p class="fb-note">Не прикладывайте скриншоты с личными данными.</p>
     </div>
   </section>
 
@@ -1055,40 +1107,85 @@
   // Обратная связь → Google Таблица (лист «Обращения»)
   (function () {
     var URL_ = 'https://script.google.com/macros/s/AKfycbwv2yx_w5ga6TQtOAExy-KU_bU0JY-DMgdp110SOhEBs0N41hry0Z77FH2tbpWP4YA/exec';
+    var LIMIT = 1000, PAUSE = 30000, KEY = 'fys-fb-last';
     var $ = function (i) { return document.getElementById(i); };
     var words = document.querySelectorAll('#fbCard .fb-word[data-t]');
+    var stars = document.querySelectorAll('#fbCard .fb-star');
     var cur = words[0];
     if (!cur) return;
+    var file = null, rating = 0, thumbUrl = '', lastSent = 0;
+    try { lastSent = +localStorage.getItem(KEY) || 0; } catch (e) {}
 
+    /* Тип обращения */
     function pick(b) {
       cur = b;
-      words.forEach(function (x) { x.classList.toggle('on', x === b); });
-      $('fbTxt').placeholder = b.dataset.ph;
+      words.forEach(function (x) { var on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+      $('fbContactRow').hidden = !b.dataset.contact;   // контакт нужен, когда ждут ответа
     }
     words.forEach(function (b) { b.addEventListener('click', function () { pick(b); }); });
     pick(cur);
 
+    /* Счётчик символов */
+    function count() {
+      var left = LIMIT - $('fbTxt').value.length, c = $('fbCount');
+      c.hidden = left > 100; c.textContent = 'осталось ' + left;
+    }
+    $('fbTxt').addEventListener('input', count);
+
+    /* Быстрые фразы */
     document.querySelectorAll('#fbCard [data-say]').forEach(function (b) {
       b.addEventListener('click', function () {
-        var t = $('fbTxt'), v = t.value.replace(/\s+$/, '');
-        t.value = v ? v + ' ' + b.dataset.say : b.dataset.say;
-        t.focus(); t.setSelectionRange(t.value.length, t.value.length);
+        var t = $('fbTxt'), v = t.value.replace(/\s+$/, ''), add = b.dataset.say;
+        if ((v ? v + ' ' + add : add).length > LIMIT) return;
+        t.value = v ? v + ' ' + add : add;
+        count(); t.focus(); t.setSelectionRange(t.value.length, t.value.length);
       });
     });
 
-    function showFile() {
-      var f = $('fbFile').files[0];
-      $('fbFileName').textContent = f ? f.name : '';
-      $('fbClear').hidden = !f;
-      $('fbAttach').textContent = f ? 'Заменить файл' : 'Прикрепить файл';
+    /* Оценка 1–5 (повторное нажатие снимает) */
+    function paintStars() {
+      stars.forEach(function (s) {
+        var v = +s.dataset.v;
+        s.classList.toggle('on', v <= rating);
+        s.setAttribute('aria-pressed', v === rating);
+      });
+    }
+    stars.forEach(function (s) {
+      s.addEventListener('click', function () { rating = rating === +s.dataset.v ? 0 : +s.dataset.v; paintStars(); });
+    });
+
+    /* Скриншот: кнопка, вставка Ctrl+V, перетаскивание */
+    function setFile(f) {
+      if (f && !/^image\//.test(f.type)) { $('fbMsg').textContent = 'Можно прикрепить только изображение.'; return; }
+      if (thumbUrl) { URL.revokeObjectURL(thumbUrl); thumbUrl = ''; }
+      file = f || null;
+      $('fbThumb').hidden = !file;
+      if (file) { thumbUrl = URL.createObjectURL(file); $('fbImg').src = thumbUrl; $('fbMsg').textContent = ''; }
+      $('fbAttach').textContent = file ? 'Заменить скриншот' : 'Прикрепить скриншот';
+      $('fbFile').value = '';
     }
     $('fbAttach').addEventListener('click', function () { $('fbFile').click(); });
-    $('fbFile').addEventListener('change', showFile);
-    $('fbClear').addEventListener('click', function () { $('fbFile').value = ''; showFile(); });
+    $('fbFile').addEventListener('change', function () { setFile($('fbFile').files[0]); });
+    $('fbClear').addEventListener('click', function () { setFile(null); });
 
-    function shrink(file) {
+    var card = $('fbCard');
+    card.addEventListener('paste', function (e) {
+      var items = (e.clipboardData && e.clipboardData.items) || [];
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].kind === 'file' && /^image\//.test(items[i].type)) { setFile(items[i].getAsFile()); e.preventDefault(); break; }
+      }
+    });
+    card.addEventListener('dragover', function (e) { e.preventDefault(); card.classList.add('drag'); });
+    card.addEventListener('dragleave', function () { card.classList.remove('drag'); });
+    card.addEventListener('drop', function (e) {
+      e.preventDefault(); card.classList.remove('drag');
+      if (e.dataTransfer && e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+    });
+
+    /* Сжатие скриншота до ~1,2 МБ (JPEG, белый фон) */
+    function shrink(f) {
       return new Promise(function (ok, no) {
-        var im = new Image(), u = URL.createObjectURL(file);
+        var im = new Image(), u = URL.createObjectURL(f);
         im.onload = function () {
           var k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement('canvas'), x;
           c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
@@ -1104,18 +1201,36 @@
       });
     }
 
+    /* Сведения об устройстве — помогают искать причину ошибки */
+    function device() {
+      var th = document.documentElement.getAttribute('data-theme') || '';
+      return window.innerWidth + '×' + window.innerHeight + ' · ' + th + ' · ' + (navigator.language || '') + ' · ' + (navigator.userAgent || '').slice(0, 110);
+    }
+
+    function showDone(on) { $('fbForm').hidden = on; $('fbDone').hidden = !on; }
+    function reset() {
+      $('fbTxt').value = ''; count(); rating = 0; paintStars(); setFile(null);
+      $('fbContact').value = ''; $('fbMsg').textContent = '';
+    }
+    $('fbAgain').addEventListener('click', function () { showDone(false); $('fbTxt').focus(); });
+
     $('fbSend').addEventListener('click', async function () {
-      var send = $('fbSend'), msg = $('fbMsg'), text = $('fbTxt').value.trim(), f = $('fbFile').files[0];
-      if (!text && !f) { msg.textContent = 'Напишите сообщение или прикрепите файл.'; return; }
+      var send = $('fbSend'), msg = $('fbMsg'), text = $('fbTxt').value.trim();
+      if ($('fbWeb').value) { reset(); showDone(true); return; }   // ловушка для ботов
+      if (!text && !file && !rating) { msg.textContent = 'Напишите сообщение, прикрепите скриншот или поставьте оценку.'; return; }
+      if (Date.now() - lastSent < PAUSE) { msg.textContent = 'Подождите немного перед следующей отправкой.'; return; }
       send.disabled = true; msg.textContent = 'Отправляю…';
       try {
-        var d = { kind: 'ticket', page: 'Главная', type: cur.dataset.t, text: text, contact: $('fbContact').value.trim() };
-        if (f) d.image = await shrink(f);
+        var d = { kind: 'ticket', page: 'Главная', type: cur.dataset.t, text: text, device: device() };
+        if (rating) d.rating = rating;
+        if (!$('fbContactRow').hidden) d.contact = $('fbContact').value.trim();
+        if (file) d.image = await shrink(file);
         await fetch(URL_, { method: 'POST', mode: 'no-cors', body: new URLSearchParams(d) });
-        msg.textContent = '✓ Спасибо! Получили.';
-        $('fbTxt').value = ''; $('fbFile').value = ''; showFile();
+        lastSent = Date.now();
+        try { localStorage.setItem(KEY, String(lastSent)); } catch (e) {}
+        reset(); showDone(true);
       } catch (e) {
-        msg.textContent = 'Не удалось отправить. Проверьте, что файл — изображение, и интернет, и попробуйте ещё раз.';
+        msg.textContent = 'Не удалось отправить. Проверьте интернет и файл (нужно изображение) и попробуйте ещё раз.';
       }
       send.disabled = false;
     });
