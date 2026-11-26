@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In which Sophie talks to hats</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#f5f0e8; --bg2:#fff; --bg3:#ede7d9;
+  --text:#1a1610; --text2:#6b6254; --text3:#a09484;
+  --accent:#2d5a8e; --accent2:#1a3d63; --accent-bg:#e8f0f9;
+  --border:rgba(0,0,0,.10); --border2:rgba(0,0,0,.18);
+  --hl-bg:#fffbea; --hl-border:#d4a830;
+  --word-bg:#d4e8ff;
+  --shadow:0 2px 12px rgba(0,0,0,.10);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#15130f; --bg2:#1e1b16; --bg3:#26231c;
+  --text:#ede7d9; --text2:#8a8070; --text3:#5a5448;
+  --accent:#6fa3d4; --accent2:#8cbde0; --accent-bg:#162438;
+  --border:rgba(255,255,255,.08); --border2:rgba(255,255,255,.15);
+  --hl-bg:#2a2410; --hl-border:#8a7025;
+  --word-bg:#1a3050;
+  --shadow:0 2px 16px rgba(0,0,0,.4);
+}}
+
+body{font-family:'Libre Baskerville',Georgia,serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── TOOLTIP ─────────────────────────────────────────── */
+#tt{
+  position:fixed;
+  z-index:99999;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .12s ease;
+  left:-999px; top:-999px;
+}
+#tt.show{ opacity:1; }
+#tt-box{
+  background:#1c1814;color:#f0ebe2;
+  border-radius:10px;padding:10px 14px;
+  min-width:140px;max-width:260px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  font-family:'DM Mono',monospace;font-size:12px;line-height:1.55;
+  white-space:normal;
+}
+@media(prefers-color-scheme:dark){
+  #tt-box{background:#eee8df;color:#1a1610}
+  #tt-lbl,#tt-note{color:#8a8070!important}
+}
+#tt-lbl{font-size:11px;font-weight:500;color:#7a7060;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+#tt-trans{font-family:'Libre Baskerville',serif;font-size:15px;margin-bottom:2px}
+#tt-note{font-size:11px;color:#7a7060;margin-top:2px}
+
+/* ── HEADER ─────────────────────────────────────────── */
+header{
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:0 2rem;display:flex;align-items:center;gap:1.25rem;
+  height:56px;position:sticky;top:0;z-index:200;box-shadow:var(--shadow);
+}
+.logo{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--accent);letter-spacing:.05em;white-space:nowrap}
+.hsep{flex:1}
+.hlabel{font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase}
+select{
+  appearance:none;background:var(--bg3);border:1px solid var(--border);
+  border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;
+  font-size:12px;padding:5px 10px;cursor:pointer;height:30px;
+}
+select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.rate-wrap{display:flex;align-items:center;gap:6px}
+.rate-disp{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);min-width:30px}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:72px;height:3px;border-radius:2px;background:var(--border2);cursor:pointer;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;
+}
+
+/* ── MAIN ───────────────────────────────────────────── */
+main{max-width:700px;margin:0 auto;padding:2.5rem 2rem 6rem}
+
+.drop-zone{
+  border:2px dashed var(--border2);border-radius:12px;padding:2.5rem;
+  text-align:center;color:var(--text2);cursor:pointer;
+  transition:border-color .2s,background .2s;
+  margin-bottom:1.25rem;font-family:'DM Mono',monospace;font-size:13px;line-height:1.8;
+}
+.drop-zone:hover{border-color:var(--accent);background:var(--accent-bg)}
+.drop-zone.hidden{display:none}
+.di{font-size:32px;display:block;margin-bottom:.5rem;opacity:.5}
+
+textarea{
+  width:100%;min-height:160px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:10px;color:var(--text);
+  font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.75;
+  padding:1rem 1.25rem;resize:vertical;display:none;margin-bottom:1rem;
+}
+textarea:focus{outline:2px solid var(--accent)}
+
+.btn-row{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.5rem}
+
+button{
+  appearance:none;border:1px solid var(--border2);border-radius:7px;
+  background:var(--bg2);color:var(--text);font-family:'DM Mono',monospace;
+  font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;
+  transition:background .15s,color .15s,border-color .15s;letter-spacing:.02em;
+}
+button:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+button:active{transform:scale(.97)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.primary:hover{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.ghost{background:none;border:none;color:var(--accent);font-size:12px;padding:0;cursor:pointer;
+  font-family:'DM Mono',monospace;text-decoration:underline;text-underline-offset:3px;letter-spacing:.02em}
+.ghost:hover{color:var(--accent2);background:none}
+
+#reader{display:none}
+.book-title{font-size:1.45rem;font-weight:700;line-height:1.3;margin-bottom:.4rem;font-style:italic}
+.book-meta{display:flex;align-items:center;flex-wrap:wrap;gap:.75rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:.04em;margin-bottom:1.5rem}
+.msep{color:var(--border2)}
+.progress-wrap{height:2px;background:var(--border);border-radius:1px;margin-bottom:1.5rem;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:1px;transition:width .4s;width:0%}
+
+.play-bar{
+  position:sticky;top:56px;z-index:150;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:8px 2rem;margin:0 -2rem 1.75rem;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+.pb{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0}
+#play-info{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em}
+
+.hint-bar{margin-bottom:1.75rem;padding:9px 14px;background:var(--accent-bg);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:.03em;line-height:1.6}
+
+.para{margin-bottom:2rem;font-size:18px;line-height:1.9;font-weight:400}
+.sent{display:inline;border-radius:3px;transition:background .15s}
+.sent.on{background:var(--hl-bg);outline:1px solid var(--hl-border);border-radius:3px}
+
+.sbtn{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:20px;height:20px;border-radius:50%;
+  border:1px solid var(--border2);background:var(--bg2);color:var(--text3);
+  cursor:pointer;font-size:9px;margin:0 3px;vertical-align:middle;
+  position:relative;top:-1px;transition:all .15s;padding:0;flex-shrink:0;
+}
+.sbtn:hover,.sbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.w{
+  display:inline;border-radius:2px;padding:0 1px;
+  transition:background .1s;cursor:pointer;
+}
+.w:hover{background:var(--word-bg)}
+
+
+.mbtn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;margin:0 3px 0 0;vertical-align:middle;position:relative;top:-1px;padding:0;transition:all .15s}
+.mbtn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.mbtn.rec{background:#c0392b;border-color:#c0392b;color:#fff;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 5px rgba(192,57,43,.25)}}
+.tbtn{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);cursor:pointer;margin:0 3px 0 0;vertical-align:middle;position:relative;top:-1px;padding:0;font-size:10px;line-height:1;transition:all .15s}
+.tbtn:hover,.tbtn.act{background:var(--accent);border-color:var(--accent);color:#fff}
+.stx{display:none;margin:.35rem 0 .7rem 26px;padding:.3rem .8rem;border-left:3px solid var(--accent);background:var(--accent-bg);border-radius:0 6px 6px 0;font-size:15px;line-height:1.6;color:var(--text2)}
+.stx.on{display:block}
+.stx.load{font-style:italic;opacity:.6}
+.w.ok{background:rgba(46,160,67,.22)}
+.w.close{background:rgba(219,150,20,.28)}
+.w.bad{background:rgba(207,34,46,.25);text-decoration:underline wavy rgba(207,34,46,.8);text-underline-offset:3px}
+#pp{position:fixed;left:50%;bottom:16px;transform:translate(-50%,140%);width:min(680px,calc(100% - 24px));z-index:300;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.25);padding:12px 16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);transition:transform .25s}
+#pp.open{transform:translate(-50%,0)}
+#pp .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#pp-score{font-size:20px;font-weight:500;color:var(--text)}
+#pp-heard{font-family:'Libre Baskerville',serif;font-size:15px;line-height:1.7;color:var(--text);margin-top:8px;min-height:1.7em}
+#pp-heard .ok{color:#2ea043}#pp-heard .close{color:#c98a0a}#pp-heard .bad{color:#cf222e;font-weight:700}#pp-heard .extra{color:var(--text3);text-decoration:line-through}
+@media(max-width:600px){
+  header{padding:0 1rem;gap:.6rem} .hlabel{display:none}
+  main{padding:1.5rem 1rem 5rem}
+  .play-bar{margin:0 -1rem 1.5rem;padding:8px 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Tooltip: direct child of body, no overflow/stacking context around it -->
+<div id="tt"><div id="tt-box">
+  <div id="tt-lbl">all</div>
+  <div id="tt-trans"><i style="opacity:.55;font-size:12px;font-style:italic">перевод…</i></div>
+  <div id="tt-note"></div>
+</div></div>
+
+<header>
+  <span class="logo">[ ЧИТАЛКА ]</span>
+  <div class="hsep"></div>
+  <span class="hlabel">Голос</span>
+  <select id="vsel"><option value="68">Microsoft William Multilingual Online (Natural) - English (Australia) ☁</option><option value="69">Microsoft Natasha Online (Natural) - English (Australia) ☁</option><option value="70">Microsoft Clara Online (Natural) - English (Canada) ☁</option><option value="71">Microsoft Liam Online (Natural) - English (Canada) ☁</option><option value="72">Microsoft Sonia Online (Natural) - English (United Kingdom) ☁</option><option value="73">Microsoft Ryan Online (Natural) - English (United Kingdom) ☁</option><option value="74">Microsoft Libby Online (Natural) - English (United Kingdom) ☁</option><option value="75">Microsoft Maisie Online (Natural) - English (United Kingdom) ☁</option><option value="76">Microsoft Thomas Online (Natural) - English (United Kingdom) ☁</option><option value="77">Microsoft Yan Online (Natural) - English (Hong Kong SAR) ☁</option><option value="78">Microsoft Sam Online (Natural) - English (Hong Kong SAR) ☁</option><option value="79">Microsoft Emily Online (Natural) - English (Ireland) ☁</option><option value="80">Microsoft Connor Online (Natural) - English (Ireland) ☁</option><option value="81">Microsoft Neerja Online (Natural) - English (India) ☁</option><option value="82">Microsoft Prabhat Online (Natural) - English (India) ☁</option><option value="83">Microsoft Asilia Online (Natural) - English (Kenya) ☁</option><option value="84">Microsoft Chilemba Online (Natural) - English (Kenya) ☁</option><option value="85">Microsoft Ezinne Online (Natural) - English (Nigeria) ☁</option><option value="86">Microsoft Abeo Online (Natural) - English (Nigeria) ☁</option><option value="87">Microsoft Molly Online (Natural) - English (New Zealand) ☁</option><option value="88">Microsoft Mitchell Online (Natural) - English (New Zealand) ☁</option><option value="89">Microsoft Rosa Online (Natural) - English (Philippines) ☁</option><option value="90">Microsoft James Online (Natural) - English (Philippines) ☁</option><option value="91">Microsoft Luna Online (Natural) - English (Singapore) ☁</option><option value="92">Microsoft Wayne Online (Natural) - English (Singapore) ☁</option><option value="93">Microsoft Imani Online (Natural) - English (Tanzania) ☁</option><option value="94">Microsoft Elimu Online (Natural) - English (Tanzania) ☁</option><option value="95">Microsoft Ava Multilingual Online (Natural) - English (United States) ☁</option><option value="96">Microsoft Andrew Multilingual Online (Natural) - English (United States) ☁</option><option value="97">Microsoft Emma Multilingual Online (Natural) - English (United States) ☁</option><option value="98">Microsoft Brian Multilingual Online (Natural) - English (United States) ☁</option><option value="99">Microsoft Ava Online (Natural) - English (United States) ☁</option><option value="100">Microsoft Andrew Online (Natural) - English (United States) ☁</option><option value="101">Microsoft Emma Online (Natural) - English (United States) ☁</option><option value="102">Microsoft Brian Online (Natural) - English (United States) ☁</option><option value="103">Microsoft Jenny Online (Natural) - English (United States) ☁</option><option value="104">Microsoft Guy Online (Natural) - English (United States) ☁</option><option value="105">Microsoft Aria Online (Natural) - English (United States) ☁</option><option value="106">Microsoft Ana Online (Natural) - English (United States) ☁</option><option value="107">Microsoft Christopher Online (Natural) - English (United States) ☁</option><option value="108">Microsoft Eric Online (Natural) - English (United States) ☁</option><option value="109">Microsoft Michelle Online (Natural) - English (United States) ☁</option><option value="110">Microsoft Roger Online (Natural) - English (United States) ☁</option><option value="111">Microsoft Steffan Online (Natural) - English (United States) ☁</option><option value="112">Microsoft Leah Online (Natural) - English (South Africa) ☁</option><option value="113">Microsoft Luke Online (Natural) - English (South Africa) ☁</option></select>
+  <span class="hlabel">Скорость</span>
+  <div class="rate-wrap">
+    <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1">
+    <span class="rate-disp" id="rdsp">0.7×</span>
+  </div>
+</header>
+
+<main>
+<div id="inp">
+  <div class="drop-zone hidden" id="dz" tabindex="0" role="button">
+    <span class="di">📄</span>
+    <strong>Кликните, чтобы вставить текст на английском</strong><br>
+    или перетащите &amp; и отпустите  ваш .txt текстовый файл.
+  </div>
+  <textarea id="ta" placeholder="Вставьте английский текст. Русский перевод можно дать следующей строкой под английской — он подставится вместо машинного." style="display: block;"></textarea>
+  <div class="btn-row">
+     <button class="ghost" id="smpl-btn">ПРИМЕР</button>
+    <button class="primary" id="load-btn">Запустить</button>
+    <button id="file-btn">Открыть .txt файл</button>
+    <input type="file" id="fi" accept=".txt,text/plain" style="display:none">
+  </div>
+</div>
+
+<div id="reader">
+  <div class="book-title" id="btitle">In which Sophie talks to hats</div>
+  <div class="book-meta">
+    <span id="ms">270 Предложений</span><span class="msep">·</span>
+    <span id="mw">4&nbsp;061 Слов</span><span class="msep">·</span>
+    <button class="ghost" id="back-btn">← Заменить текст</button>
+    <span class="msep">·</span>
+    <button class="ghost" id="save-btn">💾 Сохранить как HTML</button>
+    <span class="msep">·</span>
+    <button class="ghost" id="trall-btn">🙈 Скрыть все переводы</button>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="prog" style="width: 2%;"></div></div>
+  <div class="play-bar">
+    <button class="pb" id="prev-btn" title="Предыдущее предложение">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"></path></svg>
+    </button>
+    <button class="pb primary" id="play-btn">
+      <svg id="i-play" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style=""><path d="M8 5v14l11-7z"></path></svg>
+      <svg id="i-pause" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display: none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>
+    </button>
+    <button class="pb" id="next-btn" title="Следующее предложение">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"></path></svg>
+    </button>
+    <div id="play-info">5/270 — She was not even the child of a poor woodcutter, which …</div>
+    <button class="pb" id="stop-btn" title="Stop">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"></rect></svg>
+    </button>
+  </div>
+  <div class="hint-bar">&nbsp;·&nbsp; Пробел = пауза <br> &nbsp;·&nbsp; ← → = назад / вперед <br> &nbsp;·&nbsp; Esc = stop <br> &nbsp;·&nbsp; 🎤 = проверить произношение<br> &nbsp;·&nbsp; 🌐 = перевод предложения</div>
+  <div id="content"></div>
+</div>
+</main>
+
+<div id="pp"><div class="row"><span id="pp-score"></span><span id="pp-status" style="flex:1"></span><button id="pp-retry">Еще раз</button><button id="pp-close">✕</button></div><div id="pp-heard"></div></div>
+
+<script id="preload" type="application/json">"In which Sophie talks to hats\nIn the land of Ingary, where such things as seven-league boots and cloaks of invisibility really exist, it is quite a misfortune to be born the eldest of three.\nEveryone knows you are the one who will fail first, and worst, if the three of you set out to seek your fortunes.\nSophie Hatter was the eldest of three sisters.\nShe was not even the child of a poor woodcutter, which might have given her some chance of success.\nHer parents were well to do and kept a ladies' hat shop in the prosperous town of Market Chipping.\nTrue, her own mother died when Sophie was two years old and her sister Lettie was one year old, and their father married his youngest shop assistant, a pretty blonde girl called Fanny.\nFanny shortly gave birth to the third sister, Martha.\nThis ought to have made Sophie and Lettie into Ugly Sisters, but in fact all three girls grew up very pretty indeed, though Lettie was the one everyone said was most beautiful.\nFanny treated all three girls with the same kindness and did not favour Martha in the least.\nMr Hatter was proud of his three daughters and sent them all to the best school in town.\nSophie was the most studious.\nShe read a great deal, and very soon realised how little chance she had of an interesting future.\nIt was a disappointment to her, but she was still happy enough, looking after her sisters and grooming Martha to seek her fortune when the time came.\nSince Fanny was always busy in the shop, Sophie was the one who looked after the younger two.\nThere was a certain amount of screaming and hairpulling between those younger two.\nLettie was by no means resigned to being the one who, next to Sophie, was bound to be the least successful.\n\"It's not fair!\" Lettie would shout.\n\"Why should Martha have the best of it just because she was born the youngest?\nI shall marry a prince, so there!\"\nTo which Martha always retorted that she would end up disgustingly rich without having to marry anybody.\nThen Sophie would have to drag them apart and mend their clothes.\nShe was very deft with her needle.\nAs time went on, she made clothes for her sisters too.\nThere was one deep rose outfit she made for Lettie, the May Day before this story really starts, which Fanny said looked as if it had come from the most expensive shop in Kingsbury.\nAbout this time everyone began talking of the Witch of the Waste again.\nIt was said the Witch had threatened the life of the King's daughter and that the King had commanded his personal magician, Wizard Suliman, to go into the Waste and deal with the Witch.\nAnd it seemed that Wizard Suliman had not only failed to deal with the Witch: he had got himself killed by her.\nSo when, a few months after that, a tall black castle suddenly appeared on the hills above Market Chipping, blowing clouds of black smoke from its four tall, thin turrets, everybody was fairly sure that the Witch had moved out of the Waste again and was about to terrorise the country the way she used to fifty years ago.\nPeople got very scared indeed.\nNobody went out alone, particularly at night.\nWhat made it all the scarier was that the castle did not stay in the same place.\nSometimes it was a tall black smudge on the moors to the northwest, sometimes it reared above the rocks to the east, and sometimes it came right downhill to sit in the heather only just beyond the last farm to the north.\nYou could see it actually moving sometimes, with smoke pouring out from the turrets in dirty grey gusts.\nFor a while everyone was certain that the castle would come right down into the valley before long, and the Mayor talked of sending to the King for help.\nBut the castle stayed roving about the hills, and it was learned that it did not belong to the Witch but to Wizard Howl.\nWizard Howl was bad enough.\nThough he did not seem to want to leave the hills, he was known to amuse himself by collecting young girls and sucking the souls from them.\nOr some people said he ate their hearts.\nHe was an utterly cold-blooded and heartless wizard and no young girl was safe from him if he caught her on her own.\nSophie, Lettie and Martha, along with all the other girls in Market Chipping, were warned never to go out alone, which was a great annoyance to them.\nThey wondered what use Wizard Howl found for all the souls he collected.\nThey had other things on their minds before long, however, for Mr Hatter died suddenly just as Sophie was old enough to leave school for good.\nIt then appeared that Mr Hatter had been altogether too proud of his daughters.\nThe school fees he had been paying had left the shop with quite heavy debts.\nWhen the funeral was over, Fanny sat down in the parlour in the house next door to the shop and explained the situation.\n\"You'll all have to leave that school, I'm afraid,\" she said.\n\"I've been doing sums back and front and sideways, and the only way I can see to keep the business going and take care of the three of you is to see you all settled in a promising apprenticeship somewhere.\nIt isn't practical to have you all in the shop.\nI can't afford it.\nSo this is what I've decided.\nLettie first-\" Lettie looked up, glowing with health and beauty which even sorrow and black clothes could not hide.\n\"I want to go on learning,\" she said.\n\"So you shall, love,\" said Fanny.\n\"I've arranged for you to be apprenticed to Cesari's, the pastry cook in Market Square.\nThey've a name for treating their learners like kings and queens, and you should be very happy there, as well as learning a useful trade.\nMrs Cesari's a good customer and a good friend, and she's agreed to squeeze you in as a favour.\" Lettie laughed in the way that showed she was not at all pleased.\n\"Well, thank you,\" she said.\n\"Isn't it lucky that I like cooking?\"\nFanny looked relieved.\nLettie could be awkwardly strong-minded at times.\n\"Now Martha,\" she said.\n\"I know you're full young to go out to work, so I've thought round for something that would give you a long, quiet apprenticeship and go on being useful to you whatever you decide to do after that.\nYou know my old school friend Annabel Fairfax?\"\nMartha, who was slender and fair, fixed her big grey eyes on Fanny almost as strong-mindedly as Lettie.\n\"You mean the one who talks such a lot,\" she said.\n\"Isn't she a witch?\"\n\"Yes, with a lovely house and clients all over the Folding Valley,\" Fanny said eagerly.\n\"She's a good woman, Martha.\nShe'll teach you all she knows and very likely introduce you to grand people she knows in Kingsbury.\nYou'll be all set up in life when she's done with you.\"\n\"She's a nice lady,\" Martha conceded.\n\"All right.\"\nSophie, listening, felt that Fanny had worked everything out just as it should be.\nLettie, as the second daughter, was never likely to come to much, so Fanny had put her where she might meet a handsome young apprentice and live happily ever after.\nMartha, who was bound to strike out and make her fortune, would have witchcraft and rich friends to help her.\nAs for Sophie herself, Sophie had no doubt what was coming.\nIt did not surprise her when Fanny said, \"Now, Sophie dear, it seems only right and just that you should inherit the hat shop when I retire, being the eldest as you are.\nSo I've decided to take you on as apprentice myself, to give you a chance to learn the trade.\nHow do you feel about that?\"\nSophie could hardly say that she simply felt resigned to the hat trade.\nShe thanked Fanny gratefully.\n\"So that's settled then!\" Fanny said.\nThe next day Sophie helped Martha pack her clothes in a box, and the morning after that they all saw her off on the carrier's cart, looking small and upright and nervous.\nFor the way to Upper Folding, where Mrs Fairfax lived, lay over the hills past Wizard Howl's moving castle.\nMartha was understandably scared.\n\"She'll be all right,\" said Lettie.\nLettie refused all help with the packing.\nWhen the carrier's cart was out of sight, Lettie crammed all her possessions into a pillow case and paid the neighbour's boot-boy sixpence to wheel it in a wheelbarrow to Cesari's in Market Square.\nLettie marched behind the wheelbarrow looking much more cheerful than Sophie expected.\nIndeed, she had the air of shaking the dust of the hat shop off her feet.\nThe boot-boy brought back a scribbled note from Lettie, saying she had put her things in the girls' dormitory and Cesari's seemed great fun.\nA week later the carrier brought a letter from Martha to say that Martha had arrived safely and that Mrs Fairfax was \"a great dear and uses honey with everything.\nShe keeps bees.\"\nThat was all Sophie heard of her sisters for quite a while, because she started her own apprenticeship the day Martha and Lettie left.\nSophie of course knew the hat trade quite well already.\nSince she was a tiny child she had run in and out of the big workshed across the yard where the hats were damped and moulded on blocks, and flowers and fruit and other trimmings were made from wax and silk.\nShe knew the people who worked there.\nMost of them had been there when her father was a boy.\nShe knew Bessie, the only remaining shop assistant.\nShe knew the customers who bought the hats and the man who drove the cart which fetched raw straw hats in from the country to be shaped on the blocks in the shed.\nShe knew the other suppliers and how you made felt for winter hats.\nThere was not really much that Fanny could teach her, except perhaps the best way to get a customer to buy a hat.\n\"You lead up to the right hat, love,\" Fanny said.\n\"Show them the ones that won't quite do first, so they know the difference as soon as they put the right one on.\"\nIn fact, Sophie did not sell hats very much.\nAfter a day or so observing in the workshed, and another day going round the clothier and the silk merchant's with Fanny, Fanny set her to trimming hats.\nSophie sat in a small alcove at the back of the shop, sewing roses to bonnets and veiling to velours, lining all of them with silk and arranging wax fruit and ribbons stylishly on the outsides.\nShe was good at it.\nShe quite liked doing it.\nBut she felt isolated and a little dull.\nThe workshop people were too old to be much fun and, besides, they treated her as someone apart who was going to inherit the business someday.\nBessie treated her the same way.\nBessie's only talk anyway was about the farmer she was going to marry the week after May Day.\nSophie rather envied Fanny, who could bustle off to bargain with the silk merchant whenever she wanted.\nThe most interesting thing was the talk from the customers.\nNobody can buy a hat without gossiping.\nSophie sat in her alcove and stitched and heard that the Mayor never would eat green vegetables, and that Wizard Howl's castle had moved round to the cliffs again, really that man, whisper, whisper, whisper ...\nThe voices always dropped low when they talked of Wizard Howl, but Sophie gathered that he had caught a girl down the valley last month.\n\"Bluebeard!\" said the whispers, and then became voices again to say that Jane Farrier was a perfect disgrace the way she did her hair.\nThat was one who would never attract even Wizard Howl, let alone a respectable man.\nThen there would be a fleeting, fearful whisper about the Witch of the Waste.\nSophie began to feel that Wizard Howl and the Witch of the Waste should get together.\n\"They seem to be made for one another.\nSomeone ought to arrange a match,\" she remarked to the hat she was trimming at that moment.\nBut by the end of the month the gossip in the shop was suddenly all about Lettie.\nCesari's, it seemed, was packed with gentlemen from morning to night, each one buying quantities of cakes and demanding to be served by Lettie.\nShe had had ten proposals of marriage, ranging in quality from the Mayor's son to the lad who swept the streets, and she had refused them all, saying she was too young to make up her mind yet.\n\"I call that sensible of her,\" Sophie said to a bonnet she was pleating silk into.\nFanny was pleased with this news.\n\"I knew she'd be all right!\" she said happily.\nIt occurred to Sophie that Fanny was glad Lettie was no longer around.\n\"Lettie's bad for custom,\" she told the bonnet, pleating away at mushroom-coloured silk.\n\"She would make even you look glamorous, you dowdy old thing.\nOther ladies look at Lettie and despair.\"\nSophie talked to hats more and more as weeks went by.\nThere was no one else much to talk to.\nFanny was out bargaining, or trying to whip up custom, much of the day, and Bessie was busy serving and telling everyone her wedding plans.\nSophie got into the habit of putting each hat on its stand as she finished it, where it sat looking almost like a head without a body, and pausing while she told the hat what the body under it ought to be like.\nShe flattered the hats a bit, because you should flatter customers.\n\"You have mysterious allure,\" she told one that was all veiling with hidden twinkles.\nTo a wide, creamy hat with roses under the brim she said, \"You are going to have to marry money!\" and to a caterpillar-green straw with a curly green feather she said, \"You are young as a spring leaf.\" She told pink bonnets they had dimpled charm and smart hats trimmed with velvet that they were witty.\nShe told the mushroom-pleated bonnet, \"You have a heart of gold and someone in a high position will see it and fall in love with you.\"\nThis was because she was sorry for that particular bonnet.\nIt looked so fussy and plain.\nJane Farrier came into the shop next day and bought it.\nHer hair did look a little strange, Sophie thought, peeping out of her alcove, as if Jane had wound it round a row of pokers.\nIt seemed a pity she had chosen that bonnet.\nBut everyone seemed to be buying hats and bonnets around then.\nMaybe it was Fanny's sales talk or maybe it was spring coming on, but the hat trade was definitely picking up.\nFanny began to say, a little guiltily, \"I think I shouldn't have been in such a hurry to get Martha and Lettie placed out.\nAt this rate we might have managed.\"\nThere was so much custom as April drew on towards May Day that Sophie had to put on a demure grey dress and help in the shop too.\nBut such was the demand that she was hard at trimming hats in between customers, and every evening she took them next door to the house, where she worked by lamplight far into the night in order to have hats to sell the next day.\nCaterpillar-green hats like the one the Mayor's wife had were much called for, and so were pink bonnets.\nThen, the week before May Day, someone came in and asked for one with mushroom pleats like the one Jane Farrier had been wearing when she ran off with the Count of Catterack.\nThat night, as she sewed, Sophie admitted to herself that her life was rather dull.\nInstead of talking to the hats, she tried each one on as she finished it and looked in the mirror.\nThis was a mistake.\nThe staid grey dress did not suit Sophie, particularly when her eyes were red-rimmed with sewing, and, since her hair was a reddish straw colour, neither did caterpillar green nor pink.\nThe one with mushroom pleats simply made her look dreary.\n\"Like an old maid!\" said Sophie.\nNot that she wanted to race off with counts, like Jane Farrier, or even fancied half the town offering her marriage, like Lettie.\nBut she wanted to do something - she was not sure what - that had a bit more interest to it than simply trimming hats.\nShe thought she would find time next day to go and talk to Lettie.\nBut she did not go.\nEither she could not find the time, or she could not find the energy, or it seemed a great distance to Market Square, or she remembered that on her own she was in danger from Wizard Howl - anyway, every day it seemed more difficult to go and see her sister.\nIt was very odd.\nSophie had always thought she was nearly as strongminded as Lettie.\nNow she was finding that there were some things she could only do when there were no excuses left.\n\"This is absurd!\" Sophie said.\n\"Market Square is only two streets away.\nIf I run-\" And she swore to herself she would go round to Cesari's when the hat shop was closed for May Day.\nMeanwhile a new piece of gossip came into the shop.\nThe King had quarrelled with his own brother, Prince Justin, it was said, and the Prince had gone into exile.\nNobody quite knew the reason for the quarrel, but the Prince had actually come through Market Chipping in disguise a couple of months back, and nobody had known.\nThe Count of Catterack had been sent by the King to look for the Prince, when he happened to meet Jane Farrier instead.\nSophie listened and felt sad.\nInteresting things did seem to happen, but always to somebody else.\nStill, it would be nice to see Lettie.\nMay Day came.\nMerrymaking filled the streets from dawn onward.\nFanny went out early, but Sophie had a couple of hats to finish first.\nSophie sang as she worked.\nAfter all, Lettie was working too.\nCesari's was open till midnight on holidays.\n\"I shall buy one of their cream cakes,\" Sophie decided.\n\"I haven't had one for ages.\"\nShe watched people crowding past the window in all kinds of bright clothes, people selling souvenirs, people walking on stilts, and felt really excited.\nBut when she at last put a grey shawl over her grey dress and went out into the street, Sophie did not feel excited.\nShe felt overwhelmed.\nThere were too many people rushing past, laughing and shouting, far too much noise and jostling.\nSophie felt as if the past months of sitting and sewing had turned her into an old woman or a semi-invalid.\nShe gathered her shawl round her and crept along close to the houses, trying to avoid being trodden on by people's best shoes or being jabbed by elbows in trailing silk sleeves.\nWhen there came a sudden volley of bangs from overhead somewhere, Sophie thought she was going to faint.\nShe looked up and saw Wizard Howl's castle right down on the hillside above the town, so near it seemed to be sitting on the chimneys.\nBlue flames were shooting out of all four of the castle's turrets, bringing balls of blue fire with them that exploded high in the sky, quite horrendously.\nWizard Howl seemed to be offended by May Day.\nOr maybe he was trying to join in, in his own fashion.\nSophie was too terrified to care.\nShe would have gone home, except that she was halfway to Cesari's by then.\nSo she ran.\n\"What made me think I wanted life to be interesting?\" she asked as she ran.\n\"I'd be far too scared.\nIt comes of being the eldest of three.\"\nWhen she reached Market Square, it was worse, if possible.\nMost of the inns were in the Square.\nCrowds of young men swaggered beerily to and fro, trailing cloaks and long sleeves and stamping buckled boots they would never have dreamed of wearing on a working day, calling loud remarks and accosting girls.\nThe girls strolled in fine pairs, ready to be accosted.\nIt was perfectly normal for May Day, but Sophie was scared of that too.\nAnd when a young man in a fantastical blue and silver costume spotted Sophie and decided to accost her as well, Sophie shrank into a shop doorway and tried to hide.\nThe young man looked at her in surprise.\n\"It's all right, you little grey mouse,\" he said, laughing rather pityingly.\n\"I only want to buy you a drink.\nDon't look so scared.\"\nThe pitying look made Sophie utterly ashamed.\nHe was such a dashing specimen too, with a bony, sophisticated face - really quite old, well into his twenties - and elaborate blond hair.\nHis sleeves trailed longer than any in the Square, all scalloped edges and silver insets.\n\"Oh, no thank you, if you please, sir,\" Sophie stammered.\n\"I-I'm on my way to see my sister.\"\n\"Then by all means do so,\" laughed this advanced young man.\n\"Who am I to keep a pretty lady from her sister?\nWould you like me to go with you, since you seem so scared?\"\nHe meant it kindly, which made Sophie more ashamed than ever.\n\"No.\nNo thank you, sir!\" she gasped and fled away past him.\nHe wore perfume too.\nThe smell of hyacinths followed her as she ran.\nWhat a courtly person!\nSophie thought, as she pushed her way between the little tables outside Cesari's. The tables were packed.\nInside was packed and as noisy as the Square.\nSophie located Lettie among the line of assistants at the counter because of the group of evident farmers' sons leaning their elbows on it to shout remarks to her.\nLettie, prettier than ever and perhaps a little thinner, was putting cakes into bags as fast as she could go, giving each bag a deft little twist and looking back under her own elbow with a smile and an answer for each bag she twisted.\nThere was a great deal of laughter.\nSophie had to fight her way through to the counter.\nLettie saw her.\nShe looked shaken for a moment.\nThen her eyes and her smile widened and she shouted, \"Sophie!\"\n\"Can I talk to you?\" Sophie yelled.\n\"Somewhere,\" she shouted, a little helplessly, as a large, well-dressed elbow jostled her back from the counter.\n\"Just a moment!\" Lettie screamed back.\nShe turned to the girl next to her and whispered.\nThe girl nodded, grinned, and came to take Lettie's place.\n\"You'll have to have me instead,\" she said to the crowd.\n\"Who's next?\"\n\"But I want to talk to you, Lettie!\" one of the farmers' sons yelled.\n\"Talk to Carrie,\" Lettie said.\n\"I want to talk to my sister.\"\nNobody really seemed to mind.\nThey jostled Sophie along to the end of the counter, where Lettie held up a flap and beckoned, and told her not to keep Lettie all day.\nWhen Sophie had edged through the flap, Lettie seized her wrist and dragged her into the back of the shop, to a room surrounded by rack upon wooden rack, each one filled with rows of cakes.\nLettie pulled forward two stools.\n\"Sit down,\" she said.\nShe looked in the nearest rack, in an absent-minded way, and handed Sophie a cream cake out of it.\n\"You may need this,\" she said.\nSophie sank on to the stool, breathing the rich smell of cake and feeling a little tearful.\n\"Oh, Lettie!\" she said.\n\"I am so glad to see you!\"\n\"Yes, and I'm glad you're sitting down,\" said Lettie.\n\"You see, I'm not Lettie.\nI'm Martha.\""</script><script id="pretr" type="application/json">{"In which Sophie talks to hats": "В которой Софи разговаривает со шляпами", "In the land of Ingary, where such things as seven-league boots and cloaks of invisibility really exist, it is quite a misfortune to be born the eldest of three.": "В стране Ингарии, где на самом деле существуют такие вещи, как семимильные сапоги и плащи-невидимки, родиться старшим из троих — большое несчастье.", "Everyone knows you are the one who will fail first, and worst, if the three of you set out to seek your fortunes.": "Все знают, что если трое детей отправятся искать счастья, то первым и с самым позорным провалом потерпит неудачу именно старший.", "Sophie Hatter was the eldest of three sisters.": "Софи Хаттер была старшей из трёх сестёр.", "She was not even the child of a poor woodcutter, which might have given her some chance of success.": "Она даже не была дочерью бедного дровосека, что могло бы дать ей хоть какой-то шанс на успех.", "Her parents were well to do and kept a ladies' hat shop in the prosperous town of Market Chipping.": "Родители её были люди зажиточные и держали магазин дамских шляп в процветающем городке Маркет-Чиппинг.", "True, her own mother died when Sophie was two years old and her sister Lettie was one year old, and their father married his youngest shop assistant, a pretty blonde girl called Fanny.": "Правда, родная мать Софи умерла, когда самой Софи было два года, а её сестре Летти — один, и отец женился на своей младшей продавщице, хорошенькой блондинке по имени Фанни.", "Fanny shortly gave birth to the third sister, Martha.": "Вскоре Фанни родила третью сестру — Марту.", "This ought to have made Sophie and Lettie into Ugly Sisters, but in fact all three girls grew up very pretty indeed, though Lettie was the one everyone said was most beautiful.": "Всё это должно было превратить Софи и Летти в «злых сестёр» из сказки, но на деле все три девочки выросли очень хорошенькими, хотя красивее всех, по общему мнению, была Летти.", "Fanny treated all three girls with the same kindness and did not favour Martha in the least.": "Фанни относилась ко всем трём девочкам одинаково ласково и ничуть не выделяла Марту.", "Mr Hatter was proud of his three daughters and sent them all to the best school in town.": "Мистер Хаттер гордился тремя своими дочерьми и отдал их всех в лучшую школу города.", "Sophie was the most studious.": "Софи была самой прилежной.", "She read a great deal, and very soon realised how little chance she had of an interesting future.": "Она очень много читала и довольно скоро поняла, как мало у неё шансов на интересное будущее.", "It was a disappointment to her, but she was still happy enough, looking after her sisters and grooming Martha to seek her fortune when the time came.": "Это её огорчило, но всё же она была вполне счастлива: присматривала за сёстрами и готовила Марту к тому, чтобы та, когда придёт время, отправилась искать счастья.", "Since Fanny was always busy in the shop, Sophie was the one who looked after the younger two.": "Поскольку Фанни вечно была занята в магазине, за младшими сёстрами присматривала Софи.", "There was a certain amount of screaming and hairpulling between those younger two.": "Между двумя младшими не обходилось без криков и таскания друг друга за волосы.", "Lettie was by no means resigned to being the one who, next to Sophie, was bound to be the least successful.": "Летти совсем не желала мириться с тем, что после Софи именно ей суждено было стать самой неудачливой.", "\"It's not fair!\"": "«Это нечестно!»", "Lettie would shout.": "— кричала Летти.", "\"Why should Martha have the best of it just because she was born the youngest?": "«Почему Марте должно достаться всё лучшее только потому, что она родилась младшей?", "I shall marry a prince, so there!\"": "Я выйду замуж за принца, вот так!»", "To which Martha always retorted that she would end up disgustingly rich without having to marry anybody.": "На что Марта неизменно отвечала, что станет отвратительно богатой и ей даже не придётся ни за кого выходить замуж.", "Then Sophie would have to drag them apart and mend their clothes.": "Тогда Софи приходилось растаскивать их и чинить им одежду.", "She was very deft with her needle.": "Иголкой она орудовала очень ловко.", "As time went on, she made clothes for her sisters too.": "Со временем она начала шить и сёстрам тоже.", "There was one deep rose outfit she made for Lettie, the May Day before this story really starts, which Fanny said looked as if it had come from the most expensive shop in Kingsbury.": "Был один тёмно-розовый наряд, который она сшила для Летти к Майскому дню — к тому самому, что случился перед началом этой истории; Фанни сказала, что он выглядит так, словно куплен в самом дорогом магазине Кингсбери.", "About this time everyone began talking of the Witch of the Waste again.": "Примерно в это время все снова заговорили о Ведьме Пустошей.", "It was said the Witch had threatened the life of the King's daughter and that the King had commanded his personal magician, Wizard Suliman, to go into the Waste and deal with the Witch.": "Говорили, что Ведьма угрожала жизни королевской дочери и что король приказал своему придворному магу, волшебнику Сулиману, отправиться в Пустоши и разобраться с Ведьмой.", "And it seemed that Wizard Suliman had not only failed to deal with the Witch: he had got himself killed by her.": "И, судя по всему, волшебнику Сулиману не только не удалось с ней разобраться — он ещё и позволил ей себя убить.", "So when, a few months after that, a tall black castle suddenly appeared on the hills above Market Chipping, blowing clouds of black smoke from its four tall, thin turrets, everybody was fairly sure that the Witch had moved out of the Waste again and was about to terrorise the country the way she used to fifty years ago.": "Поэтому когда несколько месяцев спустя на холмах над Маркет-Чиппингом вдруг появился высокий чёрный замок, выпускавший клубы чёрного дыма из четырёх высоких тонких башенок, все почти не сомневались, что Ведьма снова покинула Пустоши и собирается терроризировать страну, как делала это пятьдесят лет назад.", "People got very scared indeed.": "Люди ужасно перепугались.", "Nobody went out alone, particularly at night.": "Никто не выходил из дома один, особенно по ночам.", "What made it all the scarier was that the castle did not stay in the same place.": "Страшнее всего было то, что замок не стоял на одном месте.", "Sometimes it was a tall black smudge on the moors to the northwest, sometimes it reared above the rocks to the east, and sometimes it came right downhill to sit in the heather only just beyond the last farm to the north.": "Иногда он виднелся высоким чёрным пятном на вересковых пустошах к северо-западу, иногда вздымался над скалами на востоке, а иногда спускался прямо по склону и усаживался в вереск совсем неподалёку от последней фермы на севере.", "You could see it actually moving sometimes, with smoke pouring out from the turrets in dirty grey gusts.": "Иногда можно было даже увидеть, как он движется, а из башенок грязно-серыми клубами валит дым.", "For a while everyone was certain that the castle would come right down into the valley before long, and the Mayor talked of sending to the King for help.": "Какое-то время все были уверены, что замок вот-вот спустится прямо в долину, и мэр заговорил о том, чтобы послать к королю за помощью.", "But the castle stayed roving about the hills, and it was learned that it did not belong to the Witch but to Wizard Howl.": "Но замок продолжал бродить по холмам, а потом выяснилось, что он принадлежит не Ведьме, а волшебнику Хоулу.", "Wizard Howl was bad enough.": "Волшебник Хоул был достаточно плох и сам по себе.", "Though he did not seem to want to leave the hills, he was known to amuse himself by collecting young girls and sucking the souls from them.": "Хотя он, судя по всему, не стремился покидать холмы, было известно, что он забавляется тем, что ловит молодых девушек и высасывает из них души.", "Or some people said he ate their hearts.": "А по словам некоторых, он поедал их сердца.", "He was an utterly cold-blooded and heartless wizard and no young girl was safe from him if he caught her on her own.": "Это был совершенно хладнокровный и бессердечный волшебник, и ни одна молодая девушка не была от него в безопасности, если он заставал её одну.", "Sophie, Lettie and Martha, along with all the other girls in Market Chipping, were warned never to go out alone, which was a great annoyance to them.": "Софи, Летти и Марте, как и всем остальным девушкам Маркет-Чиппинга, было велено никогда не выходить из дома одним, что их очень раздражало.", "They wondered what use Wizard Howl found for all the souls he collected.": "Им было любопытно, на что Хоулу все эти собранные души.", "They had other things on their minds before long, however, for Mr Hatter died suddenly just as Sophie was old enough to leave school for good.": "Однако вскоре им стало не до того: мистер Хаттер внезапно умер как раз тогда, когда Софи доросла до возраста, в котором можно окончательно уйти из школы.", "It then appeared that Mr Hatter had been altogether too proud of his daughters.": "Тогда выяснилось, что мистер Хаттер чересчур гордился своими дочерьми.", "The school fees he had been paying had left the shop with quite heavy debts.": "Из-за платы за обучение магазин оказался в довольно больших долгах.", "When the funeral was over, Fanny sat down in the parlour in the house next door to the shop and explained the situation.": "Когда похороны закончились, Фанни села в гостиной дома по соседству с магазином и объяснила положение дел.", "\"You'll all have to leave that school, I'm afraid,\" she said.": "«Боюсь, вам всем придётся уйти из этой школы», — сказала она.", "\"I've been doing sums back and front and sideways, and the only way I can see to keep the business going and take care of the three of you is to see you all settled in a promising apprenticeship somewhere.": "«Я пересчитывала всё и так и этак, вдоль и поперёк, и единственный способ сохранить дело и позаботиться о вас троих — пристроить вас всех в какое-нибудь перспективное ученичество.", "It isn't practical to have you all in the shop.": "Держать вас всех в магазине непрактично.", "I can't afford it.": "Я не могу себе этого позволить.", "So this is what I've decided.": "Так вот что я решила.", "Lettie first-\" Lettie looked up, glowing with health and beauty which even sorrow and black clothes could not hide.": "Сначала Летти…» Летти подняла голову, сияя здоровьем и красотой, которых не могли скрыть ни горе, ни чёрное платье.", "\"I want to go on learning,\" she said.": "«Я хочу продолжать учиться», — сказала она.", "\"So you shall, love,\" said Fanny.": "«Так и будет, милая», — сказала Фанни.", "\"I've arranged for you to be apprenticed to Cesari's, the pastry cook in Market Square.": "«Я договорилась, чтобы тебя взяли в ученицы к Чезари, кондитерам с Рыночной площади.", "They've a name for treating their learners like kings and queens, and you should be very happy there, as well as learning a useful trade.": "Они славятся тем, что обращаются со своими учениками, как с королями и королевами, так что ты будешь там очень счастлива и к тому же освоишь полезное ремесло.", "Mrs Cesari's a good customer and a good friend, and she's agreed to squeeze you in as a favour.\"": "Миссис Чезари — хорошая клиентка и хорошая подруга, и она согласилась втиснуть тебя к себе в виде одолжения».", "Lettie laughed in the way that showed she was not at all pleased.": "Летти рассмеялась так, что было ясно: ей это вовсе не по душе.", "\"Well, thank you,\" she said.": "«Что ж, спасибо», — сказала она.", "\"Isn't it lucky that I like cooking?\"": "«Как удачно, что я люблю готовить!»", "Fanny looked relieved.": "Фанни, кажется, вздохнула с облегчением.", "Lettie could be awkwardly strong-minded at times.": "Характер у Летти временами бывал весьма неудобный.", "\"Now Martha,\" she said.": "«Теперь Марта», — сказала она.", "\"I know you're full young to go out to work, so I've thought round for something that would give you a long, quiet apprenticeship and go on being useful to you whatever you decide to do after that.": "«Знаю, ты ещё слишком мала, чтобы идти работать, поэтому я подумала и подыскала для тебя что-нибудь, что даст тебе долгое, спокойное ученичество и будет пригождаться, что бы ты ни решила делать потом.", "You know my old school friend Annabel Fairfax?\"": "Ты ведь знаешь мою старую школьную подругу Аннабель Фэйрфакс?»", "Martha, who was slender and fair, fixed her big grey eyes on Fanny almost as strong-mindedly as Lettie.": "Марта, стройная и светловолосая, устремила на Фанни большие серые глаза почти так же решительно, как Летти.", "\"You mean the one who talks such a lot,\" she said.": "«Ты про ту, что так много болтает», — сказала она.", "\"Isn't she a witch?\"": "«Разве она не ведьма?»", "\"Yes, with a lovely house and clients all over the Folding Valley,\" Fanny said eagerly.": "«Да, с чудесным домом и клиентами по всей Долине Фолдинг», — с жаром ответила Фанни.", "\"She's a good woman, Martha.": "«Она хорошая женщина, Марта.", "She'll teach you all she knows and very likely introduce you to grand people she knows in Kingsbury.": "Она научит тебя всему, что знает, и, очень может быть, познакомит с важными людьми, которых знает в Кингсбери.", "You'll be all set up in life when she's done with you.\"": "Когда она с тобой закончит, ты будешь прекрасно устроена в жизни».", "\"She's a nice lady,\" Martha conceded.": "«Она милая дама», — уступила Марта.", "\"All right.\"": "«Ладно».", "Sophie, listening, felt that Fanny had worked everything out just as it should be.": "Софи, слушая, чувствовала, что Фанни всё рассчитала именно так, как и следовало.", "Lettie, as the second daughter, was never likely to come to much, so Fanny had put her where she might meet a handsome young apprentice and live happily ever after.": "Летти, как второй дочери, вряд ли суждено было многого добиться, поэтому Фанни пристроила её туда, где она могла бы встретить красивого молодого ученика и жить долго и счастливо.", "Martha, who was bound to strike out and make her fortune, would have witchcraft and rich friends to help her.": "Марте, которой было на роду написано пробиться и сколотить состояние, помогут колдовство и богатые друзья.", "As for Sophie herself, Sophie had no doubt what was coming.": "А что до самой Софи — Софи не сомневалась, что её ждёт.", "It did not surprise her when Fanny said, \"Now, Sophie dear, it seems only right and just that you should inherit the hat shop when I retire, being the eldest as you are.": "Её не удивило, когда Фанни сказала: «А теперь, Софи, дорогая, мне кажется, будет только правильно и справедливо, если ты унаследуешь шляпный магазин, когда я уйду на покой, ведь ты старшая.", "So I've decided to take you on as apprentice myself, to give you a chance to learn the trade.": "Поэтому я решила сама взять тебя в ученицы, чтобы ты могла освоить ремесло.", "How do you feel about that?\"": "Что ты об этом думаешь?»", "Sophie could hardly say that she simply felt resigned to the hat trade.": "Софи едва ли могла сказать, что просто смирилась со шляпным делом.", "She thanked Fanny gratefully.": "Она горячо поблагодарила Фанни.", "\"So that's settled then!\"": "«Ну вот и решено!»", "Fanny said.": "— сказала Фанни.", "The next day Sophie helped Martha pack her clothes in a box, and the morning after that they all saw her off on the carrier's cart, looking small and upright and nervous.": "На следующий день Софи помогла Марте уложить одежду в сундук, а утром после этого они все проводили её на повозке перевозчика: она выглядела маленькой, прямой и испуганной.", "For the way to Upper Folding, where Mrs Fairfax lived, lay over the hills past Wizard Howl's moving castle.": "Ведь дорога в Верхний Фолдинг, где жила миссис Фэйрфакс, вела через холмы мимо ходячего замка волшебника Хоула.", "Martha was understandably scared.": "Марта, понятное дело, боялась.", "\"She'll be all right,\" said Lettie.": "«С ней всё будет в порядке», — сказала Летти.", "Lettie refused all help with the packing.": "Летти отказалась от любой помощи со сборами.", "When the carrier's cart was out of sight, Lettie crammed all her possessions into a pillow case and paid the neighbour's boot-boy sixpence to wheel it in a wheelbarrow to Cesari's in Market Square.": "Когда повозка перевозчика скрылась из виду, Летти запихнула все свои пожитки в наволочку и заплатила соседскому мальчишке-чистильщику обуви шесть пенсов, чтобы тот довёз её на тачке до Чезари на Рыночной площади.", "Lettie marched behind the wheelbarrow looking much more cheerful than Sophie expected.": "Летти шагала за тачкой куда веселее, чем ожидала Софи.", "Indeed, she had the air of shaking the dust of the hat shop off her feet.": "Больше того, вид у неё был такой, словно она отряхивала с ног прах шляпного магазина.", "The boot-boy brought back a scribbled note from Lettie, saying she had put her things in the girls' dormitory and Cesari's seemed great fun.": "Мальчишка вернулся с нацарапанной запиской от Летти: она поставила свои вещи в девичью спальню, и у Чезари, кажется, очень весело.", "A week later the carrier brought a letter from Martha to say that Martha had arrived safely and that Mrs Fairfax was \"a great dear and uses honey with everything.": "Неделю спустя перевозчик привёз письмо от Марты: та благополучно добралась, а миссис Фэйрфакс — «просто прелесть и добавляет мёд во всё.", "She keeps bees.\"": "Она держит пчёл».", "That was all Sophie heard of her sisters for quite a while, because she started her own apprenticeship the day Martha and Lettie left.": "Это было всё, что Софи довольно долго слышала о сёстрах, потому что её собственное ученичество началось в тот самый день, когда уехали Марта и Летти.", "Sophie of course knew the hat trade quite well already.": "Разумеется, шляпное дело Софи уже и так знала довольно хорошо.", "Since she was a tiny child she had run in and out of the big workshed across the yard where the hats were damped and moulded on blocks, and flowers and fruit and other trimmings were made from wax and silk.": "С самого раннего детства она бегала в большую мастерскую-сарай через двор, где шляпы смачивали и формовали на болванках, а цветы, фрукты и прочие украшения делали из воска и шёлка.", "She knew the people who worked there.": "Она знала людей, которые там работали.", "Most of them had been there when her father was a boy.": "Большинство из них работало там ещё тогда, когда её отец был мальчиком.", "She knew Bessie, the only remaining shop assistant.": "Она знала Бесси, единственную оставшуюся продавщицу.", "She knew the customers who bought the hats and the man who drove the cart which fetched raw straw hats in from the country to be shaped on the blocks in the shed.": "Она знала покупательниц и человека, который на телеге привозил из деревни необработанные соломенные шляпы, чтобы их формовали на болванках в мастерской.", "She knew the other suppliers and how you made felt for winter hats.": "Она знала других поставщиков и то, как делают фетр для зимних шляп.", "There was not really much that Fanny could teach her, except perhaps the best way to get a customer to buy a hat.": "Фанни, в сущности, мало чему могла её научить, разве что лучшему способу заставить покупательницу купить шляпу.", "\"You lead up to the right hat, love,\" Fanny said.": "«Подводи к нужной шляпе, милая», — говорила Фанни.", "\"Show them the ones that won't quite do first, so they know the difference as soon as they put the right one on.\"": "«Сначала покажи те, что не совсем подходят, чтобы они сразу почувствовали разницу, как только наденут нужную».", "In fact, Sophie did not sell hats very much.": "На самом деле Софи шляпы почти не продавала.", "After a day or so observing in the workshed, and another day going round the clothier and the silk merchant's with Fanny, Fanny set her to trimming hats.": "Денёк-другой она понаблюдала за работой в мастерской, ещё день проходила с Фанни по лавкам торговца тканями и торговца шёлком, а потом Фанни посадила её за отделку шляп.", "Sophie sat in a small alcove at the back of the shop, sewing roses to bonnets and veiling to velours, lining all of them with silk and arranging wax fruit and ribbons stylishly on the outsides.": "Софи сидела в маленькой нише в глубине магазина, пришивала розы к капорам и вуали к велюровым шляпам, подбивала всё шёлком и со вкусом расставляла снаружи восковые фрукты и ленты.", "She was good at it.": "У неё это хорошо получалось.", "She quite liked doing it.": "Ей это даже нравилось.", "But she felt isolated and a little dull.": "Но она чувствовала себя одинокой и немного заскучавшей.", "The workshop people were too old to be much fun and, besides, they treated her as someone apart who was going to inherit the business someday.": "Люди из мастерской были слишком стары, чтобы с ними было весело, и к тому же относились к ней как к особе, стоящей особняком, которой когда-нибудь достанется дело.", "Bessie treated her the same way.": "Бесси относилась к ней точно так же.", "Bessie's only talk anyway was about the farmer she was going to marry the week after May Day.": "Впрочем, Бесси говорила только о фермере, за которого собиралась замуж через неделю после Майского дня.", "Sophie rather envied Fanny, who could bustle off to bargain with the silk merchant whenever she wanted.": "Софи скорее завидовала Фанни, которая могла в любой момент упорхнуть торговаться с поставщиком шёлка.", "The most interesting thing was the talk from the customers.": "Самым интересным были разговоры покупательниц.", "Nobody can buy a hat without gossiping.": "Никто не может купить шляпу, не посплетничав.", "Sophie sat in her alcove and stitched and heard that the Mayor never would eat green vegetables, and that Wizard Howl's castle had moved round to the cliffs again, really that man, whisper, whisper, whisper ...": "Софи сидела в своей нише, шила и слушала, что мэр ни за что не станет есть зелёные овощи и что замок волшебника Хоула снова переместился к скалам, ну право, этот человек, шёпот, шёпот, шёпот…", "The voices always dropped low when they talked of Wizard Howl, but Sophie gathered that he had caught a girl down the valley last month.": "Голоса всегда понижались, когда речь заходила о волшебнике Хоуле, но Софи поняла, что в прошлом месяце он поймал какую-то девушку из долины.", "\"Bluebeard!\" said the whispers, and then became voices again to say that Jane Farrier was a perfect disgrace the way she did her hair.": "«Синяя Борода!» — шептали голоса, а потом снова становились обычными и говорили, что Джейн Фарьер — просто позор со своей причёской.", "That was one who would never attract even Wizard Howl, let alone a respectable man.": "Уж эту-то не заметит даже волшебник Хоул, не говоря о порядочном мужчине.", "Then there would be a fleeting, fearful whisper about the Witch of the Waste.": "Потом следовал мимолётный, испуганный шёпот о Ведьме Пустошей.", "Sophie began to feel that Wizard Howl and the Witch of the Waste should get together.": "Софи стала думать, что волшебнику Хоулу и Ведьме Пустошей стоило бы сойтись.", "\"They seem to be made for one another.": "«Они, кажется, созданы друг для друга.", "Someone ought to arrange a match,\" she remarked to the hat she was trimming at that moment.": "Кто-нибудь должен их сосватать», — заметила она шляпе, которую как раз отделывала.", "But by the end of the month the gossip in the shop was suddenly all about Lettie.": "Но к концу месяца сплетни в магазине вдруг стали только о Летти.", "Cesari's, it seemed, was packed with gentlemen from morning to night, each one buying quantities of cakes and demanding to be served by Lettie.": "Оказалось, что Чезари с утра до вечера набит джентльменами, и каждый покупает уйму пирожных и требует, чтобы его обслуживала Летти.", "She had had ten proposals of marriage, ranging in quality from the Mayor's son to the lad who swept the streets, and she had refused them all, saying she was too young to make up her mind yet.": "Ей уже сделали десять предложений руки и сердца — от сына мэра до парня, подметавшего улицы, — и она отказала всем, говоря, что слишком молода, чтобы решать.", "\"I call that sensible of her,\" Sophie said to a bonnet she was pleating silk into.": "«Я называю это разумным с её стороны», — сказала Софи капору, в который собирала складками шёлк.", "Fanny was pleased with this news.": "Фанни обрадовалась этой новости.", "\"I knew she'd be all right!\" she said happily.": "«Я знала, что у неё всё будет хорошо!» — сказала она радостно.", "It occurred to Sophie that Fanny was glad Lettie was no longer around.": "Софи пришло в голову, что Фанни рада тому, что Летти больше нет рядом.", "\"Lettie's bad for custom,\" she told the bonnet, pleating away at mushroom-coloured silk.": "«Летти вредит торговле», — сказала она капору, продолжая собирать складки на шёлке грибного цвета.", "\"She would make even you look glamorous, you dowdy old thing.": "«Рядом с ней даже ты стал бы выглядеть шикарно, невзрачный ты старикашка.", "Other ladies look at Lettie and despair.\"": "Другие дамы смотрят на Летти и приходят в отчаяние».", "Sophie talked to hats more and more as weeks went by.": "По мере того как шли недели, Софи разговаривала со шляпами всё чаще.", "There was no one else much to talk to.": "Больше ей почти не с кем было говорить.", "Fanny was out bargaining, or trying to whip up custom, much of the day, and Bessie was busy serving and telling everyone her wedding plans.": "Фанни большую часть дня торговалась или пыталась расшевелить торговлю, а Бесси была занята покупательницами и рассказывала всем о своей свадьбе.", "Sophie got into the habit of putting each hat on its stand as she finished it, where it sat looking almost like a head without a body, and pausing while she told the hat what the body under it ought to be like.": "У Софи вошло в привычку, закончив шляпу, ставить её на подставку, где та выглядела почти как голова без тела, и, помедлив, рассказывать шляпе, каким должно быть тело под ней.", "She flattered the hats a bit, because you should flatter customers.": "Она немного льстила шляпам, потому что покупательницам и надо льстить.", "\"You have mysterious allure,\" she told one that was all veiling with hidden twinkles.": "«У тебя таинственное очарование», — сказала она одной, всей в вуалях и с затаёнными искорками.", "To a wide, creamy hat with roses under the brim she said, \"You are going to have to marry money!\" and to a caterpillar-green straw with a curly green feather she said, \"You are young as a spring leaf.\"": "Широкой кремовой шляпе с розами под полями она сказала: «Тебе придётся выйти замуж за деньги!» — а соломенной шляпке цвета гусеницы с вьющимся зелёным пером: «Ты молода, как весенний листок».", "She told pink bonnets they had dimpled charm and smart hats trimmed with velvet that they were witty.": "Розовым капорам она говорила, что у них очаровательные ямочки, а элегантным шляпам с бархатной отделкой — что они остроумны.", "She told the mushroom-pleated bonnet, \"You have a heart of gold and someone in a high position will see it and fall in love with you.\"": "Капору с грибными складками она сказала: «У тебя золотое сердце, и кто-нибудь высокопоставленный увидит это и влюбится в тебя».", "This was because she was sorry for that particular bonnet.": "Она сказала так потому, что ей было жаль именно этот капор.", "It looked so fussy and plain.": "Он выглядел таким вычурным и вместе с тем невзрачным.", "Jane Farrier came into the shop next day and bought it.": "На следующий день Джейн Фарьер зашла в магазин и купила его.", "Her hair did look a little strange, Sophie thought, peeping out of her alcove, as if Jane had wound it round a row of pokers.": "Волосы у неё и правда выглядели странновато, подумала Софи, выглядывая из своей ниши, — будто Джейн накрутила их на ряд кочерёг.", "It seemed a pity she had chosen that bonnet.": "Жаль, что она выбрала именно этот капор.", "But everyone seemed to be buying hats and bonnets around then.": "Но тогда, похоже, все покупали шляпы и капоры.", "Maybe it was Fanny's sales talk or maybe it was spring coming on, but the hat trade was definitely picking up.": "Может, дело было в уговорах Фанни, а может, в приближающейся весне, но торговля шляпами определённо оживала.", "Fanny began to say, a little guiltily, \"I think I shouldn't have been in such a hurry to get Martha and Lettie placed out.": "Фанни стала говорить, слегка виновато: «Пожалуй, не стоило мне так спешить пристраивать Марту и Летти.", "At this rate we might have managed.\"": "При таком раскладе мы бы, может, и справились».", "There was so much custom as April drew on towards May Day that Sophie had to put on a demure grey dress and help in the shop too.": "По мере того как апрель близился к Майскому дню, покупателей стало так много, что Софи пришлось надеть скромное серое платье и тоже помогать в магазине.", "But such was the demand that she was hard at trimming hats in between customers, and every evening she took them next door to the house, where she worked by lamplight far into the night in order to have hats to sell the next day.": "Но спрос был таков, что между покупательницами она усердно отделывала шляпы, а каждый вечер уносила их в дом по соседству и работала при лампе далеко за полночь, чтобы наутро было что продавать.", "Caterpillar-green hats like the one the Mayor's wife had were much called for, and so were pink bonnets.": "Шляпы цвета гусеницы, как у жены мэра, пользовались большим спросом, как и розовые капоры.", "Then, the week before May Day, someone came in and asked for one with mushroom pleats like the one Jane Farrier had been wearing when she ran off with the Count of Catterack.": "А потом, за неделю до Майского дня, кто-то пришёл и попросил капор с грибными складками, такой же, какой был на Джейн Фарьер, когда она сбежала с графом Катераком.", "That night, as she sewed, Sophie admitted to herself that her life was rather dull.": "В тот вечер, пока она шила, Софи призналась себе, что жизнь её довольно скучна.", "Instead of talking to the hats, she tried each one on as she finished it and looked in the mirror.": "Вместо того чтобы разговаривать со шляпами, она примеряла каждую, закончив её, и смотрелась в зеркало.", "This was a mistake.": "Это была ошибка.", "The staid grey dress did not suit Sophie, particularly when her eyes were red-rimmed with sewing, and, since her hair was a reddish straw colour, neither did caterpillar green nor pink.": "Строгое серое платье Софи не шло, особенно когда глаза у неё были красные от шитья, а поскольку волосы у неё были рыжеватого соломенного цвета, не шли ей ни гусеничный зелёный, ни розовый.", "The one with mushroom pleats simply made her look dreary.": "В капоре с грибными складками она выглядела просто уныло.", "\"Like an old maid!\" said Sophie.": "«Как старая дева!» — сказала Софи.", "Not that she wanted to race off with counts, like Jane Farrier, or even fancied half the town offering her marriage, like Lettie.": "Не то чтобы ей хотелось сбежать с каким-нибудь графом, как Джейн Фарьер, или чтобы полгорода предлагало ей руку и сердце, как Летти.", "But she wanted to do something - she was not sure what - that had a bit more interest to it than simply trimming hats.": "Но ей хотелось чего-то — она не знала чего, — что было бы чуть интереснее, чем просто отделывать шляпы.", "She thought she would find time next day to go and talk to Lettie.": "Она подумала, что на следующий день найдёт время сходить и поговорить с Летти.", "But she did not go.": "Но не пошла.", "Either she could not find the time, or she could not find the energy, or it seemed a great distance to Market Square, or she remembered that on her own she was in danger from Wizard Howl - anyway, every day it seemed more difficult to go and see her sister.": "То ли не находилось времени, то ли сил, то ли до Рыночной площади казалось слишком далеко, то ли она вспоминала, что одной ей грозит опасность от волшебника Хоула, — как бы то ни было, с каждым днём навестить сестру становилось всё труднее.", "It was very odd.": "Это было очень странно.", "Sophie had always thought she was nearly as strongminded as Lettie.": "Софи всегда считала, что характера у неё почти столько же, сколько у Летти.", "Now she was finding that there were some things she could only do when there were no excuses left.": "Теперь она обнаруживала, что есть вещи, которые она способна сделать, лишь когда не остаётся отговорок.", "\"This is absurd!\"": "«Это нелепо!»", "Sophie said.": "— сказала Софи.", "\"Market Square is only two streets away.": "«До Рыночной площади всего две улицы.", "If I run-\" And she swore to herself she would go round to Cesari's when the hat shop was closed for May Day.": "Если побежать…» И она поклялась себе, что зайдёт к Чезари, когда шляпный магазин закроется на Майский день.", "Meanwhile a new piece of gossip came into the shop.": "Тем временем в магазин пришла новая сплетня.", "The King had quarrelled with his own brother, Prince Justin, it was said, and the Prince had gone into exile.": "Говорили, что король поссорился с собственным братом, принцем Джастином, и принц отправился в изгнание.", "Nobody quite knew the reason for the quarrel, but the Prince had actually come through Market Chipping in disguise a couple of months back, and nobody had known.": "Никто толком не знал причины ссоры, но пару месяцев назад принц на самом деле проезжал через Маркет-Чиппинг переодетым, и никто этого не заметил.", "The Count of Catterack had been sent by the King to look for the Prince, when he happened to meet Jane Farrier instead.": "Король послал графа Катерака искать принца, а тот вместо этого случайно встретил Джейн Фарьер.", "Sophie listened and felt sad.": "Софи слушала и грустила.", "Interesting things did seem to happen, but always to somebody else.": "Интересные вещи, похоже, и правда случались, но всегда с кем-то другим.", "Still, it would be nice to see Lettie.": "И всё же было бы славно повидать Летти.", "May Day came.": "Наступил Майский день.", "Merrymaking filled the streets from dawn onward.": "С самого рассвета улицы наполнило веселье.", "Fanny went out early, but Sophie had a couple of hats to finish first.": "Фанни ушла рано, но Софи надо было сначала закончить пару шляп.", "Sophie sang as she worked.": "Софи пела за работой.", "After all, Lettie was working too.": "В конце концов, Летти тоже работала.", "Cesari's was open till midnight on holidays.": "По праздникам Чезари был открыт до полуночи.", "\"I shall buy one of their cream cakes,\" Sophie decided.": "«Куплю одно их кремовое пирожное», — решила Софи.", "\"I haven't had one for ages.\"": "«Я не ела такого целую вечность».", "She watched people crowding past the window in all kinds of bright clothes, people selling souvenirs, people walking on stilts, and felt really excited.": "Она смотрела, как за окном толпятся люди в самых разных ярких нарядах, торговцы сувенирами, люди на ходулях, и по-настоящему волновалась.", "But when she at last put a grey shawl over her grey dress and went out into the street, Sophie did not feel excited.": "Но когда она наконец накинула серую шаль поверх серого платья и вышла на улицу, Софи совсем не почувствовала волнения.", "She felt overwhelmed.": "Она почувствовала себя подавленной.", "There were too many people rushing past, laughing and shouting, far too much noise and jostling.": "Мимо неслось слишком много людей, они смеялись и кричали, шум и толкотня были просто невыносимы.", "Sophie felt as if the past months of sitting and sewing had turned her into an old woman or a semi-invalid.": "Софи чувствовала себя так, будто месяцы сидения за шитьём превратили её в старуху или полуинвалида.", "She gathered her shawl round her and crept along close to the houses, trying to avoid being trodden on by people's best shoes or being jabbed by elbows in trailing silk sleeves.": "Она запахнула шаль и пробиралась вдоль самых стен домов, стараясь, чтобы ей не наступили на ноги праздничными башмаками и не ткнули локтем в волочащиеся шёлковые рукава.", "When there came a sudden volley of bangs from overhead somewhere, Sophie thought she was going to faint.": "Когда откуда-то сверху вдруг раздался залп хлопков, Софи решила, что вот-вот упадёт в обморок.", "She looked up and saw Wizard Howl's castle right down on the hillside above the town, so near it seemed to be sitting on the chimneys.": "Она подняла глаза и увидела замок волшебника Хоула прямо на склоне холма над городом, так близко, что он, казалось, сидит на самых трубах.", "Blue flames were shooting out of all four of the castle's turrets, bringing balls of blue fire with them that exploded high in the sky, quite horrendously.": "Из всех четырёх башенок замка вырывалось синее пламя, выбрасывая шары синего огня, которые высоко в небе взрывались, и это было просто ужасающе.", "Wizard Howl seemed to be offended by May Day.": "Волшебник Хоул, похоже, обиделся на Майский день.", "Or maybe he was trying to join in, in his own fashion.": "А может быть, он пытался присоединиться к празднику на свой лад.", "Sophie was too terrified to care.": "Софи было слишком страшно, чтобы об этом думать.", "She would have gone home, except that she was halfway to Cesari's by then.": "Она бы пошла домой, если бы к тому времени не оказалась уже на полпути к Чезари.", "So she ran.": "Поэтому она побежала.", "\"What made me think I wanted life to be interesting?\" she asked as she ran.": "«С чего я взяла, что хочу, чтобы жизнь была интересной?» — спрашивала она на бегу.", "\"I'd be far too scared.": "«Мне было бы слишком страшно.", "It comes of being the eldest of three.\"": "Это всё оттого, что я старшая из троих».", "When she reached Market Square, it was worse, if possible.": "Когда она добралась до Рыночной площади, там оказалось ещё хуже, если такое возможно.", "Most of the inns were in the Square.": "Большинство трактиров находились на площади.", "Crowds of young men swaggered beerily to and fro, trailing cloaks and long sleeves and stamping buckled boots they would never have dreamed of wearing on a working day, calling loud remarks and accosting girls.": "Толпы молодых людей, хмельных от пива, расхаживали взад-вперёд, волоча плащи и длинные рукава и топая сапогами с пряжками, которые им и в голову не пришло бы надеть в будний день, выкрикивая громкие замечания и заговаривая с девушками.", "The girls strolled in fine pairs, ready to be accosted.": "Девушки прогуливались нарядными парами, готовые к тому, чтобы с ними заговорили.", "It was perfectly normal for May Day, but Sophie was scared of that too.": "Для Майского дня это было совершенно нормально, но Софи боялась и этого.", "And when a young man in a fantastical blue and silver costume spotted Sophie and decided to accost her as well, Sophie shrank into a shop doorway and tried to hide.": "А когда молодой человек в фантастическом сине-серебряном костюме заметил Софи и решил заговорить и с ней, Софи съёжилась в дверях магазина и попыталась спрятаться.", "The young man looked at her in surprise.": "Молодой человек удивлённо посмотрел на неё.", "\"It's all right, you little grey mouse,\" he said, laughing rather pityingly.": "«Всё в порядке, серая мышка», — сказал он, смеясь с оттенком жалости.", "\"I only want to buy you a drink.": "«Я всего лишь хочу угостить тебя выпивкой.", "Don't look so scared.\"": "Не бойся так».", "The pitying look made Sophie utterly ashamed.": "От этого жалостливого взгляда Софи стало ужасно стыдно.", "He was such a dashing specimen too, with a bony, sophisticated face - really quite old, well into his twenties - and elaborate blond hair.": "Он был такой щёголь, с костистым, утончённым лицом — по-настоящему немолодой, ему было уже далеко за двадцать — и затейливой светлой причёской.", "His sleeves trailed longer than any in the Square, all scalloped edges and silver insets.": "Рукава у него волочились длиннее, чем у кого-либо на площади, все в фестонах и серебряных вставках.", "\"Oh, no thank you, if you please, sir,\" Sophie stammered.": "«О нет, спасибо, будьте так добры, сэр», — запинаясь, проговорила Софи.", "\"I-I'm on my way to see my sister.\"": "«Я… я иду навестить сестру».", "\"Then by all means do so,\" laughed this advanced young man.": "«Тогда непременно идите», — засмеялся этот модный молодой человек.", "\"Who am I to keep a pretty lady from her sister?": "«Разве я вправе удерживать хорошенькую даму от встречи с сестрой?", "Would you like me to go with you, since you seem so scared?\"": "Хотите, я пойду с вами, раз вам так страшно?»", "He meant it kindly, which made Sophie more ashamed than ever.": "Он говорил это по доброте, и от этого Софи стало ещё стыднее.", "\"No.": "«Нет.", "No thank you, sir!\" she gasped and fled away past him.": "Нет, спасибо, сэр!» — выдохнула она и убежала мимо него.", "He wore perfume too.": "От него ещё и пахло духами.", "The smell of hyacinths followed her as she ran.": "Запах гиацинтов преследовал её, пока она бежала.", "What a courtly person!": "Какой учтивый человек!", "Sophie thought, as she pushed her way between the little tables outside Cesari's.": "— подумала Софи, протискиваясь между маленькими столиками у Чезари.", "The tables were packed.": "Столики были заняты.", "Inside was packed and as noisy as the Square.": "Внутри было битком и так же шумно, как на площади.", "Sophie located Lettie among the line of assistants at the counter because of the group of evident farmers' sons leaning their elbows on it to shout remarks to her.": "Летти Софи отыскала среди продавщиц у прилавка по группе явных фермерских сынков, которые облокотились на него и выкрикивали ей замечания.", "Lettie, prettier than ever and perhaps a little thinner, was putting cakes into bags as fast as she could go, giving each bag a deft little twist and looking back under her own elbow with a smile and an answer for each bag she twisted.": "Летти, хорошенькая как никогда и, пожалуй, чуть худее, запихивала пирожные в пакеты так быстро, как только могла, ловко закручивая каждый пакет и оглядываясь из-под собственного локтя с улыбкой и ответом на каждый закрученный пакет.", "There was a great deal of laughter.": "Раздавался оживлённый смех.", "Sophie had to fight her way through to the counter.": "Софи пришлось с боем пробиваться к прилавку.", "Lettie saw her.": "Летти увидела её.", "She looked shaken for a moment.": "На мгновение она словно оторопела.", "Then her eyes and her smile widened and she shouted, \"Sophie!\"": "Потом глаза её расширились, улыбка тоже, и она закричала: «Софи!»", "\"Can I talk to you?\"": "«Можно с тобой поговорить?»", "Sophie yelled.": "— прокричала Софи.", "\"Somewhere,\" she shouted, a little helplessly, as a large, well-dressed elbow jostled her back from the counter.": "«Где-нибудь», — крикнула она, немного беспомощно, когда чей-то большой, нарядно одетый локоть оттолкнул её от прилавка.", "\"Just a moment!\"": "«Минутку!»", "Lettie screamed back.": "— крикнула в ответ Летти.", "She turned to the girl next to her and whispered.": "Она повернулась к девушке рядом и что-то прошептала.", "The girl nodded, grinned, and came to take Lettie's place.": "Та кивнула, ухмыльнулась и пришла занять место Летти.", "\"You'll have to have me instead,\" she said to the crowd.": "«Придётся вам довольствоваться мной», — сказала она толпе.", "\"Who's next?\"": "«Кто следующий?»", "\"But I want to talk to you, Lettie!\" one of the farmers' sons yelled.": "«Но я хочу поговорить с тобой, Летти!» — крикнул один из фермерских сынков.", "\"Talk to Carrie,\" Lettie said.": "«Поговори с Кэрри», — сказала Летти.", "\"I want to talk to my sister.\"": "«Я хочу поговорить с сестрой».", "Nobody really seemed to mind.": "Никто, похоже, особо не возражал.", "They jostled Sophie along to the end of the counter, where Lettie held up a flap and beckoned, and told her not to keep Lettie all day.": "Они протолкали Софи к концу прилавка, где Летти приподняла откидную доску и поманила её, и велели ей не задерживать Летти на весь день.", "When Sophie had edged through the flap, Lettie seized her wrist and dragged her into the back of the shop, to a room surrounded by rack upon wooden rack, each one filled with rows of cakes.": "Когда Софи пролезла под доской, Летти схватила её за запястье и потащила в заднюю часть магазина, в комнату, со всех сторон уставленную деревянными стеллажами, на каждом из которых рядами лежали пирожные.", "Lettie pulled forward two stools.": "Летти выдвинула два табурета.", "\"Sit down,\" she said.": "«Садись», — сказала она.", "She looked in the nearest rack, in an absent-minded way, and handed Sophie a cream cake out of it.": "Она рассеянно заглянула в ближайший стеллаж и протянула Софи оттуда кремовое пирожное.", "\"You may need this,\" she said.": "«Тебе это может понадобиться», — сказала она.", "Sophie sank on to the stool, breathing the rich smell of cake and feeling a little tearful.": "Софи опустилась на табурет, вдыхая густой запах выпечки и чувствуя, что вот-вот расплачется.", "\"Oh, Lettie!\" she said.": "«Ох, Летти!» — сказала она.", "\"I am so glad to see you!\"": "«Как я рада тебя видеть!»", "\"Yes, and I'm glad you're sitting down,\" said Lettie.": "«Да, и я рада, что ты сидишь», — сказала Летти.", "\"You see, I'm not Lettie.": "«Понимаешь, я не Летти.", "I'm Martha.\"": "Я Марта»."}</script><script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// SAMPLE
+// ═══════════════════════════════════════════════════════
+const SAMPLE = `The forest in late autumn had a kind of stripped dignity. The oaks had released their leaves weeks ago, and now the branches made clean dark lines against a pale sky. There was something almost architectural about it — the way the trees held their structure without any softness to hide behind.
+
+She walked the same path she had walked every October for thirty years. The ground was soft underfoot, layered with wet leaves that smelled of iron and cold water. She was not walking for exercise. She was walking because the house had become too quiet since her husband died, and motion was the only thing that kept her from noticing it.
+
+At the stone bridge she stopped. Below, the stream ran shallow and clear over a bed of smooth pebbles. She watched it for a long time. The water made no particular sound at this depth, just a low, even murmur that sounded like patience.
+
+She thought about him, as she always did here. Not the last months, not the hospital — but the earlier version, the one who had whistled while he read the newspaper and never once in forty years forgotten her birthday. That was the person she was trying to preserve in her memory, and she worried sometimes that she was failing.`;
+
+// ═══════════════════════════════════════════════════════
+// SENTENCE SPLITTER
+// Hard rule: boundaries ONLY at . ! ?
+// ═══════════════════════════════════════════════════════
+function splitSentences(para) {
+  let s = para
+    .replace(/\b(Mr|Mrs|Ms|Dr|Prof|Rev|St|Jr|Sr|vs|etc|e\.g|i\.e|No|Vol|Fig|Dept|Corp|Inc|Ltd)\./gi,
+             (_, g) => g + '\x01')
+    .replace(/\b([A-Z])\.\s+(?=[A-Z])/g, '$1\x01 ')
+    .replace(/(\d)\.(\d)/g, '$1\x02$2')
+    .replace(/\.{2,}/g, m => '\x03'.repeat(m.length));
+
+  const TERM  = new Set(['.', '!', '?']);
+  const CLOSE = new Set(['"', '\u201d', "'", '\u2019', ')', ']', '\u00bb']);
+  const parts = [];
+  let start = 0, i = 0;
+
+  while (i < s.length) {
+    if (TERM.has(s[i])) {
+      let end = i;
+      while (end < s.length && TERM.has(s[end])) end++;
+      while (end < s.length && CLOSE.has(s[end])) end++;
+      let j = end;
+      while (j < s.length && s[j] === ' ') j++;
+      const atEnd     = j >= s.length;
+      const nextUpper = !atEnd && /[A-Z\u0400-\u042F\u201c"]/.test(s[j]);
+      if (atEnd || nextUpper) {
+        const chunk = restore(s.slice(start, end).trim());
+        if (chunk.length > 1) parts.push(chunk);
+        start = j; i = j; continue;
+      }
+    }
+    i++;
+  }
+  if (start < s.length) {
+    const chunk = restore(s.slice(start).trim());
+    if (chunk.length > 1) parts.push(chunk);
+  }
+  return parts.length ? parts : [para.trim()];
+}
+
+function restore(s) {
+  return s.replace(/\x01/g,'.').replace(/\x02/g,'.').replace(/\x03+/g, m=>'.'.repeat(m.length));
+}
+
+// ═══════════════════════════════════════════════════════
+// VOICES
+// ═══════════════════════════════════════════════════════
+const synth  = window.speechSynthesis;
+let voices   = [];
+const vsel   = document.getElementById('vsel');
+const rateEl = document.getElementById('rate');
+const rdspEl = document.getElementById('rdsp');
+
+function loadVoices() {
+  voices = synth.getVoices();
+  const en   = voices.filter(v => v.lang.startsWith('en'));
+  const list = en.length ? en : voices;
+  vsel.innerHTML = '';
+  list.forEach(v => {
+    const o = document.createElement('option');
+    o.value = voices.indexOf(v);
+    o.textContent = v.name + (v.localService ? '' : ' ☁');
+    vsel.appendChild(o);
+  });
+  const pref = list.findIndex(v => v.lang === 'en-US' || v.lang === 'en-GB');
+  if (pref >= 0) vsel.selectedIndex = pref;
+}
+loadVoices();
+if (speechSynthesis.onvoiceschanged !== undefined)
+  speechSynthesis.onvoiceschanged = loadVoices;
+rateEl.addEventListener('input', () => {
+  rdspEl.textContent = parseFloat(rateEl.value).toFixed(1).replace('.0','') + '×';
+});
+
+// ═══════════════════════════════════════════════════════
+// INPUT / FILE
+// ═══════════════════════════════════════════════════════
+const dz    = document.getElementById('dz');
+const ta    = document.getElementById('ta');
+const inpEl = document.getElementById('inp');
+const rdEl  = document.getElementById('reader');
+
+function openTA() {
+  dz.classList.add('hidden');
+  ta.style.display = 'block';
+  ta.focus();
+}
+
+dz.addEventListener('click',   openTA);
+dz.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') openTA(); });
+document.getElementById('smpl-btn').addEventListener('click', () => { openTA(); ta.value = SAMPLE; });
+
+// ── TXT file loading ─────────────────────────────────
+document.getElementById('file-btn').addEventListener('click', () =>
+  document.getElementById('fi').click());
+
+document.getElementById('fi').addEventListener('change', function() {
+  const f = this.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    ta.value = e.target.result;
+    openTA();
+  };
+  reader.onerror = function() { alert('Could not read the file.'); };
+  reader.readAsText(f, 'utf-8');
+  this.value = ''; // reset so same file can be re-selected
+});
+
+// ── Drag & drop ──────────────────────────────────────
+document.body.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+document.body.addEventListener('drop', e => {
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  if (!f.name.toLowerCase().endsWith('.txt') && f.type !== 'text/plain') {
+    alert('Please drop a .txt file.'); return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => { ta.value = ev.target.result; openTA(); };
+  reader.readAsText(f, 'utf-8');
+});
+
+document.getElementById('load-btn').addEventListener('click', () => {
+  const t = ta.value.trim(); if (!t) return;
+  buildReader(t);
+});
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  stopAll();
+  rdEl.style.display  = 'none';
+  inpEl.style.display = 'block';
+});
+
+// ═══════════════════════════════════════════════════════
+// BUILD READER
+// ═══════════════════════════════════════════════════════
+let sentences = [];
+let curIdx    = -1;
+let isPlaying = false;
+let currentRaw = '';
+const sentTr = {};     // текст предложения → перевод
+let allTr = false;
+
+const SPLAY  = `<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+const SPAUSE = `<svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+
+function buildReader(raw) {
+  currentRaw = raw;
+  allTr = false;
+  document.getElementById('trall-btn').textContent = '🌐 Показать все переводы';
+  stopAll();
+  sentences = [];
+  document.getElementById('content').innerHTML = '';
+
+  // строки с кириллицей = готовый перевод предыдущей английской строки
+  const CYR = /[\u0400-\u04FF]/;
+  const paras = [], preTr = [];
+  raw.split(/\n+/).map(p => p.trim()).filter(p => p.length > 1).forEach(line => {
+    if (CYR.test(line) && paras.length) {
+      const last = paras.length - 1;
+      preTr[last] = (preTr[last] ? preTr[last] + ' ' : '') + line;
+    } else paras.push(line);
+  });
+  const titleRaw = paras[0] || '';
+  document.getElementById('btitle').textContent =
+    titleRaw.length > 72 ? titleRaw.slice(0, 72) + '…' : titleRaw;
+
+  let idx = 0;
+  paras.forEach((para, pi) => {
+    const pDiv = document.createElement('div');
+    pDiv.className = 'para';
+
+    const sents = splitSentences(para);
+    if (preTr[pi]) {
+      const ru = splitSentences(preTr[pi]);
+      if (ru.length === sents.length) sents.forEach((t, k) => { sentTr[t] = ru[k]; });
+      else sentTr[sents[sents.length - 1]] = preTr[pi];   // число предложений не совпало
+    }
+
+    sents.forEach(sentText => {
+      const i = idx++;
+
+      const btn = document.createElement('button');
+      btn.className   = 'sbtn';
+      btn.dataset.i   = i;
+      btn.title       = 'Озвучить';
+      btn.innerHTML   = SPLAY;
+      btn.addEventListener('click', () => {
+        (isPlaying && curIdx === +btn.dataset.i) ? pauseResume() : playSent(+btn.dataset.i);
+      });
+
+      const span = document.createElement('span');
+      span.className = 'sent';
+      span.dataset.i = i;
+      const words = buildWords(span, sentText);
+      let mic = null;
+      if (SR) { mic = document.createElement("button"); mic.className = "mbtn"; mic.title = "Записать себя"; mic.innerHTML = MIC; mic.addEventListener("click", () => toggleRec(i)); }
+
+      const tb = document.createElement('button');
+      tb.className = 'tbtn'; tb.title = 'Перевод предложения'; tb.textContent = '🌐';
+      tb.addEventListener('click', () => toggleTr(i));
+      const trEl = document.createElement('span');
+      trEl.className = 'stx';
+      trEl.contentEditable = 'true';
+      trEl.spellcheck = false;
+      trEl.title = 'Кликните, чтобы исправить перевод';
+      trEl.addEventListener('input', () => {
+        if (trEl.classList.contains('load') || trEl.dataset.err) return;
+        sentTr[sentText] = trEl.textContent.trim();
+      });
+
+      pDiv.appendChild(btn);
+      if (mic) pDiv.appendChild(mic);
+      pDiv.appendChild(tb);
+      pDiv.appendChild(span);
+      pDiv.appendChild(trEl);
+      pDiv.appendChild(document.createTextNode(' '));
+      sentences.push({ text: sentText, btn, span, words, mic, tb, trEl });
+    });
+
+    document.getElementById('content').appendChild(pDiv);
+  });
+
+  const wc = paras.join(' ').split(/\s+/).filter(Boolean).length;
+  document.getElementById('ms').textContent = sentences.length + ' Предложений';
+  document.getElementById('mw').textContent = wc.toLocaleString() + ' Слов';
+
+  inpEl.style.display = 'none';
+  rdEl.style.display  = 'block';
+  updateProg();
+}
+
+function normWord(t) { return t.toLowerCase().replace(/\u2019/g, "'"); }
+function buildWords(container, text) {
+  const out = [];
+  (text.match(/[A-Za-z]+(?:['\u2019][A-Za-z]+)*|[^A-Za-z]+/g) || [text]).forEach(tok => {
+    if (/^[A-Za-z]/.test(tok)) {
+      const w = document.createElement('span');
+      w.className = 'w'; w.textContent = tok;
+      w.dataset.key = normWord(tok);
+      w.addEventListener('mouseenter', onWordEnter);
+      w.addEventListener('mouseleave', onWordLeave);
+      container.appendChild(w);
+      out.push({ el: w, norm: normWord(tok) });
+    } else container.appendChild(document.createTextNode(tok));
+  });
+  return out;
+}
+
+// ═══════════════════════════════════════════════════════
+// TTS
+// ═══════════════════════════════════════════════════════
+function playSent(i) {
+  if (i < 0 || i >= sentences.length) { stopAll(); return; }
+  stopAll(false);
+  curIdx = i; isPlaying = true;
+  hlAll(); updateProg(); updateBar(); scrollTo(i);
+
+  const utt = new SpeechSynthesisUtterance(sentences[i].text);
+  utt.lang = 'en-US';
+  utt.rate = parseFloat(rateEl.value);
+  const vi = parseInt(vsel.value, 10);
+  if (!isNaN(vi) && voices[vi]) utt.voice = voices[vi];
+
+  utt.onend   = () => { clearHL(i); if (isPlaying) playSent(i + 1); };
+  utt.onerror = ev => { if (ev.error !== 'interrupted') { isPlaying = false; updateBar(); } };
+  synth.speak(utt);
+}
+
+function stopAll(reset = true) {
+  synth.cancel();
+  stopRec(true);
+  if (reset) {
+    isPlaying = false;
+    if (curIdx >= 0 && curIdx < sentences.length) clearHL(curIdx);
+    curIdx = -1;
+    updateBar(); updateProg();
+    document.getElementById('play-info').textContent = 'Нажмите ▶ чтобы начать';
+  }
+}
+
+function pauseResume() {
+  if (synth.speaking && !synth.paused) { synth.pause();  isPlaying = false; updateBar(); }
+  else if (synth.paused)               { synth.resume(); isPlaying = true;  updateBar(); }
+}
+
+function hlAll() {
+  sentences.forEach((s, i) => {
+    const on = i === curIdx;
+    s.span.classList.toggle('on', on);
+    s.btn.classList.toggle('on', on);
+    s.btn.innerHTML = on ? SPAUSE : SPLAY;
+    s.btn.title     = on ? 'Pause' : 'Read this sentence';
+  });
+  if (curIdx >= 0 && curIdx < sentences.length) {
+    const t = sentences[curIdx].text;
+    document.getElementById('play-info').textContent =
+      `${curIdx+1}/${sentences.length} — ${t.length > 55 ? t.slice(0,55)+'…' : t}`;
+  }
+}
+function clearHL(i) {
+  if (i < 0 || i >= sentences.length) return;
+  sentences[i].span.classList.remove('on');
+  sentences[i].btn.classList.remove('on');
+  sentences[i].btn.innerHTML = SPLAY;
+  sentences[i].btn.title     = 'Read this sentence';
+}
+function updateProg() {
+  const pct = sentences.length ? Math.max(0, Math.round(((curIdx+1)/sentences.length)*100)) : 0;
+  document.getElementById('prog').style.width = pct + '%';
+}
+function updateBar() {
+  const go = isPlaying && !synth.paused;
+  document.getElementById('i-play').style.display  = go ? 'none' : '';
+  document.getElementById('i-pause').style.display = go ? ''     : 'none';
+}
+function scrollTo(i) {
+  if (i >= 0 && i < sentences.length)
+    sentences[i].span.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+document.getElementById('play-btn').addEventListener('click', () => {
+  if (!sentences.length) return;
+  synth.paused ? pauseResume() : isPlaying ? pauseResume() : playSent(curIdx >= 0 ? curIdx : 0);
+});
+document.getElementById('prev-btn').addEventListener('click', () => {
+  if (!sentences.length) return;
+  playSent(Math.max(0, curIdx <= 0 ? 0 : curIdx - 1));
+});
+document.getElementById('next-btn').addEventListener('click', () => {
+  if (!sentences.length) return;
+  playSent(Math.min(sentences.length - 1, curIdx < 0 ? 0 : curIdx + 1));
+});
+document.getElementById('stop-btn').addEventListener('click', () => stopAll());
+document.addEventListener('keydown', e => {
+  if (['TEXTAREA','INPUT','SELECT'].includes(e.target.tagName) || e.target.isContentEditable) return;
+  if (e.code === 'Space')      { e.preventDefault(); document.getElementById('play-btn').click(); }
+  if (e.code === 'ArrowRight') document.getElementById('next-btn').click();
+  if (e.code === 'ArrowLeft')  document.getElementById('prev-btn').click();
+  if (e.code === 'Escape')     stopAll();
+});
+
+// ═══════════════════════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════════════════════
+const ttEl    = document.getElementById('tt');
+const ttLbl   = document.getElementById('tt-lbl');
+const ttTrans = document.getElementById('tt-trans');
+const ttNote  = document.getElementById('tt-note');
+
+const xlat  = {};    // cache: word key → {translation, note}
+let ttKey   = '';
+let ttOn    = false;
+let ttTimer = null;
+
+function onWordEnter(e) {
+  const el = e.currentTarget;
+  const key = el && el.dataset.key;
+  if (!key) return;
+  clearTimeout(ttTimer);
+  ttTimer = setTimeout(() => { if (el && el.isConnected) showTT(el, key); }, 150);
+}
+
+function onWordLeave() {
+  clearTimeout(ttTimer);
+  hideTT();
+}
+
+function showTT(wordEl, key) {
+  ttOn  = true;
+  ttKey = key;
+
+  ttLbl.textContent   = key;
+  ttTrans.innerHTML   = '<i style="opacity:.55;font-size:12px;font-style:italic">перевод…</i>';
+  ttNote.textContent  = '';
+
+  placeTT(wordEl);
+  ttEl.classList.add('show');
+
+  if (xlat[key]) {
+    renderTT(xlat[key]);
+    return;
+  }
+  apiTranslate(key)
+    .then(r => {
+      xlat[key] = r;
+      if (ttOn && ttKey === key) renderTT(r);
+    })
+    .catch(err => {
+      console.error('translate error:', err);
+      if (ttOn && ttKey === key) {
+        ttTrans.textContent = '—';
+        ttNote.textContent  = '';
+      }
+    });
+}
+
+function renderTT(r) {
+  ttTrans.textContent = r.translation || '—';
+  ttNote.textContent  = r.note || '';
+}
+
+function hideTT() {
+  ttOn  = false;
+  ttKey = '';
+  ttEl.classList.remove('show');
+}
+
+function placeTT(wordEl) {
+  const tw = ttEl.offsetWidth  || 200;
+  const th = ttEl.offsetHeight || 70;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  const r  = wordEl.getBoundingClientRect();
+  let x = r.left + r.width / 2 - tw / 2;
+  let y = r.bottom + 10;
+
+  if (y + th + 8 > vh) y = r.top - th - 10;
+  x = Math.max(8, Math.min(x, vw - tw - 8));
+
+  ttEl.style.left = x + 'px';
+  ttEl.style.top  = y + 'px';
+}
+
+// ═══════════════════════════════════════════════════════
+// Translation EN → RU (Google gtx, MyMemory fallback)
+// ═══════════════════════════════════════════════════════
+const POS = {noun:'сущ.',verb:'гл.',adjective:'прил.',adverb:'нареч.',preposition:'предлог',conjunction:'союз',pronoun:'мест.',interjection:'межд.',article:'артикль',determiner:'опред.'};
+async function apiTranslate(w) {
+  try { return await gtx(w); } catch (e) { console.warn('gtx failed:', e); }
+  return await myMemory(w);
+}
+async function gtx(w) {
+  const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&dt=bd&q=' + encodeURIComponent(w));
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  const main = (d[0] || []).map(x => x[0]).join('').trim();
+  if (!main) throw new Error('empty');
+  const note = (d[1] || []).slice(0, 3).map(e => (POS[e[0]] || e[0]) + ': ' + (e[1] || []).slice(0, 3).join(', ')).join(' · ');
+  return { translation: main, note };
+}
+async function myMemory(w) {
+  const r = await fetch('https://api.mymemory.translated.net/get?langpair=en|ru&q=' + encodeURIComponent(w));
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const t = ((await r.json()).responseData || {}).translatedText;
+  if (!t) throw new Error('empty');
+  return { translation: t, note: '' };
+}
+
+// ═══════════════════════════════════════════════════════
+// DICTATION — pronunciation check (Web Speech Recognition)
+// ═══════════════════════════════════════════════════════
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const MIC = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-3.1A7 7 0 0 0 19 11h-2z"/></svg>';
+if (!SR) { const hb = document.querySelector('.hint-bar'); hb.innerHTML = hb.innerHTML.replace('🎤 = проверить произношение', '🎤 dictation needs Chrome / Edge / Safari'); }
+
+const pp = document.getElementById('pp'), ppScore = document.getElementById('pp-score'),
+      ppStatus = document.getElementById('pp-status'), ppHeard = document.getElementById('pp-heard');
+let rec = null, recIdx = -1, recText = '', recTimer = null, markedIdx = -1;
+
+const tokens = s => s.toLowerCase().replace(/\u2019/g, "'").match(/[a-z]+(?:'[a-z]+)*/g) || [];
+function lev(a, b) {
+  let p = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const c = [i];
+    for (let j = 1; j <= b.length; j++) c[j] = Math.min(p[j] + 1, c[j-1] + 1, p[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+    p = c;
+  }
+  return p[b.length];
+}
+// 0 = same, 0.5 = close, 1 = different
+function cost(a, b) { if (a === b) return 0; const L = Math.max(a.length, b.length); return L >= 4 && lev(a, b) / L <= 0.34 ? 0.5 : 1; }
+
+// word-level alignment of expected (E) vs recognised (R)
+function align(E, R) {
+  const n = E.length, m = R.length, D = [];
+  for (let i = 0; i <= n; i++) { D[i] = []; for (let j = 0; j <= m; j++) D[i][j] = (i && j) ? 0 : i + j; }
+  for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++)
+    D[i][j] = Math.min(D[i-1][j-1] + cost(E[i-1], R[j-1]), D[i-1][j] + 1, D[i][j-1] + 1);
+  const es = Array(n).fill('bad'), rs = Array(m).fill('extra');
+  let i = n, j = m;
+  while (i > 0 || j > 0) {
+    if (i && j && D[i][j] === D[i-1][j-1] + cost(E[i-1], R[j-1])) {
+      const c = cost(E[i-1], R[j-1]), st = c === 0 ? 'ok' : c < 1 ? 'close' : 'bad';
+      es[i-1] = st; rs[j-1] = st; i--; j--;
+    } else if (i && D[i][j] === D[i-1][j] + 1) i--;   // expected word missing
+    else j--;                                          // extra word
+  }
+  return { es, rs };
+}
+
+function clearMarks() {
+  if (markedIdx >= 0 && sentences[markedIdx]) sentences[markedIdx].words.forEach(w => w.el.className = 'w');
+  markedIdx = -1;
+}
+
+function evaluate(i, heard) {
+  const s = sentences[i], E = s.words.map(w => w.norm), R = tokens(heard);
+  if (!R.length) { ppScore.textContent = ''; ppHeard.textContent = ''; ppStatus.textContent = "Didn't catch anything — try again, a bit louder."; return; }
+  const { es, rs } = align(E, R);
+  s.words.forEach((w, k) => w.el.className = 'w ' + es[k]);
+  markedIdx = i;
+  const pts = es.reduce((a, x) => a + (x === 'ok' ? 1 : x === 'close' ? 0.5 : 0), 0);
+  const pct = Math.round(pts / (E.length || 1) * 100);
+  ppScore.textContent = pct + '%';
+  ppStatus.textContent = pct >= 90 ? 'Отлично!' : pct >= 70 ? 'Хорошо — обратите внимание на произношение подсвеченных слов в тексте' : 'Работайте над произношением подсвеченных слов в тексте';
+  ppHeard.innerHTML = R.map((w, k) => '<span class="' + rs[k] + '">' + w + '</span>').join(' ');
+}
+
+function toggleRec(i) { (rec && recIdx === i) ? stopRec() : startRec(i); }
+
+function startRec(i) {
+  stopRec(true); stopAll(); clearMarks();
+  recIdx = i; recText = '';
+  const r = rec = new SR();
+  r.lang = 'en-US'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+  r.onresult = ev => {
+    let t = '';
+    for (let k = 0; k < ev.results.length; k++) t += ev.results[k][0].transcript + ' ';
+    recText = t; ppHeard.textContent = t;
+    clearTimeout(recTimer); recTimer = setTimeout(() => stopRec(), 2200);   // auto-finish after a pause
+  };
+  r.onerror = ev => {
+    if (ev.error === 'aborted') return;
+    const msg = { 'not-allowed': 'Microphone access denied — allow it in the browser.', 'service-not-allowed': 'Нет доступа к микрофону.',
+                  'audio-capture': 'No microphone found.', 'no-speech': "Ничего не слышно - попробуйте еще раз.", 'network': 'Speech service unavailable (network).' }[ev.error];
+    if (msg) { ppStatus.textContent = msg; r._err = true; }
+  };
+  r.onend = () => {
+    if (rec !== r) return;
+    clearTimeout(recTimer); rec = null;
+    sentences[recIdx].mic.classList.remove('rec');
+    if (!r._err) evaluate(recIdx, recText);
+  };
+  pp.classList.add('open');
+  ppScore.textContent = ''; ppHeard.textContent = '';
+  ppStatus.textContent = '🎤 Слушаю… читайте предложение вслух (кликните 🎤 завершить)';
+  sentences[i].mic.classList.add('rec');
+  try { r.start(); } catch (e) { console.error(e); }
+}
+
+function stopRec(silent) {
+  clearTimeout(recTimer);
+  if (!rec) return;
+  const r = rec;
+  if (silent) {
+    rec = null; r.abort();
+    if (recIdx >= 0 && sentences[recIdx] && sentences[recIdx].mic) sentences[recIdx].mic.classList.remove('rec');
+  } else r.stop();
+}
+
+document.getElementById('pp-retry').addEventListener('click', () => { if (recIdx >= 0) startRec(recIdx); });
+document.getElementById('pp-close').addEventListener('click', () => { stopRec(true); pp.classList.remove('open'); clearMarks(); });
+
+// ═══════════════════════════════════════════════════════
+// SAVE AS STANDALONE HTML
+// ═══════════════════════════════════════════════════════
+// ── перевод предложений ─────────────────────────────
+async function gtxSent(q) {
+  const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=' + encodeURIComponent(q));
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  const t = (d[0] || []).map(x => x[0]).join('').trim();
+  if (!t) throw new Error('empty');
+  return t;
+}
+async function getTr(text) {
+  if (sentTr[text]) return sentTr[text];
+  let t;
+  try { t = await gtxSent(text); }
+  catch (e) { t = (await myMemory(text)).translation; }
+  sentTr[text] = t;
+  return t;
+}
+function openTr(i) {
+  const s = sentences[i]; if (!s) return;
+  s.trEl.classList.add('on'); s.tb.classList.add('act');
+  if (sentTr[s.text]) { s.trEl.classList.remove('load'); delete s.trEl.dataset.err; s.trEl.textContent = sentTr[s.text]; }
+  else if (!s.trEl.textContent) { s.trEl.classList.add('load'); s.trEl.textContent = 'перевод…'; }
+}
+function hideTr(i) {
+  const s = sentences[i]; if (!s) return;
+  s.trEl.classList.remove('on'); s.tb.classList.remove('act');
+}
+async function fillTr(i) {
+  const s = sentences[i]; if (!s || sentTr[s.text]) return;
+  try {
+    const t = await getTr(s.text);
+    if (sentences[i] !== s) return;
+    s.trEl.classList.remove('load'); delete s.trEl.dataset.err; s.trEl.textContent = t;
+  } catch (e) {
+    console.error('translate error:', e);
+    if (sentences[i] === s) { s.trEl.classList.remove('load'); s.trEl.dataset.err = '1'; s.trEl.textContent = '— не удалось получить перевод (проверьте интернет)'; }
+  }
+}
+function toggleTr(i) {
+  const s = sentences[i]; if (!s) return;
+  if (s.trEl.classList.contains('on')) { hideTr(i); return; }
+  if (!sentTr[s.text]) { s.trEl.textContent = ''; delete s.trEl.dataset.err; }
+  openTr(i); fillTr(i);
+}
+document.getElementById('trall-btn').addEventListener('click', async function () {
+  allTr = !allTr;
+  this.textContent = allTr ? '🙈 Скрыть все переводы' : '🌐 Показать все переводы';
+  if (!allTr) { sentences.forEach((_, i) => hideTr(i)); return; }
+  sentences.forEach((s, i) => { if (!sentTr[s.text]) s.trEl.textContent = ''; openTr(i); });
+  for (let i = 0; i < sentences.length && allTr; i++) await fillTr(i);
+});
+
+async function saveHTML() {
+  if (!currentRaw) return;
+
+  // предложить вшить переводы всех предложений
+  const saveBtn = document.getElementById('save-btn');
+  const missing = sentences.filter(s => !sentTr[s.text]);
+  if (missing.length && confirm('Добавить в файл переводы всех предложений?\nЭто займёт несколько секунд и требует интернета.\n\nОК — с переводами, Отмена — без них.')) {
+    const label = saveBtn.textContent;
+    for (let k = 0; k < missing.length; k++) {
+      saveBtn.textContent = '⏳ Перевожу ' + (k + 1) + '/' + missing.length + '…';
+      try { await getTr(missing[k].text); } catch (e) { console.error(e); break; }
+    }
+    saveBtn.textContent = label;
+  }
+
+  const clone = document.documentElement.cloneNode(true);
+
+  // вернуть страницу в «чистое» состояние
+  clone.querySelector('#content').innerHTML = '';
+  clone.querySelector('#reader').removeAttribute('style');
+  clone.querySelector('#inp').removeAttribute('style');
+  clone.querySelector('#pp').classList.remove('open');
+  clone.querySelector('#tt').classList.remove('show');
+  clone.querySelector('#tt').removeAttribute('style');
+  const old = clone.querySelector('#preload');
+  if (old) old.remove();
+
+  // заголовок вкладки
+  const title = (document.getElementById('btitle').textContent || 'Reader').trim();
+  clone.querySelector('title').textContent = title;
+
+  // вшить текст
+  const pre = document.createElement('script');
+  pre.id = 'preload';
+  pre.type = 'application/json';
+  pre.textContent = JSON.stringify(currentRaw).replace(/</g, '\\u003c');
+  const first = clone.querySelector('body script:not([type])');
+  first.parentNode.insertBefore(pre, first);
+
+  // вшить уже полученные переводы (только для текущего текста)
+  const oldTr = clone.querySelector('#pretr');
+  if (oldTr) oldTr.remove();
+  const trMap = {};
+  sentences.forEach(s => { if (sentTr[s.text]) trMap[s.text] = sentTr[s.text]; });
+  if (Object.keys(trMap).length) {
+    const pre2 = document.createElement('script');
+    pre2.id = 'pretr';
+    pre2.type = 'application/json';
+    pre2.textContent = JSON.stringify(trMap).replace(/</g, '\\u003c');
+    first.parentNode.insertBefore(pre2, first);
+  }
+
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const safe = title.replace(/[\\/:*?"<>|]+/g, '').replace(/[.\u2026\s]+$/g, '').trim().slice(0, 50).trim();
+  a.download = (safe || 'reader') + '.html';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+document.getElementById('save-btn').addEventListener('click', saveHTML);
+
+// ── автозапуск, если в файл вшит текст ──────────────
+(function () {
+  const pre = document.getElementById('preload');
+  if (!pre) return;
+  try {
+    const t = JSON.parse(pre.textContent);
+    ta.value = t;
+    dz.classList.add('hidden');
+    ta.style.display = 'block';
+    buildReader(t);
+    // сохранённые (в т.ч. исправленные вручную) переводы важнее исходных
+    const pt = document.getElementById('pretr');
+    if (pt) { try { Object.assign(sentTr, JSON.parse(pt.textContent)); } catch (e) { console.error('pretr error:', e); } }
+  } catch (e) { console.error('preload error:', e); }
+})();
+</script>
+
+
+</body></html>
