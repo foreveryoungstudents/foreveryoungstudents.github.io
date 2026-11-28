@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Чтец — озвучка русского текста</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=Golos+Text:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3f5f7; --surface:#fff; --ink:#1b2430; --muted:#5d6b7a; --line:#d5dbe2;
+  --accent:#1f3a5f; --accent-ink:#fff; --mark:#ffe27a; --mark-ink:#1b2430;
+  color-scheme:light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151c; --surface:#18202a; --ink:#e8edf2; --muted:#93a1b0; --line:#2b3644;
+    --accent:#9cc2f0; --accent-ink:#10151c; --mark:#6b5a14; --mark-ink:#fff4cc; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151c; --surface:#18202a; --ink:#e8edf2; --muted:#93a1b0; --line:#2b3644;
+  --accent:#9cc2f0; --accent-ink:#10151c; --mark:#6b5a14; --mark-ink:#fff4cc; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 "Golos Text",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 22px/1.15 "PT Serif",Georgia,"Times New Roman",serif;margin:0 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px}
+textarea,.reader{display:block;width:100%;min-height:260px;padding:14px 16px;border:0;background:transparent;color:var(--ink);
+  font:400 16px/1.6 "PT Serif",Georgia,"Times New Roman",serif;resize:vertical;border-radius:8px}
+textarea:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.reader{white-space:pre-wrap;max-height:60vh;overflow:auto}
+.reader span{cursor:pointer;border-radius:3px;padding:1px 0;transition:background .15s}
+.reader span:hover{background:color-mix(in srgb,var(--mark) 35%,transparent)}
+.reader span.now{background:var(--mark);color:var(--mark-ink)}
+.reader span.done{color:var(--muted)}
+.reader span.bm{border-left:3px solid var(--accent);padding-left:6px}
+.reader.dual{white-space:normal}
+.reader.dual span{display:block;margin:0 0 .35em}
+.reader.dual span[data-l="f"]{font-weight:700}
+button,select{font:inherit;color:var(--ink)}
+button{min-height:36px;padding:0 14px;border-radius:7px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+button.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600;min-width:104px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}
+select{min-height:36px;padding:0 8px;border-radius:7px;border:1px solid var(--line);background:var(--surface);max-width:100%;flex:1 1 200px}
+label.rate{display:flex;align-items:center;gap:8px;color:var(--muted);flex:1 1 200px}
+input[type=range]{flex:1;accent-color:var(--accent);min-width:100px}
+label.chk{display:flex;gap:8px;align-items:center;min-height:36px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.tb{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+.tb button,.stress .bar button{min-height:32px;padding:0 12px}
+.tb select,.stress .bar select{min-height:32px}
+.tb select,.tb label.rate{flex:1 1 200px}
+.seg{display:inline-flex}
+.seg button{border-radius:0;margin-left:-1px;position:relative}
+.seg button:first-child{border-radius:7px 0 0 7px;margin-left:0}
+.seg button:last-child{border-radius:0 7px 7px 0}
+.seg button:focus-visible{z-index:1}
+.seg select{border-radius:0 7px 7px 0;margin-left:-1px;flex:none;padding:0 6px}
+.meta{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;margin-top:8px;flex-wrap:wrap}
+.note{margin-top:10px;padding:8px 12px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:6px;background:var(--surface);font-size:13px;color:var(--muted)}
+.stress{margin-top:10px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.stress summary{cursor:pointer;font-weight:600;min-height:24px}
+.stress p{margin:6px 0;color:var(--muted);font-size:13px}
+.stress p:empty{display:none}
+.stress .hint{font-size:11px;margin:6px 0 0}
+.stress textarea{min-height:110px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font:400 13px/1.5 "Golos Text",system-ui,sans-serif;resize:vertical}
+.stress .bar input[type=text]{flex:1 1 200px;min-width:0;min-height:32px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink);font:inherit}
+.bmitem{display:grid;grid-template-columns:1fr auto;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
+.bmitem input{min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink);font:inherit;min-width:0}
+.bmitem button{min-height:34px;padding:0 12px}
+.bmitem .bmgo{grid-column:1/-1;text-align:left;height:auto;padding:6px 10px;overflow-wrap:anywhere}
+#spoken{display:block;position:sticky;bottom:0;z-index:5;margin:8px -16px 0;padding:6px 16px calc(6px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);font-size:12px;overflow-wrap:anywhere}
+#spoken:empty{display:none}
+.panel{position:relative}
+#bmLayer{position:absolute;overflow:hidden;pointer-events:none}
+#bmLayer>div{position:absolute;left:0;top:0}
+.bmi{position:absolute;width:12px;height:16px;min-height:0;min-width:0;padding:0;border:0;border-radius:0;background:transparent;opacity:.9;cursor:pointer;pointer-events:auto}
+.bmi::before{content:"";display:block;width:8px;height:11px;margin:0 auto;background:#e0861a;clip-path:polygon(0 0,100% 0,100% 100%,50% 72%,0 100%)}
+.bmi:hover{opacity:1}
+.bmr{position:relative;display:inline-block;vertical-align:text-top;margin-right:3px}
+#bmTip{position:absolute;z-index:6;max-width:280px;padding:6px 10px;border:1px solid var(--line);border-left:3px solid #e0861a;border-radius:6px;background:var(--surface);color:var(--ink);font:13px/1.4 "Golos Text",system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.18);white-space:pre-wrap;overflow-wrap:anywhere}
+#bmTip.empty{color:var(--muted);font-style:italic}
+.hide{display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Чтец</h1>
+  <p class="lead">Вставьте текст и нажмите «Читать». Озвучка работает в браузере, без регистрации.</p>
+
+  <div class="panel">
+    <textarea id="src" aria-label="Текст для озвучки" spellcheck="false">In the land of Ingary, where such things as seven-league boots and cloaks of invisibility really exist, it is quite a misfortune to be born the eldest of three.
+
+В стране Ингарии, где на самом деле существуют такие вещи, как семимильные сапоги и плащи-невидимки, родиться старшим из троих — большое несчастье.</textarea>
+    <div id="reader" class="reader hide" aria-live="off"></div>
+    <div id="bmLayer"><div></div></div>
+    <div id="bmTip" class="hide" role="status"></div>
+  </div>
+
+  <div class="tb">
+    <div class="seg">
+      <button id="play" class="main" title="С начала; после «Стоп» — с начала текущего абзаца">Читать</button>
+      <button id="cursor" title="С курсора: последнее прочитанное слово или слово, по которому кликнули">С курсора</button>
+      <button id="stop" disabled title="Остановить и вернуться к тексту">Стоп</button>
+      <button id="open" title="TXT, PDF, DOCX, FB2, EPUB и др.">Загрузить файл</button>
+      <select id="saveFmt" aria-label="Сохранить в файл" title="Сохранить в файл">
+        <option value="">Сохранить…</option>
+        <option value="txt">Текст (.txt)</option>
+        <option value="json">Проект: текст, закладки, словарь (.json)</option>
+      </select>
+    </div>
+    <div class="seg">
+      <button id="bmAdd" title="Добавить закладку в месте курсора" aria-label="Добавить закладку">+ Закладка</button>
+      <button id="bmPrev" title="Предыдущая закладка" aria-label="Предыдущая закладка">‹</button>
+      <button id="bmNext" title="Следующая закладка" aria-label="Следующая закладка">›</button>
+    </div>
+    <input id="file" type="file" hidden accept=".txt,.md,.markdown,.html,.htm,.xhtml,.fb2,.epub,.docx,.odt,.pdf,.srt,.csv,.log,.json">
+  </div>
+  <div class="tb">
+    <select id="voice" aria-label="Голос"></select>
+    <label class="rate">Скорость <input id="rate" type="range" min="0.6" max="1.6" step="0.05" value="1"> <output id="rateOut">1,0×</output></label>
+  </div>
+  <details id="bmPanel" class="stress">
+    <summary>Закладки<span id="bmCount"></span></summary>
+    <div id="bmList"></div>
+  </details>
+  <details class="stress" id="stressPanel">
+    <summary>Ударения</summary>
+    <textarea id="stress" spellcheck="false" aria-label="Словарь ударений"></textarea>
+    <div class="bar">
+      <select id="stressMode" autocomplete="off" aria-label="Способ передачи ударения">
+        <option value="hyph">Дефис перед гласной (сам-ой)</option>
+        <option value="caps">Ударная гласная заглавной (звонИт)</option>
+        <option value="acute">Знак ударения (звони́т)</option>
+        <option value="acutewj">Знак ударения без разрыва слова</option>
+        <option value="ac2">Символ ´ после гласной (звон´ит)</option>
+        <option value="mod">Символ ˊ после гласной (звонˊит)</option>
+        <option value="apos">Апостроф после гласной (звон'ит)</option>
+        <option value="plus">Плюс перед гласной (звон+ит)</option>
+      </select>
+      <button id="stressTest">Проверить слова</button>
+      <button id="stressAdd">Добавить омографы</button>
+    </div>
+    <div class="bar">
+      <input id="stressProbe" type="text" value="сам+ой Софи" aria-label="Фраза для проверки ударения">
+      <button id="stressCompare" title="Прочитать фразу всеми способами записи ударения">Сравнить способы</button>
+      <button id="stressRaw" title="Прочитать как написано; варианты через «;»">Как написано</button>
+    </div>
+    <p id="stressProbeInfo"></p>
+    <p class="hint">«+» или «-» перед ударной гласной: звон+ит. «слово => замена». После «|» — слова-подсказки.</p>
+  </details>
+  <div id="loadInfo" class="meta"></div>
+  <div id="spoken" class="meta"></div>
+  <div class="meta"><span id="count"></span><span id="bmInfo"></span><span id="status"></span></div>
+  <div id="note" class="note hide"></div>
+  <details id="dualPanel" class="stress">
+    <summary>Два языка</summary>
+    <p>Для текста с подстрочным переводом. Русский читается основным голосом, иностранный — голосом из списка ниже. Ударения и числительные работают только для русского.</p>
+    <label class="chk"><input type="checkbox" id="dualOn"> Читать на двух языках</label>
+    <div class="bar">
+      <select id="dualMode" aria-label="Как различать языки">
+        <option value="auto">Различать по буквам (кириллица — русский)</option>
+        <option value="altf">Строки чередуются: 1-я иностранная, 2-я русская</option>
+        <option value="altr">Строки чередуются: 1-я русская, 2-я иностранная</option>
+      </select>
+      <select id="dualVoice" aria-label="Голос для иностранного языка"></select>
+      <select id="dualRead" aria-label="Что читать">
+        <option value="all">Читать оригинал и перевод</option>
+        <option value="f">Только иностранный</option>
+        <option value="r">Только русский</option>
+      </select>
+    </div>
+    <p id="dualInfo"></p>
+  </details>
+  <details id="voicePanel" class="stress">
+    <summary>Голоса</summary>
+    <p>Голоса берутся из браузера и системы. Установите русский голос, перезапустите браузер и нажмите «Обновить список». Названия пунктов меню могут отличаться.</p>
+    <p><b>Windows.</b> Параметры → Время и язык → Речь → Добавить голоса (русские: Ирина, Павел). В Edge есть более естественные Svetlana и Dmitry (Natural).</p>
+    <p><b>Mac и iPhone.</b> Универсальный доступ → Устный контент (на iPhone — Речь) → Голоса → Русский. Лучше версия Enhanced или Premium.</p>
+    <p><b>Android.</b> Настройки → Язык и ввод → Синтез речи (Google) → Установить данные голоса → Русский.</p>
+    <p><b>Chrome.</b> Появится «Голос Google русский», ему нужен интернет.</p>
+    <div class="bar">
+      <button id="voiceRefresh">Обновить список</button>
+      <button id="voiceTest">Прослушать</button>
+    </div>
+    <p id="voiceInfo"></p>
+  </details>
+  <div class="meta"><span>Версия: 28.11.2026</span></div>
+</main>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var synth=window.speechSynthesis;
+  var src=$('#src'),reader=$('#reader'),playBtn=$('#play'),stopBtn=$('#stop'),voiceSel=$('#voice'),
+      rate=$('#rate'),rateOut=$('#rateOut'),note=$('#note'),status=$('#status'),count=$('#count');
+  var voices=[],sents=[],spans=[],idx=0,token=0,state='idle',keep=[],resumePos=null,rd=null,readOff=null;
+
+  if(!synth||!window.SpeechSynthesisUtterance){
+    note.textContent='Браузер не поддерживает озвучку. Откройте страницу в Chrome, Edge, Safari или Firefox.';
+    note.classList.remove('hide');playBtn.disabled=true;return;
+  }
+
+  function score(v){
+    var n=v.name.toLowerCase(),s=0;
+    if(/google/.test(n)&&/рус|russian/.test(n))s+=20;
+    if(/natural|neural|online/.test(n))s+=5;
+    if(/svetlana|dmitry|pavel|irina|milena|yuri|katya|google/.test(n))s+=2;
+    if(v.localService)s+=1;
+    return s;
+  }
+  function loadVoices(){
+    var all=synth.getVoices();
+    voices=all.filter(function(v){return /^ru/i.test(v.lang)||/russian|рус/i.test(v.name)});
+    voices.sort(function(a,b){return score(b)-score(a)});
+    var prev=voiceSel.value;
+    voiceSel.innerHTML='';
+    if(!voices.length){
+      var o=document.createElement('option');o.textContent='Голос по умолчанию (ru-RU)';o.value='';voiceSel.appendChild(o);
+      if(all.length){
+        note.textContent='Русский голос не найден. Установите его в настройках устройства (язык и речь).';
+        note.classList.remove('hide');
+      }
+      return;
+    }
+    note.classList.add('hide');
+    voices.forEach(function(v,i){
+      var o=document.createElement('option');o.value=String(i);o.textContent=v.name+' ('+v.lang+')';voiceSel.appendChild(o);
+    });
+    if(prev&&voiceSel.querySelector('option[value="'+prev+'"]'))voiceSel.value=prev;
+  }
+  loadVoices();
+  if('onvoiceschanged' in synth)synth.onvoiceschanged=loadVoices;
+  setTimeout(loadVoices,600);
+
+  /* Подготовка текста, чтобы синтезатор читал естественнее */
+  var rules=[
+    [/https?:\/\/\S+/g,' ссылка '],
+    [/т\.\s?д\./g,'так далее.'],[/т\.\s?е\./g,'то есть'],[/т\.\s?к\./g,'так как'],[/т\.\s?п\./g,'тому подобное.'],
+    [/и\s+др\./g,'и другие.'],[/и\s+пр\./g,'и прочее.'],[/напр\./g,'например'],[/\bсм\./g,'смотри'],
+    [/руб\./g,'рублей'],[/(\d)\s?%/g,'$1 процентов'],[/№\s?/g,'номер '],
+    [/(?<![а-яёА-ЯЁ])тыс\./g,'тысяч'],[/(?<![а-яёА-ЯЁ])млн(?![а-яё])/g,'миллионов'],[/(?<![а-яёА-ЯЁ])млрд(?![а-яё])/g,'миллиардов'],
+    [/\s[—–]\s/g,', '],[/[*_#`>~|]+/g,''],[/\s+/g,' ']
+  ];
+  /* Словарь ударений */
+  var stressBox=$('#stress'),stressMode=$('#stressMode'),stressTest=$('#stressTest'),stressList=[];
+  var oldDefaults='звон+ит\nдогов+ор\nкрас+ивее\nкатал+ог\nкварт+ал\nщав+ель\nторт+ы\nт+уфля';
+  var defaults=['звон+ит','догов+ор','крас+ивее','катал+ог','кварт+ал','щав+ель','т+орты, т+ортов','т+уфля','з+амок, з+амка, з+амку, з+амком, з+амке, з+амки, з+амков, з+амкам, з+амками, з+амках | рыцар, король, королев, принц, башн, средневеков, крепост, дворец, старин, стен','зам+ок, замк+а, замк+у, замк+ом, замк+е, замк+и, замк+ов, замк+ам, замк+ами, замк+ах | ключ, двер, запер, закр, откр, взлом, сейф, щелк, молни, ящик, чемодан'];
+  var stressMap={};
+  function renderWord(m,i){
+    var mode=stressMode.value,c=m.charAt(i);
+    var s=(mode==='hyph'&&i===m.length-1)?c+'\u0301':((mode==='hyph'&&!hyphOk(m.slice(0,i)))?c:stressMark(c,mode));
+    return m.slice(0,i)+s+m.slice(i+1);
+  }
+  /* Строка: формы через запятую [| слова-подсказки]. Несколько строк с одной и той же формой = омограф. */
+  function parseStress(){
+    stressList=[];stressMap={};stressRep=[];
+    stressBox.value.split(/\n+/).forEach(function(line){
+      if(line.indexOf('=>')>=0){addRep(line);return}
+      var parts=line.toLowerCase().split('|');
+      var ctx=(parts[1]||'').split(/[,;]+/).map(function(s){return s.trim()}).filter(Boolean);
+      var first=true;
+      parts[0].split(/[,;\s]+/).forEach(function(form){
+        var p=form.indexOf('+'),plain;
+        if(p>=0){plain=form.replace('+','')}
+        else{p=form.search(/-[аеёиоуыэюя]/);plain=p>0?form.slice(0,p)+form.slice(p+1):form}
+        if(p<=0&&form.indexOf('+')<0)return;
+        if(p<0||p>=plain.length)return;
+        if(!/^[а-яё-]+$/.test(plain))return;
+        (stressMap[plain]=stressMap[plain]||[]).push({i:p,ctx:ctx,lit:(form.indexOf('+')<0&&p<plain.length-1)?form:null});
+        if(first){stressList.push({plain:plain,i:p,lit:(form.indexOf('+')<0&&p<plain.length-1)?form:null});first=false}
+      });
+    });
+  }
+  function applyStress(t){
+    stressRep.forEach(function(r){t=t.replace(r.re,function(m){return /^[А-ЯЁA-Z]/.test(m)?r.to.charAt(0).toUpperCase()+r.to.slice(1):r.to})});
+    var words=t.toLowerCase().match(/[а-яё-]+/g)||[];
+    Object.keys(stressMap).forEach(function(plain){
+      var vars=stressMap[plain];
+      var re=new RegExp('(?<![а-яёА-ЯЁ])'+plain+'(?![а-яёА-ЯЁ])','gi');
+      t=t.replace(re,function(m){
+        var best=null,top=0,tie=false,def=null;
+        vars.forEach(function(v){
+          if(!v.ctx.length){if(!def)def=v;return}
+          var sc=v.ctx.filter(function(s){return words.some(function(w){return w!==plain&&w.indexOf(s)===0})}).length;
+          if(sc>top){top=sc;best=v;tie=false}else if(sc&&sc===top)tie=true;
+        });
+        var pick=best&&!tie?best:def;
+        return pick?(pick.lit?(/^[А-ЯЁ]/.test(m)?pick.lit.charAt(0).toUpperCase()+pick.lit.slice(1):pick.lit):renderWord(m,pick.i)):m;
+      });
+    });
+    return t;
+  }
+  function saveStress(){
+    try{localStorage.setItem('chtec.stress',stressBox.value);localStorage.setItem('chtec.stressMode',stressMode.value)}catch(e){}
+  }
+  (function(){
+    var v=null,m=null;
+    try{v=localStorage.getItem('chtec.stress');m=localStorage.getItem('chtec.stressMode')}catch(e){}
+    stressBox.value=(v!==null&&v!==oldDefaults)?v:defaults.join('\n');
+    var mf=null;
+    try{mf=localStorage.getItem('chtec.mode2')}catch(e){}
+    if(!mf){
+      stressMode.value='hyph';
+      try{localStorage.setItem('chtec.mode2','1');localStorage.setItem('chtec.stressMode','hyph')}catch(e){}
+    }else if(m)stressMode.value=m;
+    var line2='том+у | чтобы, же, самому, назад, времени, моменту, дню, месту, часу, году, началу, концу, привести, привело, приводит, стремит, подготов, готов';
+    var f2=null;
+    try{f2=localStorage.getItem('chtec.extra2')}catch(e){}
+    if(!f2){
+      if(stressBox.value.indexOf('том+у')<0&&stressBox.value.indexOf('том-у')<0)stressBox.value=stressBox.value.replace(/\s+$/,'')+'\n'+line2;
+      try{localStorage.setItem('chtec.extra2','1');localStorage.setItem('chtec.stress',stressBox.value)}catch(e){}
+    }
+    var extra1=[
+      'с+амой | красив, умн, лучш, добр, больш, главн, важн, сильн, быстр, нов, стар',
+      'с+амому | тому, этому, дню, месту, моменту, часу, году, началу, концу'
+    ];
+    var flag=null;
+    try{flag=localStorage.getItem('chtec.extra1')}catch(e){}
+    if(!flag){
+      var have=stressBox.value,add=extra1.filter(function(l){return have.indexOf(l.split(' ')[0])<0});
+      if(add.length)stressBox.value=have.replace(/\s+$/,'')+'\n'+add.join('\n');
+      try{localStorage.setItem('chtec.extra1','1');localStorage.setItem('chtec.stress',stressBox.value)}catch(e){}
+    }
+    parseStress();
+  })();
+  stressBox.addEventListener('input',function(){parseStress();saveStress()});
+  stressMode.addEventListener('change',saveStress);
+  var homographs=[
+    '+атлас, +атласа, +атласу, +атласом, +атласе | карт, мир, географ, страниц, анатом, школьн',
+    'атл+ас, атл+аса, атл+асу, атл+асом, атл+асе | ткан, платье, шёлк, шелк, блест, подклад',
+    'м+ука, м+уки, м+уку, м+укой, м+уке | боль, страдан, адск, невыносим, пытк, душев, терпе',
+    'мук+а, мук+и, мук+у, мук+ой, мук+е | пшеничн, ржан, тест, пирог, хлеб, блин, пекл, выпеч, сахар, яйц, килограмм, стакан, замес',
+    'хл+опок, хл+опка, хл+опку, хл+опком, хл+опке | ткан, футболк, рубашк, одежд, нитк, волокн, джинс, махров',
+    'хлоп+ок, хлопк+а, хлопк+у, хлопк+ом, хлопк+е | громк, звук, выстрел, раздал, взрыв, ладон, двер',
+    'пр+опасть, пр+опасти, пр+опастью | бездн, скал, гор, обрыв, глубок, ущель',
+    'п+олки, п+олок, п+олками, п+олках | книг, посуд, магазин, шкаф, стен, кухн, товар, продукт',
+    'полк+и, полк+ов, полк+ам, полк+ами, полк+ах | солдат, офицер, арми, баталь, командир, казач, гвард, дивиз, войск, пехот',
+    'пл+ачу | слёз, слез, ребёнок, ребенок, горьк, рыда',
+    'плач+у | деньг, рубл, налог, счёт, счет, кредит, зарплат, долг, наличн, штраф, аренд',
+    'пар+ит, пар+ят | птиц, орёл, орел, неб, ястреб, высоко, ввысь',
+    'п+арит, п+арят | бан, парил, веник, ног, овощ, духот, жар, гроз',
+    'д+ома | сид, остал, оста, находи, ждёт, ждет, никого',
+    'дом+а | постро, стро, высок, многоэтаж, улиц, район, город, деревн, старинн, каменн'
+  ];
+  $('#stressAdd').addEventListener('click',function(){
+    var have=stressBox.value;
+    var add=homographs.filter(function(l){return have.indexOf(l.split(',')[0])<0});
+    if(add.length)stressBox.value=(have.trim()?have.replace(/\s+$/,'')+'\n':'')+add.join('\n');
+    parseStress();saveStress();
+  });
+  stressTest.addEventListener('click',function(){
+    if(state!=='idle')return;
+    parseStress();
+    if(!stressList.length)return;
+    synth.cancel();
+    var u=new SpeechSynthesisUtterance(stressList.map(function(r){return r.lit||renderWord(r.plain,r.i)}).join(', '));
+    u.lang='ru-RU';
+    var vi=voiceSel.value;
+    if(vi!==''&&voices[+vi]){u.voice=voices[+vi];u.lang=voices[+vi].lang}
+    u.rate=parseFloat(rate.value);
+    keep.push(u);synth.speak(u);
+  });
+
+  var U=[0,['перв','y'],['втор','o'],['трет','i'],['четвёрт','y'],['пят','y'],['шест','o'],['седьм','o'],['восьм','o'],['девят','y']],
+  T1=['десят','одиннадцат','двенадцат','тринадцат','четырнадцат','пятнадцат','шестнадцат','семнадцат','восемнадцат','девятнадцат'],
+  TT=['','','двадцат','тридцат','сороков','пятидесят','шестидесят','семидесят','восьмидесят','девяност'],
+  TC=['','','двадцать','тридцать','сорок','пятьдесят','шестьдесят','семьдесят','восемьдесят','девяносто'],
+  HC=['','сто','двести','триста','четыреста','пятьсот','шестьсот','семьсот','восемьсот','девятьсот'],
+  HO=['','сот','двухсот','трёхсот','четырёхсот','пятисот','шестисот','семисот','восьмисот','девятисот'],
+  PG=['','','двух','трёх','четырёх','пяти','шести','семи','восьми','девяти'],
+  CU=['','одна','две','три','четыре','пять','шесть','семь','восемь','девять'],
+  EY=['ый','ого','ому','ом','ым','ая','ую','ое','ые','ых','ыми'],EI=['ий','ьего','ьему','ьем','ьим','ья','ью','ье','ьи','ьих','ьими'],CODES='ngdpifaoqhm';
+  function ow(stem,type,code){var k=CODES.indexOf(code),e=(type==='i'?EI:EY)[k];if(type==='o'&&k===0)e='ой';return stem+e}
+  /* порядковое числительное с нужным падежом: n им., g род., d дат., p предл., i тв., f/a/o ж.им./ж.вин./ср.им., q/h/m мн.ч. им./род./тв. */
+  function ordinal(n,code){
+    if(n<1||n>9999)return null;
+    var th=Math.floor(n/1000),r=n%1000,h=Math.floor(r/100),d=r%100,te=Math.floor(d/10),u=d%10,w=[],s;
+    if(!r)return ow(PG[th]+'тысячн','y',code);
+    if(th)w.push(th===1?'тысяча':th<5?CU[th]+' тысячи':CU[th]+' тысяч');
+    if(!d)s=[HO[h],'y'];
+    else{
+      if(h)w.push(HC[h]);
+      if(d<10)s=U[d];else if(d<20)s=[T1[d-10],'y'];else if(!u)s=[TT[te],te===4?'o':'y'];else{w.push(TC[te]);s=U[u]}
+    }
+    w.push(ow(s[0],s[1],code));
+    return w.join(' ');
+  }
+  function numerals(t){
+    var sfx={'й':'n','го':'g','му':'d','м':'p','я':'f','ю':'a','е':'o','х':'h','ми':'m'};
+    t=t.replace(/(\d{1,4})-(й|го|му|м|я|ю|е|х|ми)(?![а-яё])/g,function(m,n,s){
+      n=+n;var c=sfx[s];if(s==='е'&&n>=1000&&n%10===0)c='q';
+      return ordinal(n,c)||m;
+    });
+    var yr={'год':'n','года':'g','году':'p','годом':'i','годе':'p','г.':'n'};
+    t=t.replace(/(\d{3,4})\s?(годом|годе|году|года|год|г\.)(?![а-яё])/g,function(m,n,w,off){
+      var pw=((t.slice(0,off).match(/([а-яё]+)\s*$/i)||[])[1]||'').toLowerCase(),c=yr[w];
+      if(w==='году'&&(pw==='к'||pw==='по'))c='d';
+      if(w==='г.')c=/^(в|во|на|при|о|об)$/.test(pw)?'p':/^(с|со|до|от|из|после|около|для|без|у)$/.test(pw)?'g':pw==='к'?'d':'n';
+      var o=ordinal(+n,c);
+      return o?o+' '+({n:'год',g:'года',d:'году',p:'году',i:'годом'})[c]:m;
+    });
+    var rv={I:1,V:5,X:10,L:50,C:100};
+    t=t.replace(/(?<![A-Za-zА-Яа-яЁё])([IVXLC]{1,6})\s(век|века|веку|веком|веке)(?![а-яё])/g,function(m,r,w){
+      var n=0,i,a,b;
+      for(i=0;i<r.length;i++){a=rv[r[i]];b=rv[r[i+1]]||0;n+=a<b?-a:a}
+      var c={'век':'n','века':'g','веку':'d','веком':'i','веке':'p'}[w];
+      return (ordinal(n,c)||r)+' '+w;
+    });
+    return t;
+  }
+  var stressRep;
+  function addRep(line){
+    var pr=line.split('=>'),from=pr[0].trim(),to=pr.slice(1).join('=>').trim();
+    if(!from||!to)return;
+    var esc=from.replace(/[^а-яёА-ЯЁa-zA-Z0-9 -]/g,function(c){return '\\'+c});
+    stressRep.push({re:new RegExp('(?<![а-яёА-ЯЁA-Za-z])'+esc+'(?![а-яёА-ЯЁA-Za-z])','gi'),to:to});
+  }
+  function inlineStress(t){
+    var mode=stressMode.value;
+    return t.replace(/(?<![0-9A-Za-z])\+([аеёиоуыэюя])/gi,function(m,v,off,s){if(mode==='hyph'&&!/[а-яё]/i.test(s.charAt(off+2)||''))return v+'\u0301';if(mode==='hyph'&&!hyphOk((s.slice(0,off).match(/[а-яё]*$/i)||[''])[0]))return v;return mode==='plus'?m:stressMark(v,mode)});
+  }
+  function normalize(t){t=numerals(t);rules.forEach(function(r){t=t.replace(r[0],r[1])});return inlineStress(applyStress(t.trim()))}
+
+  function splitSentences(t){
+    return t.split(/\n+|(?<=[.!?…])\s+(?=[А-ЯЁA-Z«"“(\d—-])/).map(function(s){return s.trim()}).filter(Boolean);
+  }
+  function pieces(s){
+    var n=curLang==='f'?plainNorm(s):normalize(s);
+    if(n.length<=220)return [n];
+    var parts=n.split(/(?<=[,;:])\s+/),out=[],cur='';
+    parts.forEach(function(p){
+      if((cur+' '+p).length>200&&cur){out.push(cur);cur=p}else cur=cur?cur+' '+p:p;
+    });
+    if(cur)out.push(cur);
+    return out;
+  }
+
+  function buildReader(){
+    reader.innerHTML='';spans=[];
+    sents.forEach(function(s,i){
+      var sp=document.createElement('span');sp.textContent=s;
+      sp.addEventListener('click',function(e){clickStart(i,e)});
+      reader.appendChild(sp);reader.appendChild(document.createTextNode(' '));
+      spans.push(sp);
+    });
+  }
+  function mark(i){
+    spans.forEach(function(sp,k){sp.className=(k<i?'done':(k===i?'now':''))+(sp.dataset.bm?' bm':'')});
+    if(spans[i])spans[i].scrollIntoView({block:'center',behavior:'smooth'});
+  }
+
+  function speakPieces(list,k,my,onDone){
+    if(my!==token)return;
+    if(k>=list.length){onDone();return}
+    var u=new SpeechSynthesisUtterance(list[k]);
+    u.lang='ru-RU';
+    var vi=voiceSel.value;
+    if(vi!==''&&voices[+vi]){u.voice=voices[+vi];u.lang=voices[+vi].lang}
+    u.rate=parseFloat(rate.value);
+    $('#spoken').textContent='Голосу передано: '+list[k];
+    setRead(k,0);u.onboundary=function(e){if(my===token&&e.name!=='sentence')setRead(k,e.charIndex||0)};
+    applyLang(u);u.onend=function(){speakPieces(list,k+1,my,onDone)};
+    u.onerror=function(e){if(my===token&&e.error!=='interrupted'&&e.error!=='canceled')onDone()};
+    keep.push(u);if(keep.length>6)keep.shift();
+    synth.speak(u);
+  }
+  function next(my){
+    if(my!==token)return;
+    while(idx<sents.length&&!want(langs[idx]))idx++;
+    if(idx>=sents.length){resumePos=null;finish();return}
+    mark(idx);
+    var cur=idx;curLang=langs[cur]||'r';
+    var txt=sents[cur];
+    if(cur===firstIdx&&skipChars){txt=txt.slice(skipChars);skipChars=0;firstIdx=-1}
+    var ps=pieces(txt),st=[],acc=0;
+    ps.forEach(function(x){st.push(acc);acc+=x.length+1});
+    rd={base:sentOff[cur]+sents[cur].length-txt.length,txt:txt,starts:st,T:Math.max(1,acc-1)};readOff=rd.base;
+    speakPieces(ps,0,my,function(){if(my===token){idx=cur+1;next(my)}});
+  }
+
+  /* Где сейчас чтение: абсолютная позиция начала последнего озвученного слова (по событию границы слова, иначе — начала куска) */
+  function setRead(k,ci){
+    var r=rd;if(!r||!r.txt.length)return;
+    var o=Math.round((r.starts[k]+ci)/r.T*r.txt.length);
+    o=Math.max(0,Math.min(o,r.txt.length-1));
+    while(o>0&&!/\s/.test(r.txt.charAt(o-1)))o--;
+    readOff=r.base+o;
+  }
+  /* «Читать»: после Стопа — с начала абзаца, где остановились; иначе с начала текста */
+  function readPara(){
+    var t=src.value,p=resumePos;
+    resumePos=null;skipChars=0;firstIdx=-1;
+    var ss=p>0?splitUnits(t):[];
+    if(!ss.length){startFrom(0);return}
+    var ps=t.lastIndexOf('\n',p-1)+1,ofs=offsets(t,ss),k=ofs.findIndex(function(o){return o>=ps});
+    startFrom(k<0?ss.length-1:k);
+  }
+  /* Невидимая копия поля с теми же шрифтом и шириной — для измерения позиций текста */
+  function mirror(){
+    var cs=getComputedStyle(src),m=document.createElement('div'),st=m.style;
+    ['fontFamily','fontSize','fontWeight','lineHeight','letterSpacing','paddingTop','paddingRight','paddingBottom','paddingLeft'].forEach(function(k){st[k]=cs[k]});
+    st.position='absolute';st.visibility='hidden';st.left='-9999px';st.top='0';st.boxSizing='border-box';
+    st.width=src.clientWidth+'px';st.whiteSpace='pre-wrap';st.overflowWrap='break-word';
+    return m;
+  }
+  function showAt(p){
+    src.setSelectionRange(p,p);
+    var m=mirror(),mk=document.createElement('span');
+    m.textContent=src.value.slice(0,p);m.appendChild(mk);document.body.appendChild(m);
+    var y=mk.offsetTop;m.remove();
+    src.scrollTop=Math.max(0,y-src.clientHeight/3);
+    src.scrollIntoView({block:'nearest'});
+  }
+  /* Значки закладок: в поле текста — точно в месте закладки, в режиме чтения — в начале предложения */
+  var bmLayer=$('#bmLayer'),bmBox=bmLayer.firstChild,bmTip=$('#bmTip'),tipFor=null,drawQ=0;
+  function hideTip(){bmTip.classList.add('hide');tipFor=null}
+  function showTip(btn,list){
+    if(tipFor===btn&&!bmTip.classList.contains('hide')){hideTip();return}
+    var txt=list.map(function(b){return b.note||''}).filter(Boolean).join('\n');
+    bmTip.textContent=txt||'Без комментария';bmTip.classList.toggle('empty',!txt);
+    bmTip.classList.remove('hide');tipFor=btn;
+    var pr=$('.panel').getBoundingClientRect(),br=btn.getBoundingClientRect();
+    bmTip.style.left=Math.max(4,Math.min(br.left-pr.left,pr.width-bmTip.offsetWidth-4))+'px';
+    bmTip.style.top=(br.bottom-pr.top+4)+'px';
+  }
+  function drawMarks(){if(!drawQ){drawQ=1;requestAnimationFrame(function(){drawQ=0;doMarks()})}}
+  function doMarks(){
+    bmBox.textContent='';hideTip();
+    if(src.classList.contains('hide')||!bms.length||!src.clientWidth)return;
+    bmLayer.style.left=src.offsetLeft+'px';bmLayer.style.top=src.offsetTop+'px';
+    bmLayer.style.width=src.clientWidth+'px';bmLayer.style.height=src.clientHeight+'px';
+    var v=src.value,list=bms.slice().sort(function(a,b){return a.off-b.off}),m=mirror(),pos=0,sp=[];
+    list.forEach(function(b){
+      var o=Math.max(pos,Math.min(b.off,v.length)),s=document.createElement('span');
+      m.appendChild(document.createTextNode(v.slice(pos,o)));pos=o;m.appendChild(s);sp.push(s);
+    });
+    m.appendChild(document.createTextNode(v.slice(pos)));
+    document.body.appendChild(m);
+    var pts=sp.map(function(s){return [s.offsetLeft,s.offsetTop]});
+    m.remove();
+    list.forEach(function(b,i){
+      var ic=document.createElement('button');ic.className='bmi';ic.type='button';
+      ic.title=b.note||'Закладка';ic.setAttribute('aria-label','Закладка');
+      ic.style.left=(pts[i][0]-6)+'px';ic.style.top=(pts[i][1]-6)+'px';
+      ic.addEventListener('mousedown',function(e){e.preventDefault()});
+      ic.addEventListener('click',function(e){e.stopPropagation();showTip(ic,[b])});
+      bmBox.appendChild(ic);
+    });
+    bmBox.style.transform='translate('+(-src.scrollLeft)+'px,'+(-src.scrollTop)+'px)';
+  }
+  src.addEventListener('scroll',function(){bmBox.style.transform='translate('+(-src.scrollLeft)+'px,'+(-src.scrollTop)+'px)';hideTip()});
+  reader.addEventListener('scroll',hideTip);
+  document.addEventListener('click',function(e){if(!bmTip.contains(e.target)&&!(e.target.closest&&e.target.closest('.bmi')))hideTip()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')hideTip()});
+  if(window.ResizeObserver)new ResizeObserver(function(){drawMarks()}).observe(src);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawMarks);
+  /* Остановить озвучку; повторный cancel страхует от залипания в Edge */
+  function halt(){token++;synth.cancel();setTimeout(function(){if(state!=='playing')synth.cancel()},120)}
+  function setState(s){
+    state=s;
+    playBtn.textContent=s==='playing'?'Пауза':(s==='paused'?'Продолжить':'Читать');
+    stopBtn.disabled=s==='idle';$('#cursor').disabled=s==='playing';if(s==='idle')$('#spoken').textContent='';
+    status.textContent=s==='playing'?'Читаю…':(s==='paused'?'На паузе':'');
+  }
+  function startFrom(i){
+    token++;synth.cancel();
+    var text=src.value;
+    if(state==='idle'){sents=splitUnits(text);langs=unitLangs(sents);sentOff=offsets(text,sents);buildReader();reader.classList.toggle('dual',dual.on);spans.forEach(function(sp,i){sp.dataset.l=langs[i]});markBms()}
+    if(!sents.length){setState('idle');return}
+    src.classList.add('hide');reader.classList.remove('hide');drawMarks();
+    idx=i;setState('playing');
+    var my=token;setTimeout(function(){next(my)},60);
+  }
+  function finish(){
+    halt();readOff=null;setState('idle');
+    reader.classList.add('hide');src.classList.remove('hide');drawMarks();
+  }
+
+  playBtn.addEventListener('click',function(){
+    if(state==='idle')readPara();
+    else if(state==='playing'){halt();setState('paused');pauseEdit()}
+    else $('#cursor').click();
+  });
+  stopBtn.addEventListener('click',function(){
+    var p=readOff!=null?readOff:sentOff[idx],wp=state==='playing';
+    finish();resumePos=p!=null?p:null;
+    if(p!=null&&wp){showAt(p);requestAnimationFrame(function(){showAt(p)})}
+  });
+  rate.addEventListener('input',function(){rateOut.textContent=parseFloat(rate.value).toFixed(1).replace('.',',')+'×'});
+  voiceSel.addEventListener('change',function(){if(state==='playing')startFrom(idx)});
+  function upd(){var n=src.value.length;count.textContent=n?n.toLocaleString('ru-RU')+' симв.':'Текст пуст'}
+  src.addEventListener('input',upd);upd();
+  /* Закладки, чтение с курсора */
+  var skipChars=0,firstIdx=-1;
+  var bms=[],sentOff=[],newBm=null,saveT=0,prevVal=src.value,bmList=$('#bmList'),bmPanel=$('#bmPanel'),bmInfo=$('#bmInfo');
+  function offsets(text,list){var pos=0;return list.map(function(s){var i=text.indexOf(s,pos);if(i<0)i=pos;pos=i+s.length;return i})}
+  function sentAt(pos,offs){var k=0;for(var i=0;i<offs.length;i++){if(offs[i]<=pos)k=i;else break}return k}
+  function curPos(){return state==='playing'?(sentOff[idx]||0):src.selectionStart}
+  function snippet(off){
+    var s=src.value.slice(off,off+60).replace(/\s+/g,' ').trim();
+    return s?s+(src.value.length>off+60?'…':''):'(конец текста)';
+  }
+  function saveAll(){
+    clearTimeout(saveT);
+    saveT=setTimeout(function(){try{localStorage.setItem('chtec.doc',JSON.stringify({text:src.value,bms:bms}))}catch(e){}},400);
+  }
+  function markBms(){
+    spans.forEach(function(sp,i){
+      var a=sentOff[i],z=i+1<sentOff.length?sentOff[i+1]:1e9;
+      var hit=bms.filter(function(b){return b.off>=a&&b.off<z});
+      sp.dataset.bm=hit.length?'1':'';
+      sp.title=hit.map(function(b){return b.note||'Закладка'}).join('; ');
+      sp.classList.toggle('bm',!!hit.length);
+      var old=sp.querySelector('.bmi');if(old)old.remove();
+      if(hit.length){
+        var ic=document.createElement('button');ic.className='bmi bmr';ic.type='button';ic.title=sp.title;ic.setAttribute('aria-label','Закладка');
+        ic.addEventListener('click',function(e){e.stopPropagation();showTip(ic,hit)});
+        sp.insertBefore(ic,sp.firstChild);
+      }
+    });
+    drawMarks();
+  }
+  function renderBms(){
+    bms.sort(function(a,b){return a.off-b.off});
+    $('#bmCount').textContent=bms.length?' ('+bms.length+')':'';
+    bmList.innerHTML='';
+    if(!bms.length){
+      bmList.innerHTML='<p>Закладок пока нет. Поставьте курсор в текст и нажмите «+ Закладка».</p>';
+      markBms();return;
+    }
+    bms.forEach(function(b){
+      var row=document.createElement('div');row.className='bmitem';
+      var go=document.createElement('button');go.className='bmgo';go.textContent=snippet(b.off);go.title='Перейти к закладке';
+      go.onclick=function(){goTo(b.off)};
+      var inp=document.createElement('input');inp.type='text';inp.value=b.note||'';inp.placeholder='Комментарий';
+      inp.setAttribute('aria-label','Комментарий к закладке');
+      inp.oninput=function(){b.note=inp.value;saveAll();markBms()};
+      var del=document.createElement('button');del.textContent='✕';del.title='Удалить закладку';del.setAttribute('aria-label','Удалить закладку');
+      del.onclick=function(){bms.splice(bms.indexOf(b),1);renderBms();saveAll()};
+      row.appendChild(go);row.appendChild(inp);row.appendChild(del);bmList.appendChild(row);
+      if(b===newBm){newBm=null;inp.focus()}
+    });
+    markBms();
+  }
+  function goTo(off){
+    if(state!=='playing'){
+      src.blur();src.setSelectionRange(off,off);src.focus({preventScroll:true});showAt(off);
+    }else startFrom(sentAt(off,sentOff));
+  }
+  function addBm(){
+    var off=curPos();
+    var ex=bms.filter(function(b){return b.off===off})[0];
+    newBm=ex||{off:off,note:''};
+    if(!ex)bms.push(newBm);
+    bmPanel.open=true;renderBms();saveAll();
+  }
+  function stepBm(dir){
+    if(!bms.length){bmInfo.textContent='Закладок нет';return}
+    var p=curPos(),t=null,k;
+    if(dir>0){for(k=0;k<bms.length;k++){if(bms[k].off>p){t=bms[k];break}}if(!t)t=bms[0]}
+    else{for(k=bms.length-1;k>=0;k--){if(bms[k].off<p){t=bms[k];break}}if(!t)t=bms[bms.length-1]}
+    bmInfo.textContent='Закладка '+(bms.indexOf(t)+1)+' из '+bms.length+(t.note?': '+t.note:'');
+    goTo(t.off);
+  }
+  ['#cursor','#bmAdd','#bmPrev','#bmNext'].forEach(function(s){$(s).addEventListener('mousedown',function(e){e.preventDefault()})});
+  $('#bmAdd').addEventListener('click',addBm);
+  $('#bmPrev').addEventListener('click',function(){stepBm(-1)});
+  $('#bmNext').addEventListener('click',function(){stepBm(1)});
+  $('#cursor').addEventListener('click',function(){
+    if(state!=='idle')setState('idle');
+    var t=src.value,ss=splitUnits(t);
+    if(!ss.length)return;
+    var ofs=offsets(t,ss),pos=src.selectionStart,k=sentAt(pos,ofs),sk=pos-ofs[k];
+    while(sk>0&&!/\s/.test(t.charAt(ofs[k]+sk-1)))sk--;
+    skipChars=(sk>0&&sk<ss[k].length)?sk:0;firstIdx=k;
+    startFrom(k);
+  });
+  src.addEventListener('input',function(){
+    var nv=src.value,d=nv.length-prevVal.length,c=src.selectionStart,p,rb=resumePos==null?[]:[{off:resumePos}],all=bms.concat(rb);
+    if(d>0){p=c-d;all.forEach(function(b){if(b.off>=p)b.off+=d})}
+    else if(d<0){p=c;all.forEach(function(b){if(b.off>p-d)b.off+=d;else if(b.off>p)b.off=p})}
+    all.forEach(function(b){b.off=Math.max(0,Math.min(b.off,nv.length))});
+    if(rb.length)resumePos=rb[0].off;
+    prevVal=nv;renderBms();saveAll();
+  });
+  (function(){
+    var d=null;
+    try{d=JSON.parse(localStorage.getItem('chtec.doc')||'null')}catch(e){}
+    if(d&&typeof d.text==='string'&&d.text.indexOf('Москва — столица России, крупнейший город страны.')!==0){
+      src.value=d.text;src.setSelectionRange(0,0);
+      if(Array.isArray(d.bms))bms=d.bms.filter(function(b){return b&&typeof b.off==='number'});
+    }
+    prevVal=src.value;upd();renderBms();
+  })();
+  /* Загрузка файлов */
+  var loadInfo=$('#loadInfo'),fileIn=$('#file'),backup=null;
+  function decode(buf){
+    var b=new Uint8Array(buf);
+    if(b[0]===0xFF&&b[1]===0xFE)return new TextDecoder('utf-16le').decode(b);
+    if(b[0]===0xFE&&b[1]===0xFF)return new TextDecoder('utf-16be').decode(b);
+    try{return new TextDecoder('utf-8',{fatal:true}).decode(b)}catch(e){return new TextDecoder('windows-1251').decode(b)}
+  }
+  function decodeXml(buf){
+    var head=new TextDecoder('latin1').decode(new Uint8Array(buf).slice(0,200)),m=head.match(/encoding=["']([\w-]+)["']/i);
+    try{return new TextDecoder(m?m[1]:'utf-8').decode(buf)}catch(e){return decode(buf)}
+  }
+  function loadScript(url){
+    return new Promise(function(ok,fail){
+      var s=document.createElement('script');s.src=url;s.onload=ok;
+      s.onerror=function(){fail(new Error('не удалось загрузить модуль чтения файла, проверьте интернет'))};
+      document.head.appendChild(s);
+    });
+  }
+  function needZip(){return window.JSZip?Promise.resolve():loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js')}
+  function htmlText(h){
+    var d=new DOMParser().parseFromString(h,'text/html');
+    d.querySelectorAll('script,style,head').forEach(function(e){e.remove()});
+    d.querySelectorAll('br').forEach(function(e){e.replaceWith('\n')});
+    d.querySelectorAll('p,div,li,h1,h2,h3,h4,h5,h6,tr,blockquote,section').forEach(function(e){e.append('\n')});
+    return d.body.textContent;
+  }
+  function xmlText(x,tags){
+    x=x.replace(new RegExp('</(?:'+tags+')>','g'),'\n').replace(/<(?:w:br|w:cr|text:line-break)\s*\/>/g,'\n').replace(/<(?:w:tab|text:tab)\s*\/>/g,' ').replace(/<[^>]+>/g,'');
+    var t=document.createElement('textarea');t.innerHTML=x;return t.value;
+  }
+  function fbText(x){
+    var d=new DOMParser().parseFromString(x,'text/xml'),out=[];
+    d.querySelectorAll('body p,body v').forEach(function(p){
+      var b=p.closest('body');
+      if(b&&b.getAttribute('name')==='notes')return;
+      out.push(p.textContent);
+    });
+    return out.join('\n');
+  }
+  function zipText(buf,path,tags){
+    return needZip().then(function(){return JSZip.loadAsync(buf)}).then(function(z){
+      var f=z.file(path);if(!f)throw new Error('повреждённый файл');
+      return f.async('string');
+    }).then(function(x){return xmlText(x,tags)});
+  }
+  function epubText(buf){
+    return needZip().then(function(){return JSZip.loadAsync(buf)}).then(function(zip){
+      return zip.file('META-INF/container.xml').async('string').then(function(c){
+        var opf=c.match(/full-path="([^"]+)"/)[1],dir=opf.indexOf('/')>=0?opf.slice(0,opf.lastIndexOf('/')+1):'';
+        return zip.file(opf).async('string').then(function(o){
+          var man={},out=[];
+          (o.match(/<item\b[^>]*>/g)||[]).forEach(function(it){
+            var id=(it.match(/\bid="([^"]*)"/)||[])[1],hr=(it.match(/\bhref="([^"]*)"/)||[])[1];
+            if(id&&hr)man[id]=hr;
+          });
+          var order=(o.match(/<itemref\b[^>]*>/g)||[]).map(function(r){return man[(r.match(/idref="([^"]*)"/)||[])[1]]}).filter(Boolean);
+          return order.reduce(function(p,h){
+            return p.then(function(){
+              var f=zip.file(dir+decodeURIComponent(h.split('#')[0]));
+              return f?f.async('string').then(function(s){out.push(htmlText(s))}):null;
+            });
+          },Promise.resolve()).then(function(){return out.join('\n\n')});
+        });
+      });
+    });
+  }
+  function pdfText(buf){
+    var pv='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    return (window.pdfjsLib?Promise.resolve():loadScript(pv+'pdf.min.js')).then(function(){
+      pdfjsLib.GlobalWorkerOptions.workerSrc=pv+'pdf.worker.min.js';
+      return pdfjsLib.getDocument({data:new Uint8Array(buf)}).promise;
+    }).then(function(pdf){
+      var out=[],p=Promise.resolve();
+      for(var i=1;i<=pdf.numPages;i++)(function(n){
+        p=p.then(function(){return pdf.getPage(n).then(function(pg){return pg.getTextContent()}).then(function(tc){
+          var s='';tc.items.forEach(function(it){s+=it.str+(it.hasEOL?'\n':'')});out.push(s);
+        })});
+      })(i);
+      return p.then(function(){
+        return out.join('\n\n').replace(/([а-яё])-\n([а-яё])/g,'$1$2').replace(/([^.!?…:;»"\n])\n(?=[^\n])/g,'$1 ').replace(/ {2,}/g,' ');
+      });
+    });
+  }
+  function readFile(f){
+    var ext=(f.name.split('.').pop()||'').toLowerCase();
+    return f.arrayBuffer().then(function(buf){
+      if(ext==='pdf')return pdfText(buf);
+      if(ext==='docx')return zipText(buf,'word/document.xml','w:p');
+      if(ext==='odt')return zipText(buf,'content.xml','text:p|text:h');
+      if(ext==='epub')return epubText(buf);
+      if(ext==='fb2')return fbText(decodeXml(buf));
+      if(/^(html?|xhtml)$/.test(ext))return htmlText(decode(buf));
+      if(/^(txt|md|markdown|text|log|srt|csv|)$/.test(ext))return decode(buf);
+      throw new Error('формат .'+ext+' не поддерживается');
+    });
+  }
+  function clean(t){return t.replace(/\r\n?/g,'\n').replace(/\u00a0/g,' ').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()}
+  function applyText(t,name){
+    if(state!=='idle')finish();
+    backup={text:src.value,bms:bms.slice()};loadedName=name;resumePos=null;
+    src.value=t;bms=[];prevVal=t;
+    src.setSelectionRange(0,0);src.scrollTop=0;
+    upd();renderBms();saveAll();
+    loadInfo.innerHTML='';
+    loadInfo.appendChild(document.createTextNode('Загружено: '+name+' ('+t.length.toLocaleString('ru-RU')+' симв.) '));
+    var undo=document.createElement('button');undo.textContent='Вернуть прежний текст';
+    undo.onclick=function(){src.value=backup.text;bms=backup.bms;prevVal=src.value;resumePos=null;upd();renderBms();saveAll();loadInfo.textContent=''};
+    loadInfo.appendChild(undo);
+  }
+  function openFile(f){
+    if(!f)return;
+    if(/\.json$/i.test(f.name)){openProject(f);return}
+    loadInfo.textContent='Читаю файл «'+f.name+'»…';
+    readFile(f).then(function(t){
+      t=clean(t||'');
+      if(!t){loadInfo.textContent='В файле «'+f.name+'» не нашлось текста (возможно, это скан).';return}
+      applyText(t,f.name);
+    }).catch(function(e){loadInfo.textContent='Не удалось открыть «'+f.name+'»: '+((e&&e.message)||'ошибка')});
+  }
+  $('#open').addEventListener('click',function(){fileIn.click()});
+  fileIn.addEventListener('change',function(){openFile(fileIn.files[0]);fileIn.value=''});
+  var dz=document.querySelector('.panel');
+  dz.addEventListener('dragover',function(e){e.preventDefault()});
+  dz.addEventListener('drop',function(e){e.preventDefault();openFile(e.dataTransfer.files[0])});
+
+  /* Голоса */
+  var voiceInfo=$('#voiceInfo');
+  function voiceCount(){loadVoices();voiceInfo.textContent='Русских голосов найдено: '+voices.length}
+  $('#voiceRefresh').addEventListener('click',function(){voiceCount();setTimeout(voiceCount,500)});
+  $('#voiceTest').addEventListener('click',function(){
+    if(state!=='idle')return;
+    synth.cancel();
+    var u=new SpeechSynthesisUtterance('Здравствуйте! Это пример чтения на русском языке.');
+    u.lang='ru-RU';
+    var vi=voiceSel.value;
+    if(vi!==''&&voices[+vi]){u.voice=voices[+vi];u.lang=voices[+vi].lang}
+    u.rate=parseFloat(rate.value);
+    keep.push(u);synth.speak(u);
+  });
+  /* Два языка */
+  var dual={on:true,mode:'auto',read:'all',voice:''},langs=[],curLang='r',fVoices=[],fSel=$('#dualVoice');
+  function plainNorm(s){return s.replace(/https?:\/\/\S+/g,' ').replace(/[*_#`>~|]+/g,'').replace(/\s+/g,' ').trim()}
+  function splitUnits(t){
+    return dual.on&&dual.mode!=='auto'?t.split(/\n+/).map(function(s){return s.trim()}).filter(Boolean):splitSentences(t);
+  }
+  function unitLangs(list){
+    if(!dual.on)return list.map(function(){return 'r'});
+    if(dual.mode==='auto')return list.map(function(s){
+      var c=(s.match(/[а-яё]/gi)||[]).length,l=(s.match(/\p{L}/gu)||[]).length-c;
+      return c>=l?'r':'f';
+    });
+    return list.map(function(s,i){return (i%2===0)===(dual.mode==='altf')?'f':'r'});
+  }
+  function want(l){return !dual.on||dual.read==='all'||dual.read===l}
+  function applyLang(u){
+    if(curLang!=='f'||!dual.on)return;
+    var v=fVoices[+fSel.value];
+    if(v){u.voice=v;u.lang=v.lang}else{u.voice=null;u.lang='en-US'}
+  }
+  function fillF(){
+    var prev=fVoices[+fSel.value]?fVoices[+fSel.value].name:dual.voice;
+    fVoices=synth.getVoices().filter(function(v){return !/^ru/i.test(v.lang)}).sort(function(a,b){return a.lang<b.lang?-1:(a.lang>b.lang?1:(a.name<b.name?-1:1))});
+    fSel.innerHTML='';
+    fVoices.forEach(function(v,i){var o=document.createElement('option');o.value=i;o.textContent=v.lang+' — '+v.name;fSel.appendChild(o)});
+    var k=fVoices.findIndex(function(v){return v.name===prev});
+    if(k<0)k=fVoices.findIndex(function(v){return /^en/i.test(v.lang)});
+    if(k>=0)fSel.value=k;
+    $('#dualInfo').textContent=fVoices.length?'':'Иностранных голосов не найдено. Установите нужный язык в системе (см. «Голоса»).';
+  }
+  function saveDual(){
+    dual.on=$('#dualOn').checked;dual.mode=$('#dualMode').value;dual.read=$('#dualRead').value;
+    var v=fVoices[+fSel.value];dual.voice=v?v.name:'';
+    try{localStorage.setItem('chtec.dual',JSON.stringify(dual))}catch(e){}
+  }
+  (function(){
+    var d=null;
+    try{d=JSON.parse(localStorage.getItem('chtec.dual')||'null')}catch(e){}
+    if(d&&typeof d==='object'){dual.on=!!d.on;dual.mode=d.mode||'auto';dual.read=d.read||'all';dual.voice=d.voice||''}
+    $('#dualOn').checked=dual.on;$('#dualMode').value=dual.mode;$('#dualRead').value=dual.read;
+    fillF();setTimeout(fillF,600);
+    synth.addEventListener('voiceschanged',fillF);
+    ['#dualOn','#dualMode','#dualRead','#dualVoice'].forEach(function(s){$(s).addEventListener('change',saveDual)});
+  })();
+  /* Сохранение в файл */
+  var loadedName='',saveSel=$('#saveFmt');
+  function baseName(){
+    var n=(loadedName||'').replace(/\.[^.]+$/,'');
+    return n||('Чтец-'+new Date().toISOString().slice(0,10));
+  }
+  function saveFile(name,data){
+    var c=(window.claude&&window.claude.use)?window.claude.use('downloads'):Promise.resolve(false);
+    return Promise.resolve(c).then(function(d){
+      if(d)return d.save({filename:name,data:data});
+      if(d===null)throw {code:'unavailable'};
+      var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data]));a.download=name;
+      document.body.appendChild(a);a.click();a.remove();
+    });
+  }
+  saveSel.addEventListener('change',function(){
+    var v=saveSel.value,data,name;
+    saveSel.selectedIndex=0;
+    if(!v)return;
+    if(!src.value.trim()){loadInfo.textContent='Нечего сохранять: текст пуст.';return}
+    if(v==='txt'){data=src.value;name=baseName()+'.txt'}
+    else{
+      data=JSON.stringify({app:'chtec',v:1,text:src.value,bms:bms,stress:stressBox.value,stressMode:stressMode.value,dual:dual,rate:rate.value},null,1);
+      name=baseName()+'.json';
+    }
+    saveFile(name,data).then(function(){loadInfo.textContent='Сохранено: '+name}).catch(function(e){
+      var c=e&&e.code;
+      loadInfo.textContent=c==='declined'?'':(c==='host_unavailable'||c==='unavailable'?'В этом устройстве сохранение недоступно: откройте страницу в браузере на компьютере.':'Не удалось сохранить ('+(c||'ошибка')+').');
+    });
+  });
+  function openProject(f){
+    f.text().then(function(s){
+      var o=JSON.parse(s);
+      if(!o||o.app!=='chtec'||typeof o.text!=='string')throw new Error('это не файл проекта «Чтеца»');
+      if(state!=='idle')finish();
+      resumePos=null;src.value=o.text;prevVal=o.text;
+      bms=Array.isArray(o.bms)?o.bms.filter(function(b){return b&&typeof b.off==='number'}):[];
+      if(typeof o.stress==='string')stressBox.value=o.stress;
+      if(o.stressMode)stressMode.value=o.stressMode;
+      if(o.dual){
+        $('#dualOn').checked=!!o.dual.on;$('#dualMode').value=o.dual.mode||'auto';$('#dualRead').value=o.dual.read||'all';
+        dual.voice=o.dual.voice||'';fillF();
+        var vk=fVoices.findIndex(function(v){return v.name===dual.voice});if(vk>=0)fSel.value=vk;
+      }
+      if(o.rate){rate.value=o.rate;rate.dispatchEvent(new Event('input'))}
+      parseStress();saveStress();saveDual();
+      src.setSelectionRange(0,0);src.scrollTop=0;
+      loadedName=f.name;upd();renderBms();saveAll();
+      loadInfo.textContent='Проект загружен: '+f.name;
+    }).catch(function(e){loadInfo.textContent='Не удалось открыть «'+f.name+'»: '+((e&&e.message)||'ошибка')});
+  }
+  function clickStart(i,e){
+    var sk=0,r=null,sp=spans[i];
+    if(document.caretRangeFromPoint)r=document.caretRangeFromPoint(e.clientX,e.clientY);
+    else if(document.caretPositionFromPoint){
+      var cp=document.caretPositionFromPoint(e.clientX,e.clientY);
+      if(cp){r=document.createRange();r.setStart(cp.offsetNode,cp.offset)}
+    }
+    if(r&&sp&&sp.contains(r.startContainer)&&r.startContainer.nodeType===3)sk=r.startOffset;
+    var s=sents[i]||'';
+    while(sk>0&&!/\s/.test(s.charAt(sk-1)))sk--;
+    skipChars=(sk>0&&sk<s.length)?sk:0;firstIdx=i;
+    startFrom(i);
+  }
+  function pauseEdit(){
+    var p=readOff!=null?readOff:(sentOff[idx]||0);
+    reader.classList.add('hide');src.classList.remove('hide');drawMarks();
+    showAt(p);requestAnimationFrame(function(){showAt(p)});
+  }
+  /* Подбор способа передачи ударения */
+  var probeKeep=[];
+  function probeSpeak(list){
+    if(state==='playing')return;
+    synth.cancel();probeKeep=[];
+    var vi=voiceSel.value;
+    list.forEach(function(txt){
+      var u=new SpeechSynthesisUtterance(txt);
+      u.lang='ru-RU';
+      if(vi!==''&&voices[+vi]){u.voice=voices[+vi];u.lang=voices[+vi].lang}
+      u.rate=parseFloat(rate.value);
+      probeKeep.push(u);synth.speak(u);
+    });
+  }
+  $('#stressCompare').addEventListener('click',function(){
+    var raw=$('#stressProbe').value.trim();
+    if(!raw)return;
+    function mk(m){
+      return raw.replace(/(?<![0-9A-Za-z])\+([аеёиоуыэюя])/gi,function(x,v){
+        return m==='none'?v:(m==='plus'?x:stressMark(v,m));
+      });
+    }
+    var items=[['Без знака',mk('none')],['Заглавная гласная',mk('caps')],['Знак ударения',mk('acute')],['Знак без разрыва слова',mk('acutewj')],['Символ акут',mk('ac2')],['Модификатор',mk('mod')],['Апостроф',mk('apos')],['Дефис',mk('hyph')],['Плюс',mk('plus')]];
+    var list=[];
+    items.forEach(function(it){list.push(it[0]);list.push(it[1])});
+    $('#stressProbeInfo').textContent='Читаю по очереди: '+items.map(function(it,i){return (i+1)+') '+it[0]+': '+it[1]}).join('; ');
+    probeSpeak(list);
+  });
+  $('#stressRaw').addEventListener('click',function(){
+    var raw=$('#stressProbe').value.trim();
+    if(!raw)return;
+    var vs=raw.split(';').map(function(x){return x.trim()}).filter(Boolean);
+    if(vs.length<2){$('#stressProbeInfo').textContent='';probeSpeak([raw]);return}
+    var list=[];
+    vs.forEach(function(v,i){list.push('Вариант '+(i+1));list.push(v)});
+    $('#stressProbeInfo').textContent='Читаю по очереди: '+vs.map(function(v,i){return (i+1)+') '+v}).join('; ');
+    probeSpeak(list);
+  });
+  function hyphOk(pre){return pre.length>=2||/^[свк]$/i.test(pre)}
+  function stressMark(v,mode){
+    switch(mode){
+      case 'hyph':return '-'+v;
+      case 'caps':return v.toUpperCase();
+      case 'acute':return v+'\u0301';
+      case 'acutewj':return v+'\u0301\u2060';
+      case 'ac2':return v+'\u00b4';
+      case 'mod':return v+'\u02ca';
+      case 'apos':return v+"'";
+      default:return '+'+v;
+    }
+  }
+  window.addEventListener('pagehide',function(){synth.cancel()});
+})();
+</script>
+</body>
+</html>
